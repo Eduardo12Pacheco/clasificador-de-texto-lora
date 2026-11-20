@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
 from test_collect_experiment_reports import VALIDATE, _run
 
 from conftest import write_experiment_reports
@@ -39,3 +40,14 @@ def test_missing_search_trials_is_named(tmp_path: Path) -> None:
 
     assert result.returncode == 1
     assert "missing report" in result.stderr
+
+
+def test_experiments_default_root_is_reports_experiments(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    write_experiment_reports(tmp_path / "reports" / "experiments")
+    monkeypatch.chdir(tmp_path)
+
+    result = _run(VALIDATE, "experiments")
+
+    assert result.returncode == 0, result.stderr + result.stdout

@@ -406,14 +406,22 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Run the requested validator; return 0 on success and 1 on failure."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("kind", choices=sorted(_VALIDATORS))
-    parser.add_argument("--root", type=Path, default=Path("reports"))
+    parser.add_argument(
+        "--root",
+        type=Path,
+        default=None,
+        help="Report root (defaults to reports/experiments for the experiments kind).",
+    )
     args = parser.parse_args(argv)
+    root = args.root
+    if root is None:
+        root = Path("reports/experiments") if args.kind == "experiments" else Path("reports")
     try:
-        _VALIDATORS[args.kind](args.root)
+        _VALIDATORS[args.kind](root)
     except ReportError as error:
         print(f"error: {error}", file=sys.stderr)
         return 1
-    print(f"OK {args.kind} reports under {args.root}")
+    print(f"OK {args.kind} reports under {root}")
     return 0
 
 
