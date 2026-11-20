@@ -11,12 +11,13 @@ immutable once accepted; later changes are appended as an addendum or a new ADR.
 | [0002](0002-task-and-dataset-selection.md) | Task and dataset selection | Accepted |
 | [0003](0003-backbone-and-adaptation-method.md) | Backbone and adaptation method | Accepted |
 | [0004](0004-evaluation-protocol-and-leakage-policy.md) | Evaluation protocol and leakage policy | Accepted |
+| [0005](0005-onnx-runtime-inference-and-quantization.md) | ONNX Runtime inference and the quantisation gate | Accepted |
 | [0006](0006-calibration-and-abstention.md) | Calibration and abstention | Accepted |
+| [0007](0007-artifact-distribution-and-integrity.md) | Artifact distribution, bundles and integrity | Accepted |
 | [0008](0008-experiment-tracking.md) | Experiment tracking | Accepted |
 | [0009](0009-synthetic-dialect-robustness.md) | Synthetic dialect robustness probe | Accepted |
 
-ADR-0005/0007 are introduced by inference and distribution. Every ADR uses the
-template below.
+Every ADR uses the template below.
 
 ## Template
 
