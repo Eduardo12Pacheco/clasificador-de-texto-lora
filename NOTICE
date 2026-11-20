@@ -24,3 +24,10 @@ selected and reformatted by this project, as stated in its NOTICE.md.
 The exact dataset revision, checksum and lineage are documented in
 docs/DATA.md. The model card for released weights states the modifications
 made by this project.
+
+Released model artifacts
+  stc-es-intent-0.1.0.zip ships the fp32 ONNX graph, tokenizer, labels,
+  calibration, the TF-IDF baseline and MODEL_CARD.md. The LoRA adapter is
+  distributed separately as stc-es-intent-0.1.0-adapter.zip. Both are Apache-2.0
+  derivatives of BSC-LT/MrBERT-es; the dataset attribution above travels with
+  them. The model registry pins the release sha256.

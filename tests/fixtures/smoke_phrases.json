@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "model": "stc-es-intent",
+  "phrases": [
+    {
+      "text": "despiértame a las cinco de la mañana",
+      "accepted_intents": ["alarm_set"]
+    },
+    {
+      "text": "ponme música de los Beatles",
+      "accepted_intents": ["play_music"]
+    },
+    {
+      "text": "¿qué tiempo hace en Guayaquil?",
+      "accepted_intents": ["weather_query"]
+    },
+    {
+      "text": "envía un correo a mi hermana",
+      "accepted_intents": ["email_sendemail"]
+    },
+    {
+      "text": "recuérdame comprar leche mañana",
+      "accepted_intents": ["calendar_set", "lists_createoradd"]
+    },
+    {
+      "text": "cuéntame un chiste",
+      "accepted_intents": ["general_joke"]
+    }
+  ]
+}

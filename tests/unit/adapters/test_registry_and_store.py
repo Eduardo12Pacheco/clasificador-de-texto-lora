@@ -30,9 +30,17 @@ def _entry(**overrides: object) -> RegistryEntry:
     return RegistryEntry(**values)  # type: ignore[arg-type]
 
 
-def test_committed_registry_is_valid_and_empty() -> None:
+def test_committed_registry_points_at_the_v010_release() -> None:
     registry = ModelRegistry.from_file(REGISTRY)
-    assert registry.entries == ()
+    assert len(registry.entries) == 1
+    entry = registry.find("stc-es-intent")
+    assert entry.version == "0.1.0"
+    assert entry.license == "Apache-2.0"
+    assert entry.url.startswith(
+        "https://github.com/Eduardo12Pacheco/spanish-text-classifier-lora/releases/download/v0.1.0/"
+    )
+    assert len(entry.sha256) == 64
+    assert entry.size_bytes > 100_000_000
 
 
 def test_registry_round_trip(tmp_path: Path) -> None:
