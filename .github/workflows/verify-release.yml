@@ -1,0 +1,104 @@
+name: Verify release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to verify (for example v0.1.0)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: verify (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Resolve the release tag
+        id: release
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          tag="${RELEASE_TAG:-$INPUT_TAG}"
+          if [ -z "$tag" ]; then
+            echo "error: no release tag supplied" >&2
+            exit 1
+          fi
+          version="${tag#v}"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Install the released wheel
+        shell: bash
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+          VERSION: ${{ steps.release.outputs.version }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          tool_bin="$RUNNER_TEMP/stc-tool-bin"
+          mkdir -p "$tool_bin"
+          echo "$tool_bin" >> "$GITHUB_PATH"
+          wheel="https://github.com/${REPOSITORY}/releases/download/${TAG}/spanish_text_classifier_lora-${VERSION}-py3-none-any.whl"
+          UV_TOOL_DIR="$RUNNER_TEMP/stc-tool" UV_TOOL_BIN_DIR="$tool_bin" \
+            uv tool install --python 3.12 "spanish-text-classifier-lora @ ${wheel}"
+      - name: Wait until the model bundle is attached (up to 10 minutes)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          for attempt in $(seq 1 60); do
+            if gh release view "$TAG" --json assets --jq '.assets[].name' \
+              | grep -Eq '^stc-es-intent-.*\.zip$'; then
+              echo "model bundle is attached"
+              exit 0
+            fi
+            echo "waiting for the model bundle (${attempt}/60)"
+            sleep 10
+          done
+          echo "error: the model bundle was not attached within 10 minutes" >&2
+          exit 1
+      - name: Pull and verify the released bundle
+        run: |
+          stc model pull
+          stc model verify
+      - name: Check fixed smoke phrases
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import pathlib
+          import subprocess
+
+          fixture = pathlib.Path("tests/fixtures/smoke_phrases.json")
+          document = json.loads(fixture.read_text(encoding="utf-8"))
+          failures = []
+          for phrase in document["phrases"]:
+              result = subprocess.run(
+                  ["stc", "predict", phrase["text"], "--json"],
+                  capture_output=True,
+                  text=True,
+                  check=True,
+              )
+              intent = json.loads(result.stdout)["predictions"][0]["intent"]
+              if intent not in phrase["accepted_intents"]:
+                  failures.append((phrase["text"], intent, phrase["accepted_intents"]))
+          if failures:
+              raise SystemExit(f"smoke phrase failures: {failures}")
+          print(f"OK: {len(document['phrases'])} smoke phrases matched")
+          PY
+      - name: Print environment diagnostics
+        run: stc doctor
