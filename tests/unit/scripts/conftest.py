@@ -246,3 +246,78 @@ def write_all_reports(root: Path) -> None:
 def final_reports(tmp_path: Path):
     """Return a writer callable for a valid final-report tree."""
     return lambda **kwargs: write_final_reports(tmp_path, **kwargs)
+
+
+def write_experiment_reports(root: Path) -> None:
+    """Write a minimal valid ``reports/experiments`` tree."""
+    _write_json(
+        root / "environment.json",
+        {
+            "schema_version": 1,
+            "git_sha": "a" * 40,
+            "uv_lock_sha256": "b" * 64,
+            "cuda_available": True,
+            "device_name": "NVIDIA GeForce RTX 4060",
+            "driver_version": "620.70.06",
+            "library_versions": {
+                "torch": "2.15.0",
+                "transformers": "4.57.6",
+                "peft": "0.22.0",
+                "optuna": "5.1.0",
+                "mlflow": "3.18.0",
+            },
+            "stages_seconds": {"screening": 1.0},
+        },
+    )
+    _write_json(
+        root / "screening.json",
+        {
+            "schema_version": 1,
+            "runs": [
+                {
+                    "backbone": "BSC-LT/MrBERT-es",
+                    "seed": 13,
+                    "dev_macro_f1": 0.84,
+                    "dev_accuracy": 0.85,
+                    "trainable_params": 100,
+                    "epoch_seconds": 20.0,
+                    "peak_vram_mib": 1500.0,
+                    "cpu_latency_ms_p50": 15.5,
+                }
+            ],
+        },
+    )
+    _write_json(
+        root / "selection.json",
+        {
+            "schema_version": 1,
+            "selected": "BSC-LT/MrBERT-es",
+            "rule_branch": "mrbert_ahead",
+            "per_backbone_means": {"BSC-LT/MrBERT-es": 0.84},
+        },
+    )
+    _write_json(
+        root / "full_ft_reference.json",
+        {
+            "schema_version": 1,
+            "runs": [{"lr": 3e-5, "dev_macro_f1": 0.85}],
+        },
+    )
+    _write_json(
+        root / "search_trials.json",
+        {
+            "schema_version": 1,
+            "trials": [{"number": 0, "state": "COMPLETE", "value": 0.83, "params": {"r": 16}}],
+            "best": {"value": 0.83, "params": {"r": 16}},
+        },
+    )
+    _write_json(
+        root / "final_seeds.json",
+        {
+            "schema_version": 1,
+            "seeds": [{"seed": 13, "dev_macro_f1": 0.84}],
+            "selected_seed": 13,
+            "dev_macro_f1_mean": 0.84,
+            "dev_macro_f1_std": 0.0,
+        },
+    )

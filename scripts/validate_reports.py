@@ -290,6 +290,104 @@ def validate_baseline(root: Path) -> None:
         _unit(dev.get(key), f"baseline.dev_metrics.{key}")
 
 
+BACKBONE_BRANCHES = {"within_1pt_prefer_mrbert", "bertin_ahead", "mrbert_ahead"}
+
+
+def _validate_environment(path: Path) -> None:
+    payload = _load(path)
+    _integer(payload.get("schema_version"), f"{path}.schema_version", minimum=1)
+    _string(payload.get("git_sha"), f"{path}.git_sha")
+    _string(payload.get("uv_lock_sha256"), f"{path}.uv_lock_sha256")
+    _string(payload.get("device_name"), f"{path}.device_name")
+    _string(payload.get("driver_version"), f"{path}.driver_version")
+    if not isinstance(payload.get("cuda_available"), bool):
+        raise ReportError(f"{path}.cuda_available: expected a boolean")
+    versions = _mapping(payload.get("library_versions"), f"{path}.library_versions")
+    for key in ("torch", "transformers", "peft", "optuna", "mlflow"):
+        _string(versions.get(key), f"{path}.library_versions.{key}")
+    if "stages_seconds" in payload:
+        _mapping(payload.get("stages_seconds"), f"{path}.stages_seconds")
+
+
+def _validate_screening(path: Path) -> None:
+    payload = _load(path)
+    _integer(payload.get("schema_version"), f"{path}.schema_version", minimum=1)
+    runs = _list(payload.get("runs"), f"{path}.runs")
+    if not runs:
+        raise ReportError(f"{path}.runs: must not be empty")
+    for index, raw in enumerate(runs):
+        row = _mapping(raw, f"{path}.runs[{index}]")
+        _string(row.get("backbone"), f"{path}.runs[{index}].backbone")
+        _integer(row.get("seed"), f"{path}.runs[{index}].seed", minimum=0)
+        _unit(row.get("dev_macro_f1"), f"{path}.runs[{index}].dev_macro_f1")
+        _unit(row.get("dev_accuracy"), f"{path}.runs[{index}].dev_accuracy")
+        _integer(row.get("trainable_params"), f"{path}.runs[{index}].trainable_params")
+        _number(row.get("epoch_seconds"), f"{path}.runs[{index}].epoch_seconds", minimum=0.0)
+        _number(row.get("peak_vram_mib"), f"{path}.runs[{index}].peak_vram_mib", minimum=0.0)
+        _number(
+            row.get("cpu_latency_ms_p50"),
+            f"{path}.runs[{index}].cpu_latency_ms_p50",
+            minimum=0.0,
+        )
+
+
+def _validate_selection(path: Path) -> None:
+    payload = _load(path)
+    _string(payload.get("selected"), f"{path}.selected")
+    branch = _string(payload.get("rule_branch"), f"{path}.rule_branch")
+    if branch not in BACKBONE_BRANCHES:
+        raise ReportError(f"{path}.rule_branch: unknown branch {branch!r}")
+    _mapping(payload.get("per_backbone_means"), f"{path}.per_backbone_means")
+
+
+def _validate_search_trials(path: Path) -> None:
+    payload = _load(path)
+    _integer(payload.get("schema_version"), f"{path}.schema_version", minimum=1)
+    trials = _list(payload.get("trials"), f"{path}.trials")
+    if not trials:
+        raise ReportError(f"{path}.trials: must not be empty")
+    for index, raw in enumerate(trials):
+        trial = _mapping(raw, f"{path}.trials[{index}]")
+        _integer(trial.get("number"), f"{path}.trials[{index}].number", minimum=0)
+        _string(trial.get("state"), f"{path}.trials[{index}].state")
+        _mapping(trial.get("params"), f"{path}.trials[{index}].params")
+    best = _mapping(payload.get("best"), f"{path}.best")
+    _number(best.get("value"), f"{path}.best.value", minimum=0.0, maximum=1.0)
+
+
+def _validate_full_ft(path: Path) -> None:
+    payload = _load(path)
+    _integer(payload.get("schema_version"), f"{path}.schema_version", minimum=1)
+    runs = _list(payload.get("runs"), f"{path}.runs")
+    if not runs:
+        raise ReportError(f"{path}.runs: must not be empty")
+    for index, raw in enumerate(runs):
+        row = _mapping(raw, f"{path}.runs[{index}]")
+        _number(row.get("lr"), f"{path}.runs[{index}].lr", minimum=0.0)
+        _unit(row.get("dev_macro_f1"), f"{path}.runs[{index}].dev_macro_f1")
+
+
+def _validate_final_seeds(path: Path) -> None:
+    payload = _load(path)
+    _integer(payload.get("schema_version"), f"{path}.schema_version", minimum=1)
+    seeds = _list(payload.get("seeds"), f"{path}.seeds")
+    if not seeds:
+        raise ReportError(f"{path}.seeds: must not be empty")
+    _integer(payload.get("selected_seed"), f"{path}.selected_seed", minimum=0)
+    _unit(payload.get("dev_macro_f1_mean"), f"{path}.dev_macro_f1_mean")
+    _number(payload.get("dev_macro_f1_std"), f"{path}.dev_macro_f1_std", minimum=0.0)
+
+
+def validate_experiments(root: Path) -> None:
+    """Validate the compact experiment reports committed by T11."""
+    _validate_environment(root / "environment.json")
+    _validate_screening(root / "screening.json")
+    _validate_selection(root / "selection.json")
+    _validate_full_ft(root / "full_ft_reference.json")
+    _validate_search_trials(root / "search_trials.json")
+    _validate_final_seeds(root / "final_seeds.json")
+
+
 def validate_all(root: Path) -> None:
     """Validate every report family that exists in the committed tree."""
     validate_data_audit(root)
@@ -299,6 +397,7 @@ def validate_all(root: Path) -> None:
 
 _VALIDATORS: dict[str, Callable[[Path], None]] = {
     "final": validate_final,
+    "experiments": validate_experiments,
     "all": validate_all,
 }
 

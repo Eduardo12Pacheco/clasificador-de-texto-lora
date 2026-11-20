@@ -15,6 +15,8 @@ SCRIPTS = [
     "render_results.py",
     "render_model_card.py",
     "check_error_analysis.py",
+    "collect_experiment_reports.py",
+    "make_tiny_fixtures.py",
 ]
 
 
