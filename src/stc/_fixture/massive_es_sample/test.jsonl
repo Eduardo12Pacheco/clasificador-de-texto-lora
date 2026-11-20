@@ -1,0 +1,117 @@
+{"id":"2673","text":"me acorde de poner una alarma para recordarme mi próxima cita con el médico","intent":"alarm_query","scenario":"alarm","worker_id":"5"}
+{"id":"3870","text":"cuál es la hora de despertador de mi alarma para mi vuelo de este fin de semana","intent":"alarm_query","scenario":"alarm","worker_id":"5"}
+{"id":"2983","text":"quitar alarma ajustada","intent":"alarm_remove","scenario":"alarm","worker_id":"1"}
+{"id":"399","text":"elimina la primera alarma","intent":"alarm_remove","scenario":"alarm","worker_id":"1"}
+{"id":"3694","text":"necesito una alarma para mañana a las cinco y media de la mañana","intent":"alarm_set","scenario":"alarm","worker_id":"5"}
+{"id":"8731","text":"ponga una alarma repetida para recordar el evento de facebook que tengo que asistir en el siete de abril","intent":"alarm_set","scenario":"alarm","worker_id":"10"}
+{"id":"1715","text":"baja el volumen al cincuenta por ciento","intent":"audio_volume_down","scenario":"audio","worker_id":"19"}
+{"id":"5481","text":"baja el volumen","intent":"audio_volume_down","scenario":"audio","worker_id":"15"}
+{"id":"2206","text":"de ahora en adelante mudo","intent":"audio_volume_mute","scenario":"audio","worker_id":"23"}
+{"id":"2796","text":"silencia el volumen de los altavoces","intent":"audio_volume_mute","scenario":"audio","worker_id":"15"}
+{"id":"1065","text":"dónde está el ajuste de volumen","intent":"audio_volume_other","scenario":"audio","worker_id":"19"}
+{"id":"4638","text":"cambiar la configuración del volumen en negativo alexa","intent":"audio_volume_other","scenario":"audio","worker_id":"0"}
+{"id":"1374","text":"puedes subir el volumen","intent":"audio_volume_up","scenario":"audio","worker_id":"15"}
+{"id":"608","text":"después desactiva modo silencioso","intent":"audio_volume_up","scenario":"audio","worker_id":"19"}
+{"id":"7189","text":"tengo algo planeado","intent":"calendar_query","scenario":"calendar","worker_id":"17"}
+{"id":"8828","text":"es cierto el evento del calendario","intent":"calendar_query","scenario":"calendar","worker_id":"17"}
+{"id":"6726","text":"cancela la siguiente reunión","intent":"calendar_remove","scenario":"calendar","worker_id":"6"}
+{"id":"8771","text":"eliminar el viaje de compras que yo he programado para el veintitrés de marzo","intent":"calendar_remove","scenario":"calendar","worker_id":"21"}
+{"id":"7477","text":"acuérdame el cinco de marzo de cada año de ocuparme de los regalos de aniversario de boda de mis padres","intent":"calendar_set","scenario":"calendar","worker_id":"19"}
+{"id":"8261","text":"envíame una alerta y hora antes de mi próxima cita","intent":"calendar_set","scenario":"calendar","worker_id":"20"}
+{"id":"10164","text":"por cuanto tiempo debo cocinar unos macarrones","intent":"cooking_recipe","scenario":"cooking","worker_id":"1"}
+{"id":"9940","text":"búscame la receta de la tarta de chocolate","intent":"cooking_recipe","scenario":"cooking","worker_id":"21"}
+{"id":"4112","text":"convierte la hora actual de g. m. t. a e. s. t.","intent":"datetime_convert","scenario":"datetime","worker_id":"19"}
+{"id":"5523","text":"convierte ocho y media de g. m. t. cuatro a g. m. t. cinco y media","intent":"datetime_convert","scenario":"datetime","worker_id":"1"}
+{"id":"3960","text":"di la hora","intent":"datetime_query","scenario":"datetime","worker_id":"0"}
+{"id":"4667","text":"hora actual en","intent":"datetime_query","scenario":"datetime","worker_id":"19"}
+{"id":"15747","text":"agrega el correo electronico de esta persona","intent":"email_addcontact","scenario":"email","worker_id":"9"}
+{"id":"16846","text":"por favor agrega un email para julia ruiz a mis contactos juliaruiz arroba yahoo punto com","intent":"email_addcontact","scenario":"email","worker_id":"7"}
+{"id":"16263","text":"recibí algún correo electrónico nuevo de roberto","intent":"email_query","scenario":"email","worker_id":"0"}
+{"id":"16974","text":"por favor revise todos los correos electrónicos nuevos del departamento de impuestos sobre la renta","intent":"email_query","scenario":"email","worker_id":"16"}
+{"id":"15794","text":"donde vive sio","intent":"email_querycontact","scenario":"email","worker_id":"21"}
+{"id":"16273","text":"cómo puedo contactar con sara","intent":"email_querycontact","scenario":"email","worker_id":"21"}
+{"id":"16459","text":"nuevo mensaje a newmail arroba gmail punto com","intent":"email_sendemail","scenario":"email","worker_id":"15"}
+{"id":"16989","text":"por favor di al email que me ha enviado jorge que necesito el dinero ahora es urgente","intent":"email_sendemail","scenario":"email","worker_id":"6"}
+{"id":"46","text":"que pasa","intent":"general_greet","scenario":"general","worker_id":"17"}
+{"id":"4913","text":"estás al tanto de esta broma","intent":"general_joke","scenario":"general","worker_id":"17"}
+{"id":"5952","text":"cuéntame un buen chiste ahora mismo","intent":"general_joke","scenario":"general","worker_id":"17"}
+{"id":"15563","text":"aclara el problema","intent":"general_quirky","scenario":"general","worker_id":"17"}
+{"id":"6572","text":"tienes novio","intent":"general_quirky","scenario":"general","worker_id":"17"}
+{"id":"290","text":"enciende la aspiradora de limpieza","intent":"iot_cleaning","scenario":"iot","worker_id":"9"}
+{"id":"3841","text":"activa la roomba","intent":"iot_cleaning","scenario":"iot","worker_id":"0"}
+{"id":"4271","text":"preparar cafe ahora","intent":"iot_coffee","scenario":"iot","worker_id":"23"}
+{"id":"6060","text":"por favor enciende la cafetera","intent":"iot_coffee","scenario":"iot","worker_id":"21"}
+{"id":"1511","text":"enséñame los colores disponibles para la luz","intent":"iot_hue_lightchange","scenario":"iot","worker_id":"6"}
+{"id":"4826","text":"pon las luces rosa","intent":"iot_hue_lightchange","scenario":"iot","worker_id":"19"}
+{"id":"468","text":"cambia las luces a tenue","intent":"iot_hue_lightdim","scenario":"iot","worker_id":"0"}
+{"id":"6015","text":"baja el brillo de las luces","intent":"iot_hue_lightdim","scenario":"iot","worker_id":"9"}
+{"id":"1750","text":"apagar todas las luces","intent":"iot_hue_lightoff","scenario":"iot","worker_id":"21"}
+{"id":"3378","text":"no hay luces en la cocina","intent":"iot_hue_lightoff","scenario":"iot","worker_id":"0"}
+{"id":"286","text":"enciende las luces de la cocina","intent":"iot_hue_lighton","scenario":"iot","worker_id":"21"}
+{"id":"3522","text":"por favor enciende las luces de mi terraza","intent":"iot_hue_lighton","scenario":"iot","worker_id":"0"}
+{"id":"5574","text":"haz más brillantes las luces del salon","intent":"iot_hue_lightup","scenario":"iot","worker_id":"0"}
+{"id":"962","text":"incrementa el brillo de las luces","intent":"iot_hue_lightup","scenario":"iot","worker_id":"0"}
+{"id":"2566","text":"apaga mi enchufe wemo","intent":"iot_wemo_off","scenario":"iot","worker_id":"9"}
+{"id":"4966","text":"hola quiero apagar mi enchufe wemo","intent":"iot_wemo_off","scenario":"iot","worker_id":"0"}
+{"id":"1551","text":"enciende wemo","intent":"iot_wemo_on","scenario":"iot","worker_id":"0"}
+{"id":"4201","text":"enciende wemo","intent":"iot_wemo_on","scenario":"iot","worker_id":"0"}
+{"id":"10600","text":"por favor actualiza mi lista de la compra con un galón de leche dos por ciento","intent":"lists_createoradd","scenario":"lists","worker_id":"15"}
+{"id":"13043","text":"quiero pastel de camote de una panadería local","intent":"lists_createoradd","scenario":"lists","worker_id":"20"}
+{"id":"10455","text":"qué hay en mi lista de tareas pendientes","intent":"lists_query","scenario":"lists","worker_id":"20"}
+{"id":"10957","text":"recuérdame cuántas listas tengo yo","intent":"lists_query","scenario":"lists","worker_id":"23"}
+{"id":"10590","text":"eliminar la segunda fila de la lista","intent":"lists_remove","scenario":"lists","worker_id":"20"}
+{"id":"10718","text":"puedes eliminar este artículo de la lista","intent":"lists_remove","scenario":"lists","worker_id":"20"}
+{"id":"1076","text":"no pongas rock metal","intent":"music_dislikeness","scenario":"music","worker_id":"6"}
+{"id":"3103","text":"no pongas esta canción de nuevo","intent":"music_dislikeness","scenario":"music","worker_id":"6"}
+{"id":"3683","text":"guarda todas las canciones que he escuchado más de una vez","intent":"music_likeness","scenario":"music","worker_id":"6"}
+{"id":"4672","text":"este es la mejor banda de música de la historia","intent":"music_likeness","scenario":"music","worker_id":"18"}
+{"id":"1808","text":"título","intent":"music_query","scenario":"music","worker_id":"18"}
+{"id":"2355","text":"en qué película sale la música cuál es el nombre de la música","intent":"music_query","scenario":"music","worker_id":"5"}
+{"id":"1710","text":"cambiar el modo de música a rock","intent":"music_settings","scenario":"music","worker_id":"17"}
+{"id":"5911","text":"reproducir la música","intent":"music_settings","scenario":"music","worker_id":"21"}
+{"id":"178","text":"dime las noticias internacionales","intent":"news_query","scenario":"news","worker_id":"19"}
+{"id":"2384","text":"que esta pasando alrededor del mundo","intent":"news_query","scenario":"news","worker_id":"23"}
+{"id":"9691","text":"abre audiolibro de historia de roma","intent":"play_audiobook","scenario":"play","worker_id":"7"}
+{"id":"9720","text":"reanuda el libro cuatro de el tiempo entre costuras","intent":"play_audiobook","scenario":"play","worker_id":"2"}
+{"id":"10276","text":"vamos a jugar acorazado","intent":"play_game","scenario":"play","worker_id":"17"}
+{"id":"10346","text":"comienza un juego y juega conmigo","intent":"play_game","scenario":"play","worker_id":"0"}
+{"id":"1467","text":"juega slayer","intent":"play_music","scenario":"play","worker_id":"0"}
+{"id":"3686","text":"enciende la lista de reproducción que yo he dedicado a la música rock","intent":"play_music","scenario":"play","worker_id":"21"}
+{"id":"11366","text":"volver al episodio anterior del podcast","intent":"play_podcasts","scenario":"play","worker_id":"17"}
+{"id":"11539","text":"iniciar el próximo podcast","intent":"play_podcasts","scenario":"play","worker_id":"7"}
+{"id":"9438","text":"puedes poner para mi una canción de rap en la radio","intent":"play_radio","scenario":"play","worker_id":"1"}
+{"id":"9519","text":"reproducir cualquier canal f.m. de pop","intent":"play_radio","scenario":"play","worker_id":"21"}
+{"id":"13847","text":"cual es el tipo de cambio del dinero de mexico","intent":"qa_currency","scenario":"qa","worker_id":"17"}
+{"id":"14074","text":"un dólar es igual a la cantidad de inr","intent":"qa_currency","scenario":"qa","worker_id":"17"}
+{"id":"14138","text":"por favor dime el significado de cilindro","intent":"qa_definition","scenario":"qa","worker_id":"1"}
+{"id":"14622","text":"describe lo que es una sphere","intent":"qa_definition","scenario":"qa","worker_id":"2"}
+{"id":"13473","text":"cuando consiguió estados unidos la libertad","intent":"qa_factoid","scenario":"qa","worker_id":"17"}
+{"id":"14169","text":"a dónde fue amal clooney a la universidad","intent":"qa_factoid","scenario":"qa","worker_id":"2"}
+{"id":"13359","text":"cuanto es doce más ciento noventa y seis","intent":"qa_maths","scenario":"qa","worker_id":"2"}
+{"id":"14757","text":"divide setenta y seis en dos partes","intent":"qa_maths","scenario":"qa","worker_id":"2"}
+{"id":"14544","text":"averigüe el precio de las acciones de microsoft en nasdaq","intent":"qa_stock","scenario":"qa","worker_id":"2"}
+{"id":"14925","text":"subió o bajó el precio de las acciones de walmart","intent":"qa_stock","scenario":"qa","worker_id":"17"}
+{"id":"11582","text":"sucede algo en la escena del jazz en edimburgo","intent":"recommendation_events","scenario":"recommendation","worker_id":"16"}
+{"id":"7026","text":"que eventos van a suceder en mi ciudad esta semana","intent":"recommendation_events","scenario":"recommendation","worker_id":"20"}
+{"id":"11665","text":"solo estoy buscando algunos desfiles de vestidos puedes encontrar tiendas de ropa dentro de una milla","intent":"recommendation_locations","scenario":"recommendation","worker_id":"20"}
+{"id":"13318","text":"quiero saber qué supermercado cerca de mí tiene el mejor precio en pan sin glúten","intent":"recommendation_locations","scenario":"recommendation","worker_id":"0"}
+{"id":"11695","text":"tienes alguna sugerencia de películas de acción","intent":"recommendation_movies","scenario":"recommendation","worker_id":"16"}
+{"id":"13181","text":"chequea en los cines precios y disponibilidad por las peliculas de estreno en mi zona","intent":"recommendation_movies","scenario":"recommendation","worker_id":"15"}
+{"id":"15703","text":"tuitea a marypaz que se quedaron sin tallas demasiado rápido","intent":"social_post","scenario":"social","worker_id":"18"}
+{"id":"15736","text":"envia un comentario negativo sobre la compañía","intent":"social_post","scenario":"social","worker_id":"15"}
+{"id":"15249","text":"a alguien le gustó mi foto que acabo de publicar","intent":"social_query","scenario":"social","worker_id":"0"}
+{"id":"6500","text":"redes sociales","intent":"social_query","scenario":"social","worker_id":"15"}
+{"id":"2336","text":"un paquete de noodles ponlo para llevar","intent":"takeaway_order","scenario":"takeaway","worker_id":"18"}
+{"id":"5966","text":"puedes pedir algo para comer por mi","intent":"takeaway_order","scenario":"takeaway","worker_id":"18"}
+{"id":"171","text":"alexa entregan a casa","intent":"takeaway_query","scenario":"takeaway","worker_id":"18"}
+{"id":"5324","text":"hola tenéis entrega a domicilio","intent":"takeaway_query","scenario":"takeaway","worker_id":"18"}
+{"id":"12759","text":"tiempo de conducción a los angeles","intent":"transport_query","scenario":"transport","worker_id":"17"}
+{"id":"12930","text":"busca en el mapa tiendas cerca de mí","intent":"transport_query","scenario":"transport","worker_id":"22"}
+{"id":"12548","text":"necesito un taxi para volver a casa","intent":"transport_taxi","scenario":"transport","worker_id":"22"}
+{"id":"12553","text":"reservame un taxi que vaya a la ubicación","intent":"transport_taxi","scenario":"transport","worker_id":"10"}
+{"id":"12233","text":"busca en google billetes de tren a madrid","intent":"transport_ticket","scenario":"transport","worker_id":"22"}
+{"id":"12468","text":"busca un billete de tren a valencia","intent":"transport_ticket","scenario":"transport","worker_id":"22"}
+{"id":"12256","text":"cómo está el tráfico actualmente cerca de central park road","intent":"transport_traffic","scenario":"transport","worker_id":"10"}
+{"id":"12869","text":"informe de trafico","intent":"transport_traffic","scenario":"transport","worker_id":"15"}
+{"id":"344","text":"lloverá mañana","intent":"weather_query","scenario":"weather","worker_id":"18"}
+{"id":"5871","text":"cómo está el clima de madrid hoy","intent":"weather_query","scenario":"weather","worker_id":"18"}

@@ -1,0 +1,358 @@
+{"id":"1438","text":"qué alarmas tengo yo","intent":"alarm_query","scenario":"alarm","worker_id":"5"}
+{"id":"2671","text":"podrías comprobar que tengo mi alarma para mañana por la mañana","intent":"alarm_query","scenario":"alarm","worker_id":"5"}
+{"id":"2873","text":"tengo alguna alarma para hoy","intent":"alarm_query","scenario":"alarm","worker_id":"5"}
+{"id":"356","text":"cuál es mi próxima alarma","intent":"alarm_query","scenario":"alarm","worker_id":"1"}
+{"id":"5505","text":"qué alarmas están activadas en la casa","intent":"alarm_query","scenario":"alarm","worker_id":"10"}
+{"id":"559","text":"cuál es la situación de la alarma para mañana","intent":"alarm_query","scenario":"alarm","worker_id":"5"}
+{"id":"2984","text":"borrar alarma programada","intent":"alarm_remove","scenario":"alarm","worker_id":"1"}
+{"id":"3536","text":"apaga todas mis alarmas","intent":"alarm_remove","scenario":"alarm","worker_id":"5"}
+{"id":"3903","text":"por favor borra la alarma del miércoles llamada tenis","intent":"alarm_remove","scenario":"alarm","worker_id":"5"}
+{"id":"4922","text":"apagar todas las alarmas","intent":"alarm_remove","scenario":"alarm","worker_id":"5"}
+{"id":"5121","text":"eliminar todas las alarmas si las hubiere","intent":"alarm_remove","scenario":"alarm","worker_id":"1"}
+{"id":"561","text":"cancelar mi alarma de las ocho de la mañana","intent":"alarm_remove","scenario":"alarm","worker_id":"5"}
+{"id":"1772","text":"por favor poner una alarma a las cinco de la tarde","intent":"alarm_set","scenario":"alarm","worker_id":"5"}
+{"id":"3462","text":"envíame una alerta para despertarme a las siete de la mañana mañana por la mañana","intent":"alarm_set","scenario":"alarm","worker_id":"0"}
+{"id":"3660","text":"poner una alarma a las siete de la mañana","intent":"alarm_set","scenario":"alarm","worker_id":"5"}
+{"id":"3696","text":"google pon alarma que suene en una hora","intent":"alarm_set","scenario":"alarm","worker_id":"5"}
+{"id":"4852","text":"puedes poner mi alarma","intent":"alarm_set","scenario":"alarm","worker_id":"5"}
+{"id":"723","text":"programar una alarma para despertarme dentro de tres horas","intent":"alarm_set","scenario":"alarm","worker_id":"5"}
+{"id":"1353","text":"quiero bajar mi altavoz","intent":"audio_volume_down","scenario":"audio","worker_id":"20"}
+{"id":"2021","text":"disminuir el volumen a muy baja","intent":"audio_volume_down","scenario":"audio","worker_id":"23"}
+{"id":"3560","text":"por favor baja el sonido","intent":"audio_volume_down","scenario":"audio","worker_id":"15"}
+{"id":"4167","text":"bajar el volumen a la mitad","intent":"audio_volume_down","scenario":"audio","worker_id":"4"}
+{"id":"5482","text":"olly baja el volumen","intent":"audio_volume_down","scenario":"audio","worker_id":"15"}
+{"id":"735","text":"puedes por favor bajar tu volumen","intent":"audio_volume_down","scenario":"audio","worker_id":"19"}
+{"id":"2511","text":"necesito que estés en silencio hasta mañana","intent":"audio_volume_mute","scenario":"audio","worker_id":"15"}
+{"id":"3839","text":"silencia audio","intent":"audio_volume_mute","scenario":"audio","worker_id":"23"}
+{"id":"4242","text":"por favor no hables","intent":"audio_volume_mute","scenario":"audio","worker_id":"23"}
+{"id":"5283","text":"por favor silenciate","intent":"audio_volume_mute","scenario":"audio","worker_id":"19"}
+{"id":"5842","text":"activa silencio","intent":"audio_volume_mute","scenario":"audio","worker_id":"16"}
+{"id":"6167","text":"sin notificaciones durante cinco minutos","intent":"audio_volume_mute","scenario":"audio","worker_id":"0"}
+{"id":"1049","text":"cambia la configuración de audio","intent":"audio_volume_other","scenario":"audio","worker_id":"0"}
+{"id":"1064","text":"mostrar los ajustes de volumen","intent":"audio_volume_other","scenario":"audio","worker_id":"16"}
+{"id":"1173","text":"ajusta el sonido","intent":"audio_volume_other","scenario":"audio","worker_id":"15"}
+{"id":"1175","text":"ajustar cómodamente el sonido","intent":"audio_volume_other","scenario":"audio","worker_id":"0"}
+{"id":"152","text":"cambia el volumen","intent":"audio_volume_other","scenario":"audio","worker_id":"15"}
+{"id":"1907","text":"mejora la claridad del volumen","intent":"audio_volume_other","scenario":"audio","worker_id":"15"}
+{"id":"1083","text":"no puede escucharte repetir eso más fuerte","intent":"audio_volume_up","scenario":"audio","worker_id":"0"}
+{"id":"1631","text":"necesito oir el volumen de la musica que suena","intent":"audio_volume_up","scenario":"audio","worker_id":"15"}
+{"id":"4091","text":"quiero volumen en mis altavoces","intent":"audio_volume_up","scenario":"audio","worker_id":"20"}
+{"id":"4541","text":"ajusta el volumen del reproductor","intent":"audio_volume_up","scenario":"audio","worker_id":"15"}
+{"id":"5220","text":"hacer que el volumen del altavoz sea máximo","intent":"audio_volume_up","scenario":"audio","worker_id":"23"}
+{"id":"748","text":"por favor baja el volumen de esta canción","intent":"audio_volume_up","scenario":"audio","worker_id":"19"}
+{"id":"6890","text":"cuáles son los horarios del espectáculo","intent":"calendar_query","scenario":"calendar","worker_id":"19"}
+{"id":"6984","text":"haz una lista con todos los eventos de halloween que haya cerca de ciudad real","intent":"calendar_query","scenario":"calendar","worker_id":"18"}
+{"id":"7110","text":"tengo algún plan para esta noche despues de las ocho de la tarde","intent":"calendar_query","scenario":"calendar","worker_id":"1"}
+{"id":"7615","text":"cuéntame sobre el próximo juego de hockey del diablo el viernes","intent":"calendar_query","scenario":"calendar","worker_id":"16"}
+{"id":"7824","text":"que pasa hoy","intent":"calendar_query","scenario":"calendar","worker_id":"16"}
+{"id":"8929","text":"cuantas reuniones ha habido","intent":"calendar_query","scenario":"calendar","worker_id":"17"}
+{"id":"6759","text":"eliminar mi próxima reunión","intent":"calendar_remove","scenario":"calendar","worker_id":"16"}
+{"id":"7058","text":"eliminar evento de noviembre","intent":"calendar_remove","scenario":"calendar","worker_id":"17"}
+{"id":"7144","text":"eliminar la fiesta del primero de junio de mi calendario","intent":"calendar_remove","scenario":"calendar","worker_id":"17"}
+{"id":"8087","text":"puedo quitar un recordatorio","intent":"calendar_remove","scenario":"calendar","worker_id":"1"}
+{"id":"8554","text":"elimina la fiesta de navidad en la iglesia del miércoles que viene","intent":"calendar_remove","scenario":"calendar","worker_id":"22"}
+{"id":"8613","text":"elimina mi último evento","intent":"calendar_remove","scenario":"calendar","worker_id":"22"}
+{"id":"6889","text":"dale a guardar","intent":"calendar_set","scenario":"calendar","worker_id":"17"}
+{"id":"6955","text":"programa una notificación para la reunión con el jefe","intent":"calendar_set","scenario":"calendar","worker_id":"22"}
+{"id":"7198","text":"haz que no se me olvide la cita con el veterinario de toti del veinticinco","intent":"calendar_set","scenario":"calendar","worker_id":"19"}
+{"id":"7416","text":"repetir recordatorio para mis citas de navidad","intent":"calendar_set","scenario":"calendar","worker_id":"20"}
+{"id":"8536","text":"recuérdame que rellene el formulario de solicitud de la universidad cada dos días a partir de ahora","intent":"calendar_set","scenario":"calendar","worker_id":"22"}
+{"id":"8552","text":"programar una reunión con tomás el martes a las nueve de la mañana","intent":"calendar_set","scenario":"calendar","worker_id":"18"}
+{"id":"13479","text":"necesito una receta de alitas de pollo para mi olla","intent":"cooking_query","scenario":"cooking","worker_id":"15"}
+{"id":"13488","text":"olly puedo usar azúcar moreno en vez de blanco para hacer calamares","intent":"cooking_query","scenario":"cooking","worker_id":"15"}
+{"id":"14736","text":"cuál es la forma mas fácil y rápida de cocinar un pavo","intent":"cooking_query","scenario":"cooking","worker_id":"1"}
+{"id":"6637","text":"qué se cocina para la merienda","intent":"cooking_query","scenario":"cooking","worker_id":"15"}
+{"id":"10026","text":"googlea los pasos para preparar el plato","intent":"cooking_recipe","scenario":"cooking","worker_id":"1"}
+{"id":"10069","text":"cuántas cucharaditas hay en una taza","intent":"cooking_recipe","scenario":"cooking","worker_id":"1"}
+{"id":"10113","text":"como se cocina una buena hamburguesa olly","intent":"cooking_recipe","scenario":"cooking","worker_id":"21"}
+{"id":"10235","text":"encender la estufa ajustar la llama para cocinar pon todos los ingredientes en la olla a presión para cocinar los ingredientes manténlos en la estufa y espera a que se cocinen","intent":"cooking_recipe","scenario":"cooking","worker_id":"1"}
+{"id":"9919","text":"cúal es la receta para la salsa de la pasta","intent":"cooking_recipe","scenario":"cooking","worker_id":"15"}
+{"id":"9967","text":"cuál es la mejor manera de cocinar pasta","intent":"cooking_recipe","scenario":"cooking","worker_id":"14"}
+{"id":"2229","text":"qué son las nueve de la mañana de madrid a barcelona","intent":"datetime_convert","scenario":"datetime","worker_id":"0"}
+{"id":"394","text":"si es mediodia en madrid que hora es en california","intent":"datetime_convert","scenario":"datetime","worker_id":"1"}
+{"id":"4215","text":"necesito la zona horaria de madrid españa en vez de la zona horaria del centro","intent":"datetime_convert","scenario":"datetime","worker_id":"1"}
+{"id":"49","text":"dime la hora en el huso horario más cinco","intent":"datetime_convert","scenario":"datetime","worker_id":"0"}
+{"id":"5203","text":"las ocho de la mañana en lanzarote que hora son en la zona del este","intent":"datetime_convert","scenario":"datetime","worker_id":"19"}
+{"id":"5498","text":"a qué hora puedo llamar desde madrid para que sean horario de oficina en australia","intent":"datetime_convert","scenario":"datetime","worker_id":"0"}
+{"id":"2633","text":"fecha actual por favor","intent":"datetime_query","scenario":"datetime","worker_id":"1"}
+{"id":"2913","text":"cuál es la fecha exacta de hoy","intent":"datetime_query","scenario":"datetime","worker_id":"19"}
+{"id":"3958","text":"a cuántas horas adelánte está madrid capital","intent":"datetime_query","scenario":"datetime","worker_id":"19"}
+{"id":"5676","text":"el veintidós de mayo es mi fecha de nacimiento y quiero saber qué día es el veintitrés de mayo","intent":"datetime_query","scenario":"datetime","worker_id":"0"}
+{"id":"671","text":"podrias decirme que fecha es hoy","intent":"datetime_query","scenario":"datetime","worker_id":"1"}
+{"id":"886","text":"dime que hora es ahora mismo","intent":"datetime_query","scenario":"datetime","worker_id":"19"}
+{"id":"16226","text":"edita contactos","intent":"email_addcontact","scenario":"email","worker_id":"0"}
+{"id":"16333","text":"añadir nueva dirección de correo electrónico","intent":"email_addcontact","scenario":"email","worker_id":"6"}
+{"id":"16468","text":"agrega este correo electronico a mis contactos","intent":"email_addcontact","scenario":"email","worker_id":"7"}
+{"id":"16469","text":"necesito que agregues este correo en mis contactos","intent":"email_addcontact","scenario":"email","worker_id":"0"}
+{"id":"16545","text":"hacer de este correo electrónico un nuevo contacto","intent":"email_addcontact","scenario":"email","worker_id":"16"}
+{"id":"16808","text":"añade apahelp arroba yahoo punto com a mis contactos","intent":"email_addcontact","scenario":"email","worker_id":"21"}
+{"id":"16040","text":"tengo algún correo electrónico de juan en la última semana","intent":"email_query","scenario":"email","worker_id":"0"}
+{"id":"16097","text":"me ha enviado ana algún correo electrónico nuevo","intent":"email_query","scenario":"email","worker_id":"6"}
+{"id":"16101","text":"por favor revisa correo de matrimonio","intent":"email_query","scenario":"email","worker_id":"0"}
+{"id":"16606","text":"comprobar los nuevos correos electrónicos en el último día","intent":"email_query","scenario":"email","worker_id":"21"}
+{"id":"17004","text":"muéstrame todos los correos electrónicos del contrato","intent":"email_query","scenario":"email","worker_id":"16"}
+{"id":"17176","text":"tengo correos electrónicos","intent":"email_query","scenario":"email","worker_id":"7"}
+{"id":"16154","text":"tengo algún contacto de teresa perez","intent":"email_querycontact","scenario":"email","worker_id":"15"}
+{"id":"16256","text":"lee el número de contacto de alex de mi agenda telefónica","intent":"email_querycontact","scenario":"email","worker_id":"15"}
+{"id":"16283","text":"revisa en contactos","intent":"email_querycontact","scenario":"email","worker_id":"7"}
+{"id":"16863","text":"marca el número","intent":"email_querycontact","scenario":"email","worker_id":"21"}
+{"id":"16952","text":"cuál es el correo electrónico de carlos","intent":"email_querycontact","scenario":"email","worker_id":"0"}
+{"id":"17091","text":"contactos","intent":"email_querycontact","scenario":"email","worker_id":"0"}
+{"id":"15856","text":"envía un correo electrónico a la dirección de correo electrónico actual","intent":"email_sendemail","scenario":"email","worker_id":"6"}
+{"id":"16237","text":"reenvía el correo con la nueva dirección","intent":"email_sendemail","scenario":"email","worker_id":"15"}
+{"id":"16690","text":"responder a un nuevo correo electrónico de juan","intent":"email_sendemail","scenario":"email","worker_id":"0"}
+{"id":"16996","text":"necesito enviar un correo electrónico a miguel","intent":"email_sendemail","scenario":"email","worker_id":"16"}
+{"id":"17025","text":"crear un correo electrónico a mamá y preguntar sobre el tiempo de esta semana","intent":"email_sendemail","scenario":"email","worker_id":"0"}
+{"id":"4539","text":"no quería que enviaras ese texto todavía espera a que te diga que lo envíes","intent":"email_sendemail","scenario":"email","worker_id":"21"}
+{"id":"1101","text":"buenos dias","intent":"general_greet","scenario":"general","worker_id":"17"}
+{"id":"1392","text":"oye que pasa","intent":"general_greet","scenario":"general","worker_id":"17"}
+{"id":"1829","text":"hola que vas a hacer","intent":"general_greet","scenario":"general","worker_id":"17"}
+{"id":"2942","text":"oye que es hoy","intent":"general_greet","scenario":"general","worker_id":"17"}
+{"id":"6211","text":"buen dia","intent":"general_greet","scenario":"general","worker_id":"17"}
+{"id":"719","text":"hola","intent":"general_greet","scenario":"general","worker_id":"17"}
+{"id":"1159","text":"decir cosas graciosas","intent":"general_joke","scenario":"general","worker_id":"17"}
+{"id":"125","text":"alexa cuentame un chiste","intent":"general_joke","scenario":"general","worker_id":"17"}
+{"id":"3363","text":"un sacerdote entra en un bar","intent":"general_joke","scenario":"general","worker_id":"17"}
+{"id":"3534","text":"la broma del día","intent":"general_joke","scenario":"general","worker_id":"17"}
+{"id":"636","text":"que es lo gracioso en un chiste sobre coche","intent":"general_joke","scenario":"general","worker_id":"17"}
+{"id":"849","text":"dame un chiste","intent":"general_joke","scenario":"general","worker_id":"17"}
+{"id":"13471","text":"puedes guardar secretos","intent":"general_quirky","scenario":"general","worker_id":"17"}
+{"id":"13837","text":"te arrepientes de algo o tienes juicios de valor fuera del alcance de tu capacidad intelectual","intent":"general_quirky","scenario":"general","worker_id":"17"}
+{"id":"14401","text":"dime la ultima cosa que buscaste para mi","intent":"general_quirky","scenario":"general","worker_id":"17"}
+{"id":"2739","text":"tenia la intencion de hacerlo","intent":"general_quirky","scenario":"general","worker_id":"17"}
+{"id":"6306","text":"te puedo decir sobre mi dia","intent":"general_quirky","scenario":"general","worker_id":"15"}
+{"id":"6598","text":"somos amigos","intent":"general_quirky","scenario":"general","worker_id":"17"}
+{"id":"1068","text":"hay algo que deba saber antes de activar el robot aspirador","intent":"iot_cleaning","scenario":"iot","worker_id":"21"}
+{"id":"1146","text":"activa el robot aspirador","intent":"iot_cleaning","scenario":"iot","worker_id":"23"}
+{"id":"2436","text":"encender el robot aspirador","intent":"iot_cleaning","scenario":"iot","worker_id":"23"}
+{"id":"2519","text":"quiero encender el robot aspirador","intent":"iot_cleaning","scenario":"iot","worker_id":"0"}
+{"id":"3842","text":"haz que la roomba empiece a limpiar","intent":"iot_cleaning","scenario":"iot","worker_id":"0"}
+{"id":"4011","text":"inicia la aspiradora por mi","intent":"iot_cleaning","scenario":"iot","worker_id":"0"}
+{"id":"3419","text":"puedes programar la cafetera para que haga café a las tres de la tarde todos los días de la semana","intent":"iot_coffee","scenario":"iot","worker_id":"21"}
+{"id":"342","text":"prepara una taza de café ahora","intent":"iot_coffee","scenario":"iot","worker_id":"20"}
+{"id":"3627","text":"olly haz una taza de cafe","intent":"iot_coffee","scenario":"iot","worker_id":"15"}
+{"id":"5011","text":"solo haz lo de siempre","intent":"iot_coffee","scenario":"iot","worker_id":"0"}
+{"id":"5848","text":"por favor hazme un capuccino","intent":"iot_coffee","scenario":"iot","worker_id":"7"}
+{"id":"6002","text":"ve y prepárame un café","intent":"iot_coffee","scenario":"iot","worker_id":"19"}
+{"id":"2019","text":"luces de transición a azul a verde a amarillo","intent":"iot_hue_lightchange","scenario":"iot","worker_id":"21"}
+{"id":"2714","text":"quiero tener colores vibrantes","intent":"iot_hue_lightchange","scenario":"iot","worker_id":"0"}
+{"id":"3376","text":"luces a cincuenta por ciento","intent":"iot_hue_lightchange","scenario":"iot","worker_id":"0"}
+{"id":"3448","text":"cambia el color de las luces a azul","intent":"iot_hue_lightchange","scenario":"iot","worker_id":"22"}
+{"id":"4061","text":"por favor cambia el color de las luces te diré cuando parar","intent":"iot_hue_lightchange","scenario":"iot","worker_id":"0"}
+{"id":"4165","text":"me gustaría que las luces del baño se pusieran en amarillo","intent":"iot_hue_lightchange","scenario":"iot","worker_id":"4"}
+{"id":"156","text":"baja el brillo","intent":"iot_hue_lightdim","scenario":"iot","worker_id":"0"}
+{"id":"3084","text":"sombra más clara en las luces por favor","intent":"iot_hue_lightdim","scenario":"iot","worker_id":"23"}
+{"id":"3237","text":"baja las luces del salón","intent":"iot_hue_lightdim","scenario":"iot","worker_id":"6"}
+{"id":"4009","text":"haz que las luces sean menos brillantes","intent":"iot_hue_lightdim","scenario":"iot","worker_id":"9"}
+{"id":"5383","text":"baja las luces del cuarto","intent":"iot_hue_lightdim","scenario":"iot","worker_id":"9"}
+{"id":"924","text":"baja las luces un poco","intent":"iot_hue_lightdim","scenario":"iot","worker_id":"0"}
+{"id":"1972","text":"apaga la luz principal","intent":"iot_hue_lightoff","scenario":"iot","worker_id":"6"}
+{"id":"2043","text":"no necesito luz","intent":"iot_hue_lightoff","scenario":"iot","worker_id":"9"}
+{"id":"2243","text":"por favor apaga la luz de la cocina por mí","intent":"iot_hue_lightoff","scenario":"iot","worker_id":"0"}
+{"id":"2896","text":"apaga la lampara inteligente en la despensa","intent":"iot_hue_lightoff","scenario":"iot","worker_id":"0"}
+{"id":"4076","text":"apaga las luce de mi habitación","intent":"iot_hue_lightoff","scenario":"iot","worker_id":"7"}
+{"id":"4276","text":"por favor apaga la lámpara","intent":"iot_hue_lightoff","scenario":"iot","worker_id":"21"}
+{"id":"1501","text":"enciende todas las luces de arriba","intent":"iot_hue_lighton","scenario":"iot","worker_id":"0"}
+{"id":"1889","text":"pon las luces de discoteca","intent":"iot_hue_lighton","scenario":"iot","worker_id":"7"}
+{"id":"2905","text":"enciende la lámpara","intent":"iot_hue_lighton","scenario":"iot","worker_id":"20"}
+{"id":"3896","text":"está oscuro","intent":"iot_hue_lighton","scenario":"iot","worker_id":"19"}
+{"id":"471","text":"apagar las luces","intent":"iot_hue_lighton","scenario":"iot","worker_id":"0"}
+{"id":"5470","text":"alexa por favor enciende las luces","intent":"iot_hue_lighton","scenario":"iot","worker_id":"23"}
+{"id":"1091","text":"por favor haz que las luces de la habitación sean más brillantes","intent":"iot_hue_lightup","scenario":"iot","worker_id":"0"}
+{"id":"1418","text":"por favor ilumina las luces","intent":"iot_hue_lightup","scenario":"iot","worker_id":"0"}
+{"id":"1562","text":"está oscuro aquí la mente aumenta la intensidad de la luz","intent":"iot_hue_lightup","scenario":"iot","worker_id":"0"}
+{"id":"211","text":"haz que la habitación sea más brillante","intent":"iot_hue_lightup","scenario":"iot","worker_id":"0"}
+{"id":"5002","text":"aumentar el brillo de la luz","intent":"iot_hue_lightup","scenario":"iot","worker_id":"0"}
+{"id":"5572","text":"sube el brillo de las luces de la habitación del cuarto","intent":"iot_hue_lightup","scenario":"iot","worker_id":"9"}
+{"id":"3324","text":"por favor apaga el enchufe wemo","intent":"iot_wemo_off","scenario":"iot","worker_id":"21"}
+{"id":"4203","text":"corte la energía wemo por favor","intent":"iot_wemo_off","scenario":"iot","worker_id":"0"}
+{"id":"4746","text":"desactiva el enchufe","intent":"iot_wemo_off","scenario":"iot","worker_id":"15"}
+{"id":"4768","text":"puedes por favor apagar el enchufe wemo","intent":"iot_wemo_off","scenario":"iot","worker_id":"0"}
+{"id":"5628","text":"apaga el ventilador","intent":"iot_wemo_off","scenario":"iot","worker_id":"0"}
+{"id":"677","text":"por favor apaga el enchufe de mi movil cuando esté cargado","intent":"iot_wemo_off","scenario":"iot","worker_id":"0"}
+{"id":"1748","text":"si el interruptor esta encendido apaga el resto","intent":"iot_wemo_on","scenario":"iot","worker_id":"15"}
+{"id":"2074","text":"encender el enchufe de mi baño","intent":"iot_wemo_on","scenario":"iot","worker_id":"21"}
+{"id":"4230","text":"necesito encender el enchufe en mi oficina para mi ordenador","intent":"iot_wemo_on","scenario":"iot","worker_id":"6"}
+{"id":"5048","text":"en el enchufe del cargador de móvil","intent":"iot_wemo_on","scenario":"iot","worker_id":"0"}
+{"id":"6062","text":"enciende los enchufes de las luces","intent":"iot_wemo_on","scenario":"iot","worker_id":"21"}
+{"id":"6160","text":"enchufe encender","intent":"iot_wemo_on","scenario":"iot","worker_id":"0"}
+{"id":"10469","text":"puedes crear una nueva lista en la lista de reproducción","intent":"lists_createoradd","scenario":"lists","worker_id":"20"}
+{"id":"10550","text":"por favor empieza una nueva lista","intent":"lists_createoradd","scenario":"lists","worker_id":"7"}
+{"id":"10622","text":"añade pañales a la lista de cosméticos","intent":"lists_createoradd","scenario":"lists","worker_id":"7"}
+{"id":"10642","text":"reemplaza los muebles con electrónica de la lista","intent":"lists_createoradd","scenario":"lists","worker_id":"15"}
+{"id":"10872","text":"agregar ketchup a la lista","intent":"lists_createoradd","scenario":"lists","worker_id":"20"}
+{"id":"10899","text":"por favor haz una lista de amigos que invitar a la fiesta","intent":"lists_createoradd","scenario":"lists","worker_id":"7"}
+{"id":"10504","text":"qué listas tengo","intent":"lists_query","scenario":"lists","worker_id":"21"}
+{"id":"10540","text":"muestra la lista","intent":"lists_query","scenario":"lists","worker_id":"4"}
+{"id":"10572","text":"java","intent":"lists_query","scenario":"lists","worker_id":"10"}
+{"id":"10597","text":"háblame de la lista","intent":"lists_query","scenario":"lists","worker_id":"20"}
+{"id":"10835","text":"dime qué hay en mi lista de la compra","intent":"lists_query","scenario":"lists","worker_id":"21"}
+{"id":"10890","text":"dame la lista de la compra","intent":"lists_query","scenario":"lists","worker_id":"7"}
+{"id":"10459","text":"borra la lista creada ayer","intent":"lists_remove","scenario":"lists","worker_id":"7"}
+{"id":"10567","text":"eliminar lista de compras","intent":"lists_remove","scenario":"lists","worker_id":"20"}
+{"id":"10670","text":"eliminar la lista de personas que empiezan por la letra media en mi lista de contactos","intent":"lists_remove","scenario":"lists","worker_id":"4"}
+{"id":"10733","text":"eliminar tarea de casa de mi lista de tareas pendientes","intent":"lists_remove","scenario":"lists","worker_id":"20"}
+{"id":"10810","text":"eliminar las manzanas de mi lista de la compra","intent":"lists_remove","scenario":"lists","worker_id":"21"}
+{"id":"11036","text":"eliminar bananas de mi lista de compras","intent":"lists_remove","scenario":"lists","worker_id":"20"}
+{"id":"1053","text":"esta canción no es muy buena","intent":"music_dislikeness","scenario":"music","worker_id":"18"}
+{"id":"1055","text":"no vuelvas a poner esta canción","intent":"music_dislikeness","scenario":"music","worker_id":"17"}
+{"id":"3113","text":"odio esta canción por favor recuérdalo así no tengo que volverla a escuchar nunca más","intent":"music_dislikeness","scenario":"music","worker_id":"18"}
+{"id":"4650","text":"no quiero escuchar mas canciones de ese tipo","intent":"music_dislikeness","scenario":"music","worker_id":"17"}
+{"id":"6122","text":"esa canción de fondo es terrible","intent":"music_dislikeness","scenario":"music","worker_id":"17"}
+{"id":"949","text":"esa canción de fondo es irritante","intent":"music_dislikeness","scenario":"music","worker_id":"5"}
+{"id":"149","text":"esta canción fue muy buena","intent":"music_likeness","scenario":"music","worker_id":"21"}
+{"id":"1587","text":"guardar mi opinión sobre la canción que se está reproduciendo","intent":"music_likeness","scenario":"music","worker_id":"21"}
+{"id":"2950","text":"guarda esta canción como mi favorita","intent":"music_likeness","scenario":"music","worker_id":"6"}
+{"id":"3914","text":"por favor anota en el título de la canción buena melodía","intent":"music_likeness","scenario":"music","worker_id":"18"}
+{"id":"4886","text":"guarda la opinión que acabo de publicar sobre esta canción","intent":"music_likeness","scenario":"music","worker_id":"6"}
+{"id":"871","text":"añadir opinión","intent":"music_likeness","scenario":"music","worker_id":"21"}
+{"id":"1740","text":"por favor dime el nombre de esta canción que está sonando","intent":"music_query","scenario":"music","worker_id":"1"}
+{"id":"2440","text":"fecha de grabación de la canción que se está reproduciendo","intent":"music_query","scenario":"music","worker_id":"21"}
+{"id":"4103","text":"qué es esto que estamos escuchando","intent":"music_query","scenario":"music","worker_id":"18"}
+{"id":"4989","text":"qué playlist está en modo aleatorio","intent":"music_query","scenario":"music","worker_id":"6"}
+{"id":"5263","text":"nombre de banda","intent":"music_query","scenario":"music","worker_id":"17"}
+{"id":"5409","text":"por favor muéstrame detalles de la canción anterior","intent":"music_query","scenario":"music","worker_id":"5"}
+{"id":"2212","text":"repite la música","intent":"music_settings","scenario":"music","worker_id":"6"}
+{"id":"2343","text":"establecer la pista veintiocho en el reproductor de música en repetición","intent":"music_settings","scenario":"music","worker_id":"21"}
+{"id":"445","text":"repite álbum","intent":"music_settings","scenario":"music","worker_id":"5"}
+{"id":"5313","text":"por favor poner radio en modo alaeatorio","intent":"music_settings","scenario":"music","worker_id":"5"}
+{"id":"549","text":"por favor repite de nuevo esa música de ozuna","intent":"music_settings","scenario":"music","worker_id":"21"}
+{"id":"5785","text":"cambia la música","intent":"music_settings","scenario":"music","worker_id":"6"}
+{"id":"1039","text":"qué noticias tienes hoy","intent":"news_query","scenario":"news","worker_id":"18"}
+{"id":"2379","text":"qué ha pasado recientemente en el mundo","intent":"news_query","scenario":"news","worker_id":"18"}
+{"id":"245","text":"enséñame algunas noticias de marca","intent":"news_query","scenario":"news","worker_id":"0"}
+{"id":"2650","text":"cuál es el titular de las noticias locales de la mañana de hoy","intent":"news_query","scenario":"news","worker_id":"23"}
+{"id":"2726","text":"escuchemos las noticias de el país","intent":"news_query","scenario":"news","worker_id":"0"}
+{"id":"3867","text":"léeme los titulares de las noticias de el país","intent":"news_query","scenario":"news","worker_id":"10"}
+{"id":"3692","text":"por favor repite la última frase de ese libro","intent":"play_audiobook","scenario":"play","worker_id":"21"}
+{"id":"9686","text":"reanuda patria","intent":"play_audiobook","scenario":"play","worker_id":"0"}
+{"id":"9789","text":"reanudar el último audiolibro reproducido","intent":"play_audiobook","scenario":"play","worker_id":"21"}
+{"id":"9790","text":"empezar a reproducir el audiolibro la bella y la bestia","intent":"play_audiobook","scenario":"play","worker_id":"17"}
+{"id":"9813","text":"reproduce el audiolibro patria desde el primero","intent":"play_audiobook","scenario":"play","worker_id":"0"}
+{"id":"9870","text":"quiero escuchar la isla del tesoro de robert louis stevenson","intent":"play_audiobook","scenario":"play","worker_id":"4"}
+{"id":"10274","text":"abre angry birds","intent":"play_game","scenario":"play","worker_id":"22"}
+{"id":"10306","text":"juega scabble conmigo","intent":"play_game","scenario":"play","worker_id":"10"}
+{"id":"10326","text":"pon nuestro partido de fútbol favorito en televisión","intent":"play_game","scenario":"play","worker_id":"17"}
+{"id":"10360","text":"juega un juego de ajedrez conmigo","intent":"play_game","scenario":"play","worker_id":"0"}
+{"id":"10383","text":"pon mindsweeper conmigo","intent":"play_game","scenario":"play","worker_id":"21"}
+{"id":"10402","text":"por el partido de fútbol para mí mismo ahora","intent":"play_game","scenario":"play","worker_id":"0"}
+{"id":"3525","text":"bailemos","intent":"play_music","scenario":"play","worker_id":"1"}
+{"id":"3633","text":"google quería escuchar mi lista de reproducción de música flamenca","intent":"play_music","scenario":"play","worker_id":"21"}
+{"id":"3969","text":"pop","intent":"play_music","scenario":"play","worker_id":"10"}
+{"id":"4032","text":"cuáles son los éxitos de country de hoy","intent":"play_music","scenario":"play","worker_id":"0"}
+{"id":"5656","text":"toca para mí la música de rafael","intent":"play_music","scenario":"play","worker_id":"2"}
+{"id":"6150","text":"encontrar música jazz en mi lista de reproducción","intent":"play_music","scenario":"play","worker_id":"10"}
+{"id":"11284","text":"siguiente episodio","intent":"play_podcasts","scenario":"play","worker_id":"0"}
+{"id":"11290","text":"cuál es el mejor podcast","intent":"play_podcasts","scenario":"play","worker_id":"7"}
+{"id":"11346","text":"sigue en podcast","intent":"play_podcasts","scenario":"play","worker_id":"0"}
+{"id":"11354","text":"iniciar la aplicación de podcast","intent":"play_podcasts","scenario":"play","worker_id":"2"}
+{"id":"11408","text":"por favor comienza el próximo episodio de podcast","intent":"play_podcasts","scenario":"play","worker_id":"17"}
+{"id":"11465","text":"continuar con el siguiente podcast","intent":"play_podcasts","scenario":"play","worker_id":"7"}
+{"id":"9289","text":"me gustaría escuchar noventa y nueve punto cinco","intent":"play_radio","scenario":"play","worker_id":"2"}
+{"id":"9351","text":"quiero escuchar algo de música pon una emisora de radio","intent":"play_radio","scenario":"play","worker_id":"0"}
+{"id":"9463","text":"pon lo mejor de pereza","intent":"play_radio","scenario":"play","worker_id":"0"}
+{"id":"9487","text":"enciende nadie sabe nada","intent":"play_radio","scenario":"play","worker_id":"2"}
+{"id":"9549","text":"pon los cuarenta principales en el noventa y nueve punto cinco","intent":"play_radio","scenario":"play","worker_id":"22"}
+{"id":"9641","text":"spotify abierto y entrenamiento abierto","intent":"play_radio","scenario":"play","worker_id":"10"}
+{"id":"13565","text":"cuantos bp hay en un dólar estadounidense","intent":"qa_currency","scenario":"qa","worker_id":"17"}
+{"id":"13849","text":"puedes decirme el tipo de cambio de la moneda canadiense","intent":"qa_currency","scenario":"qa","worker_id":"2"}
+{"id":"13897","text":"cambiar euro a dólar","intent":"qa_currency","scenario":"qa","worker_id":"17"}
+{"id":"13993","text":"cuál es el tipo de cambio del dólar","intent":"qa_currency","scenario":"qa","worker_id":"2"}
+{"id":"14433","text":"cuántas rupias indias por dólar estadounidense son hoy","intent":"qa_currency","scenario":"qa","worker_id":"17"}
+{"id":"15110","text":"cómo verifico el tipo de cambio de mi moneda","intent":"qa_currency","scenario":"qa","worker_id":"2"}
+{"id":"13243","text":"que es mezcla de especias","intent":"qa_definition","scenario":"qa","worker_id":"1"}
+{"id":"14135","text":"que es un organismo","intent":"qa_definition","scenario":"qa","worker_id":"2"}
+{"id":"14945","text":"qué significa la manzana de mis ojo","intent":"qa_definition","scenario":"qa","worker_id":"2"}
+{"id":"14955","text":"definir diez","intent":"qa_definition","scenario":"qa","worker_id":"17"}
+{"id":"14998","text":"me puedes describir el iphone siete","intent":"qa_definition","scenario":"qa","worker_id":"18"}
+{"id":"15059","text":"dame la definición de flecha","intent":"qa_definition","scenario":"qa","worker_id":"17"}
+{"id":"13104","text":"conoces a antonio resines","intent":"qa_factoid","scenario":"qa","worker_id":"22"}
+{"id":"13292","text":"fecha de nacimiento de la estrella de cine keanu reeves","intent":"qa_factoid","scenario":"qa","worker_id":"17"}
+{"id":"13729","text":"háblame de sean connery","intent":"qa_factoid","scenario":"qa","worker_id":"1"}
+{"id":"14326","text":"qué voces ha tocado andy y lucas","intent":"qa_factoid","scenario":"qa","worker_id":"2"}
+{"id":"14511","text":"dónde vive pedro almodóvar","intent":"qa_factoid","scenario":"qa","worker_id":"2"}
+{"id":"15019","text":"como de alto es mel gibson","intent":"qa_factoid","scenario":"qa","worker_id":"17"}
+{"id":"13057","text":"que es la ecuacion lineal","intent":"qa_maths","scenario":"qa","worker_id":"2"}
+{"id":"13059","text":"di cuál es el valor del pecado treinta","intent":"qa_maths","scenario":"qa","worker_id":"17"}
+{"id":"13103","text":"que hace uno mas","intent":"qa_maths","scenario":"qa","worker_id":"2"}
+{"id":"13193","text":"como resuelves tres dos","intent":"qa_maths","scenario":"qa","worker_id":"2"}
+{"id":"13294","text":"cuanto es ciento treinta y seis mas trescientos ochenta y siete","intent":"qa_maths","scenario":"qa","worker_id":"2"}
+{"id":"14086","text":"lo que es doscientos dividido por trece","intent":"qa_maths","scenario":"qa","worker_id":"2"}
+{"id":"13883","text":"google i. b. m. precio acciones","intent":"qa_stock","scenario":"qa","worker_id":"1"}
+{"id":"13933","text":"cuál es el cambio en best buy stick","intent":"qa_stock","scenario":"qa","worker_id":"17"}
+{"id":"14312","text":"muéstrame el precio de las acciones de facebook","intent":"qa_stock","scenario":"qa","worker_id":"2"}
+{"id":"14626","text":"dame el precio de las acciones de pccomponentes","intent":"qa_stock","scenario":"qa","worker_id":"2"}
+{"id":"14873","text":"cual es el precio de repsol ahora mismo","intent":"qa_stock","scenario":"qa","worker_id":"1"}
+{"id":"14943","text":"cuéntame sobre el precio de las acciones de innova","intent":"qa_stock","scenario":"qa","worker_id":"17"}
+{"id":"11686","text":"por favor actualíceme con la lista de eventos que suceden en mi área","intent":"recommendation_events","scenario":"recommendation","worker_id":"23"}
+{"id":"11804","text":"puedes encontrarme una feria callejera en el barrio","intent":"recommendation_events","scenario":"recommendation","worker_id":"0"}
+{"id":"11885","text":"dónde debería cenar esta noche en madrid","intent":"recommendation_events","scenario":"recommendation","worker_id":"22"}
+{"id":"11929","text":"que eventos estan sucediendo en los angeles","intent":"recommendation_events","scenario":"recommendation","worker_id":"16"}
+{"id":"12031","text":"enumerar los próximos eventos en nueva york","intent":"recommendation_events","scenario":"recommendation","worker_id":"20"}
+{"id":"7815","text":"muéstra me los próximos eventos en chicago","intent":"recommendation_events","scenario":"recommendation","worker_id":"16"}
+{"id":"11592","text":"cuanto","intent":"recommendation_locations","scenario":"recommendation","worker_id":"15"}
+{"id":"11659","text":"di me un buen restaurante chino","intent":"recommendation_locations","scenario":"recommendation","worker_id":"16"}
+{"id":"11806","text":"dónde puedo ir de compras en esta área","intent":"recommendation_locations","scenario":"recommendation","worker_id":"16"}
+{"id":"11837","text":"muéstrame algunos restaurantes veganos cerca","intent":"recommendation_locations","scenario":"recommendation","worker_id":"0"}
+{"id":"11943","text":"quiero encontrar algo de comida china lo que hay cerca de mí","intent":"recommendation_locations","scenario":"recommendation","worker_id":"0"}
+{"id":"11966","text":"donde un buen restaurante","intent":"recommendation_locations","scenario":"recommendation","worker_id":"0"}
+{"id":"11728","text":"cuál es el mayor éxito de taquilla de esta semana","intent":"recommendation_movies","scenario":"recommendation","worker_id":"23"}
+{"id":"11734","text":"cómo es la nueva película swat","intent":"recommendation_movies","scenario":"recommendation","worker_id":"20"}
+{"id":"11738","text":"enseña horarios","intent":"recommendation_movies","scenario":"recommendation","worker_id":"15"}
+{"id":"11850","text":"cuáles son los horarios para el mago pop en el teatro más cercano","intent":"recommendation_movies","scenario":"recommendation","worker_id":"22"}
+{"id":"12057","text":"proyección de teatro local qué película","intent":"recommendation_movies","scenario":"recommendation","worker_id":"0"}
+{"id":"12069","text":"qué películas se están proyectando en los cines carmike","intent":"recommendation_movies","scenario":"recommendation","worker_id":"2"}
+{"id":"15367","text":"tuitear queja de orange","intent":"social_post","scenario":"social","worker_id":"5"}
+{"id":"15474","text":"envía un mensaje a iberdrola la electricidad se ha ido de nuevo","intent":"social_post","scenario":"social","worker_id":"5"}
+{"id":"15517","text":"por favor twittea para mí sobre el mal servicio prestado por el ristorante mumbai","intent":"social_post","scenario":"social","worker_id":"0"}
+{"id":"15623","text":"tuitear una queja al servicio de atención al cliente","intent":"social_post","scenario":"social","worker_id":"0"}
+{"id":"15692","text":"podría tuitear que la botella de agua de kinley se cobró por más del precio minorista máximo en el cine","intent":"social_post","scenario":"social","worker_id":"0"}
+{"id":"15698","text":"fraude en el pesaje de productos","intent":"social_post","scenario":"social","worker_id":"0"}
+{"id":"15176","text":"avísame si recibo un nuevo mensaje personal de marta en facebook hoy","intent":"social_query","scenario":"social","worker_id":"18"}
+{"id":"15259","text":"últimos posts en instagram","intent":"social_query","scenario":"social","worker_id":"22"}
+{"id":"15320","text":"por favor las ultimas novedades de mi historia","intent":"social_query","scenario":"social","worker_id":"15"}
+{"id":"15328","text":"mira instagram","intent":"social_query","scenario":"social","worker_id":"5"}
+{"id":"15424","text":"cuál es la historia más popular en mi perfil de facebook","intent":"social_query","scenario":"social","worker_id":"6"}
+{"id":"15465","text":"por favor mira las noticias en redes sociales","intent":"social_query","scenario":"social","worker_id":"5"}
+{"id":"1731","text":"busca el mejor restaurante cerca de mi y pide una pizza","intent":"takeaway_order","scenario":"takeaway","worker_id":"18"}
+{"id":"305","text":"pedir una pizza al telepizza","intent":"takeaway_order","scenario":"takeaway","worker_id":"18"}
+{"id":"3844","text":"pide una pizza para mi","intent":"takeaway_order","scenario":"takeaway","worker_id":"18"}
+{"id":"4564","text":"pide comida del rodilla","intent":"takeaway_order","scenario":"takeaway","worker_id":"18"}
+{"id":"4565","text":"llamar al domino's pizza","intent":"takeaway_order","scenario":"takeaway","worker_id":"18"}
+{"id":"4626","text":"qué restaurantes mexicanos hay cerca de aquí que hagan envíos","intent":"takeaway_order","scenario":"takeaway","worker_id":"18"}
+{"id":"1908","text":"estado de mi pedido del restaurante","intent":"takeaway_query","scenario":"takeaway","worker_id":"18"}
+{"id":"351","text":"mira si el restaurante pone para llevar","intent":"takeaway_query","scenario":"takeaway","worker_id":"18"}
+{"id":"4064","text":"este sitio hace comida para llevar","intent":"takeaway_query","scenario":"takeaway","worker_id":"18"}
+{"id":"51","text":"alexa opciones de entrega mejor valoradas de comida china","intent":"takeaway_query","scenario":"takeaway","worker_id":"18"}
+{"id":"55","text":"quiero pedir curry para llevar alguna recomendación","intent":"takeaway_query","scenario":"takeaway","worker_id":"18"}
+{"id":"5553","text":"puntuaciones de los restaurantes","intent":"takeaway_query","scenario":"takeaway","worker_id":"18"}
+{"id":"12279","text":"puedes buscar los precios de los billetes de tren por mí","intent":"transport_query","scenario":"transport","worker_id":"17"}
+{"id":"12348","text":"enséñame los horarios de tren de kalka a madrid de hoy","intent":"transport_query","scenario":"transport","worker_id":"22"}
+{"id":"12393","text":"enseñame la direccion de este sitio","intent":"transport_query","scenario":"transport","worker_id":"7"}
+{"id":"12420","text":"dónde está el carrefour más cercano","intent":"transport_query","scenario":"transport","worker_id":"22"}
+{"id":"12570","text":"cuales son los horarios de salida y llegadas para este tren","intent":"transport_query","scenario":"transport","worker_id":"15"}
+{"id":"12823","text":"buscar el horario del tren a madrid","intent":"transport_query","scenario":"transport","worker_id":"22"}
+{"id":"12300","text":"llámame un taxi","intent":"transport_taxi","scenario":"transport","worker_id":"4"}
+{"id":"12399","text":"llama un uber para que me recoja a las siete de la tarde hoy","intent":"transport_taxi","scenario":"transport","worker_id":"17"}
+{"id":"12462","text":"pídeme un uber para esta noche a las siete de la tarde","intent":"transport_taxi","scenario":"transport","worker_id":"22"}
+{"id":"12544","text":"taxi ahora","intent":"transport_taxi","scenario":"transport","worker_id":"22"}
+{"id":"12559","text":"reserva un taxi uber","intent":"transport_taxi","scenario":"transport","worker_id":"7"}
+{"id":"12850","text":"pídeme un uber a calle diagonal","intent":"transport_taxi","scenario":"transport","worker_id":"22"}
+{"id":"12147","text":"olly necesito ir a valencia el viernes noche puedes cogerme un billete por favor","intent":"transport_ticket","scenario":"transport","worker_id":"5"}
+{"id":"12234","text":"reserve un asiento en clase ejecutiva en el próximo tren a la ciudad de nueva york","intent":"transport_ticket","scenario":"transport","worker_id":"10"}
+{"id":"12351","text":"reserva un billete de tren con asiento de litera a córdoba para la próxima semana","intent":"transport_ticket","scenario":"transport","worker_id":"4"}
+{"id":"12390","text":"tráeme un billete de tren","intent":"transport_ticket","scenario":"transport","worker_id":"17"}
+{"id":"12523","text":"puedes reservarme un boleto de tren por menos de dólares","intent":"transport_ticket","scenario":"transport","worker_id":"17"}
+{"id":"12563","text":"comprar un billete de tren a valencia para el catorce de abril","intent":"transport_ticket","scenario":"transport","worker_id":"22"}
+{"id":"12183","text":"¿hay algún accidente en el cuatrocientos cinco","intent":"transport_traffic","scenario":"transport","worker_id":"10"}
+{"id":"12703","text":"cuánto durará el viaje al trabajo","intent":"transport_traffic","scenario":"transport","worker_id":"5"}
+{"id":"12720","text":"cuál es mi eta para la oficina si salgo en treinta minutos","intent":"transport_traffic","scenario":"transport","worker_id":"10"}
+{"id":"12726","text":"como de lento es el trafico en la a5","intent":"transport_traffic","scenario":"transport","worker_id":"7"}
+{"id":"12863","text":"cualquier problema de tráfico hoy","intent":"transport_traffic","scenario":"transport","worker_id":"10"}
+{"id":"6656","text":"atasco de tráfico","intent":"transport_traffic","scenario":"transport","worker_id":"10"}
+{"id":"1391","text":"olly va a hacer buen tiempo el sábado","intent":"weather_query","scenario":"weather","worker_id":"18"}
+{"id":"1932","text":"está el tiempo calmado hoy","intent":"weather_query","scenario":"weather","worker_id":"18"}
+{"id":"327","text":"domingo","intent":"weather_query","scenario":"weather","worker_id":"18"}
+{"id":"3506","text":"qué pronóstico del tiempo hay para hoy","intent":"weather_query","scenario":"weather","worker_id":"18"}
+{"id":"374","text":"dime si lo siguiente es cierto sobre el tiempo","intent":"weather_query","scenario":"weather","worker_id":"15"}
+{"id":"5724","text":"qué tiempo va a hacer hoy por la noche","intent":"weather_query","scenario":"weather","worker_id":"18"}
