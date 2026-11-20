@@ -94,6 +94,12 @@ select = ["E", "F", "I", "UP", "B", "SIM", "C4", "PT", "RUF", "N", "S", "ANN"]
 "scripts/*.py" = ["ANN001", "ANN201", "ANN202", "ANN401", "S603", "S607"]
 # D16 fixes these exception names; the capability token reads as a noun phrase.
 "src/stc/domain/errors.py" = ["N818"]
+# matplotlib is an optional extra without static types; the guarded import keeps
+# it out of the runtime path and the module is tested through the missing-extra branch.
+"src/stc/adapters/reporting/plots.py" = ["ANN401"]
+# D2/D10 name the bootstrap sample count ``B`` and the softmax temperature ``T``.
+"src/stc/domain/stats.py" = ["N803"]
+"src/stc/domain/calibration.py" = ["N803"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["stc"]
@@ -243,6 +249,8 @@ ignore_imports = [
   "stc.bootstrap -> stc.adapters.data.jsonl_repository",
   "stc.bootstrap -> stc.adapters.data.massive_archive",
   "stc.bootstrap -> stc.adapters.data.massive_parser",
+  "stc.bootstrap -> stc.adapters.reporting.json_writer",
+  "stc.bootstrap -> stc.adapters.storage.access_log",
 ]
 modules = [
   "stc.adapters.api",
