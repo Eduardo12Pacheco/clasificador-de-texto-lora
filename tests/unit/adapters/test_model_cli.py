@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import re
 import shutil
 import zipfile
 from pathlib import Path
@@ -18,6 +19,11 @@ from stc.adapters.inference.bundle_io import verify_bundle
 REPO_ROOT = Path(__file__).resolve().parents[3]
 TINY_BUNDLE = REPO_ROOT / "tests" / "fixtures" / "tiny_bundle"
 runner = CliRunner()
+_ANSI = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def _plain(text: str) -> str:
+    return _ANSI.sub("", text)
 
 
 def _invoke(args: list[str], home: Path, **kwargs: object):
@@ -224,7 +230,7 @@ def test_help_lists_every_new_command(tmp_path: Path) -> None:
 def test_export_help_exits_zero(tmp_path: Path) -> None:
     result = _invoke(["export", "--help"], tmp_path)
     assert result.exit_code == 0
-    assert "--quantize" in result.output
+    assert "--quantize" in _plain(result.output)
 
 
 def test_packed_bundle_carries_the_legal_assets(tmp_path: Path) -> None:
