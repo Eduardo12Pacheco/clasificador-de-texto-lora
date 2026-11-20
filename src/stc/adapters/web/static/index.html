@@ -1,21 +1,271 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-theme="system">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>stc · clasificador de intenciones</title>
-    <style>
-      :root { color-scheme: light dark; }
-      body { font-family: system-ui, sans-serif; margin: 3rem auto; max-width: 42rem; padding: 0 1rem; }
-      code { padding: 0.15rem 0.35rem; border-radius: 0.25rem; background: color-mix(in srgb, currentColor 12%, transparent); }
-    </style>
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="description"
+      content="Clasificador local de intenciones para asistentes virtuales en español, con confianza calibrada y revisión manual."
+    />
+    <title>stc · Clasificador de intenciones</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/app.css" />
+    <script type="module" src="/static/app.js"></script>
   </head>
   <body>
-    <h1>stc</h1>
-    <p>Clasificador de intenciones para asistentes virtuales en español.</p>
-    <p>
-      La interfaz completa llega con la tarea T10. Mientras tanto usa
-      <code>POST /v1/predict</code> o <code>stc predict</code>.
-    </p>
+    <a class="skip-link" href="#main" data-i18n="app.skip">Saltar al contenido</a>
+
+    <header class="site-header">
+      <div class="brand">
+        <p class="wordmark">stc</p>
+        <h1 data-i18n="app.title">Clasificador de intenciones</h1>
+        <p class="subtitle" data-i18n="app.subtitle">
+          Enrutamiento de peticiones para asistentes virtuales en español
+        </p>
+      </div>
+      <div class="header-actions">
+        <span id="model-chip" class="chip chip-model" data-i18n="header.modelLoading">
+          Cargando modelo…
+        </span>
+        <button
+          id="theme-toggle"
+          class="icon-button"
+          type="button"
+          data-i18n-aria-label="header.theme"
+          aria-label="Cambiar tema"
+        >
+          <span aria-hidden="true">◐</span>
+        </button>
+        <button
+          id="lang-toggle"
+          class="icon-button lang-button"
+          type="button"
+          data-i18n-aria-label="header.language"
+          aria-label="Cambiar idioma"
+        >
+          EN
+        </button>
+      </div>
+    </header>
+
+    <main id="main">
+      <div id="offline-banner" class="offline-banner" role="status" hidden>
+        <span class="status-dot" aria-hidden="true"></span>
+        <span data-i18n="offline.banner">
+          Sin conexión a la red. La aplicación local sigue funcionando si el servidor está activo.
+        </span>
+      </div>
+
+      <form id="classify-form" class="card input-card" novalidate>
+        <label class="field-label" for="text-input" data-i18n="input.label">
+          ¿Qué quieres hacer?
+        </label>
+        <textarea
+          id="text-input"
+          name="text"
+          rows="3"
+          maxlength="512"
+          autocomplete="off"
+          spellcheck="false"
+          aria-describedby="input-hint input-counter"
+          data-i18n-placeholder="input.placeholder"
+          placeholder="Escribe una petición, por ejemplo: ponme música de Juanes"
+        ></textarea>
+        <div class="input-meta">
+          <span id="input-hint" class="hint" data-i18n="input.hint">
+            Ctrl/Cmd + Enter para clasificar
+          </span>
+          <span id="input-counter" class="counter" aria-live="polite">0/512</span>
+        </div>
+        <div class="actions">
+          <button id="classify-button" class="button primary" type="submit" data-i18n="actions.classify">
+            Clasificar
+          </button>
+          <button id="clear-button" class="button secondary" type="button" data-i18n="actions.clear">
+            Limpiar
+          </button>
+        </div>
+        <div class="examples">
+          <span class="examples-label" data-i18n="examples.label">Ejemplos</span>
+          <div id="examples-list" class="chip-row" role="list">
+            <button class="chip example-chip" type="button" role="listitem" data-example="prende la luz del cuarto">
+              prende la luz del cuarto
+            </button>
+            <button class="chip example-chip" type="button" role="listitem" data-example="ponme música de Juanes">
+              ponme música de Juanes
+            </button>
+            <button
+              class="chip example-chip"
+              type="button"
+              role="listitem"
+              data-example="recuérdame llamar a mi mamá mañana a las ocho"
+            >
+              recuérdame llamar a mi mamá mañana a las ocho
+            </button>
+            <button
+              class="chip example-chip"
+              type="button"
+              role="listitem"
+              data-example="¿cómo está el clima en Quito?"
+            >
+              ¿cómo está el clima en Quito?
+            </button>
+            <button
+              class="chip example-chip"
+              type="button"
+              role="listitem"
+              data-example="despiértame a las seis de la mañana"
+            >
+              despiértame a las seis de la mañana
+            </button>
+            <button class="chip example-chip" type="button" role="listitem" data-example="envía un correo a Pedro">
+              envía un correo a Pedro
+            </button>
+            <button class="chip example-chip" type="button" role="listitem" data-example="pide una pizza grande">
+              pide una pizza grande
+            </button>
+            <button class="chip example-chip" type="button" role="listitem" data-example="cuéntame un chiste">
+              cuéntame un chiste
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <section
+        id="result"
+        class="card result-card"
+        aria-labelledby="result-title"
+        aria-live="polite"
+        data-state="empty"
+      >
+        <div class="section-heading">
+          <h2 id="result-title" class="section-title" data-i18n="result.label">Resultado</h2>
+        </div>
+
+        <div id="result-empty" class="empty-state">
+          <p class="empty-title" data-i18n="empty.title">Sin resultados todavía</p>
+          <p class="empty-body" data-i18n="empty.body">
+            Escribe una petición o elige un ejemplo para ver la intención, el escenario y la
+            confianza calibrada.
+          </p>
+        </div>
+
+        <div id="result-loading" class="skeleton" aria-hidden="true" hidden>
+          <span class="skeleton-line skeleton-title" data-i18n="loading.label">Clasificando…</span>
+          <span class="skeleton-line"></span>
+          <span class="skeleton-line short"></span>
+        </div>
+
+        <div id="result-body" hidden>
+          <p class="eyebrow" data-i18n="result.topIntent">Intención principal</p>
+          <div class="top-line">
+            <code id="top-intent" class="intent-code">—</code>
+            <span id="scenario-badge" class="badge">—</span>
+          </div>
+
+          <div class="confidence-block">
+            <div class="confidence-heading">
+              <span data-i18n="result.confidence">Confianza calibrada</span>
+              <strong id="confidence-value">—</strong>
+            </div>
+            <div
+              id="confidence-meter"
+              class="meter"
+              role="meter"
+              aria-valuemin="0"
+              aria-valuemax="1"
+              aria-valuenow="0"
+            >
+              <span id="confidence-fill" class="meter-fill"></span>
+            </div>
+          </div>
+
+          <div class="candidates">
+            <h3 class="small-title" data-i18n="result.top3">Tres mejores opciones</h3>
+            <ol id="top-k" class="top-k"></ol>
+          </div>
+
+          <div id="review-banner" class="review-banner" role="status" hidden>
+            <span class="status-dot" aria-hidden="true"></span>
+            <span data-i18n="result.review">Confianza baja: conviene revisar manualmente</span>
+          </div>
+
+          <div class="result-meta">
+            <span id="latency-chip" class="chip"></span>
+            <label id="compare-control" class="switch" hidden>
+              <input id="compare-toggle" type="checkbox" />
+              <span data-i18n="compare.toggle">Comparar con el baseline</span>
+            </label>
+          </div>
+        </div>
+
+        <div id="result-error" class="error-state" role="alert" hidden>
+          <strong data-i18n="error.title">No se pudo clasificar</strong>
+          <p id="error-detail"></p>
+          <p id="error-hint" class="error-hint" hidden></p>
+          <button id="retry-button" class="button secondary" type="button" data-i18n="actions.retry">
+            Reintentar
+          </button>
+        </div>
+      </section>
+
+      <section id="compare" class="card compare-card" aria-labelledby="compare-title" hidden>
+        <div class="section-heading">
+          <h2 id="compare-title" class="section-title" data-i18n="compare.title">
+            Comparación de modelos
+          </h2>
+          <span id="compare-agreement" class="chip"></span>
+        </div>
+        <div class="compare-grid">
+          <article class="compare-column">
+            <h3 class="small-title" data-i18n="compare.default">Transformer LoRA</h3>
+            <code id="compare-default-intent" class="intent-code">—</code>
+            <p id="compare-default-scenario" class="compare-scenario"></p>
+            <p id="compare-default-confidence" class="compare-confidence"></p>
+          </article>
+          <article class="compare-column">
+            <h3 class="small-title" data-i18n="compare.baseline">TF-IDF + lineal</h3>
+            <code id="compare-baseline-intent" class="intent-code">—</code>
+            <p id="compare-baseline-scenario" class="compare-scenario"></p>
+            <p id="compare-baseline-confidence" class="compare-confidence"></p>
+          </article>
+        </div>
+      </section>
+
+      <details id="model-panel" class="card model-panel">
+        <summary data-i18n="modelPanel.summary">Información del modelo</summary>
+        <dl class="model-grid">
+          <div><dt data-i18n="modelPanel.id">Identificador</dt><dd id="model-id">—</dd></div>
+          <div><dt data-i18n="modelPanel.version">Versión</dt><dd id="model-version">—</dd></div>
+          <div>
+            <dt data-i18n="modelPanel.quantization">Cuantización</dt>
+            <dd id="model-quantization">—</dd>
+          </div>
+          <div><dt data-i18n="modelPanel.parameters">Parámetros</dt><dd id="model-parameters">—</dd></div>
+          <div><dt data-i18n="modelPanel.license">Licencia</dt><dd id="model-license">—</dd></div>
+          <div><dt data-i18n="modelPanel.temperature">Temperatura (T)</dt><dd id="model-temperature">—</dd></div>
+          <div>
+            <dt data-i18n="modelPanel.threshold">Umbral de revisión (τ)</dt>
+            <dd id="model-threshold">—</dd>
+          </div>
+          <div><dt data-i18n="modelPanel.ece">ECE en dev (antes → después)</dt><dd id="model-ece">—</dd></div>
+          <div>
+            <dt data-i18n="modelPanel.baseline">Baseline disponible</dt>
+            <dd id="model-baseline">—</dd>
+          </div>
+        </dl>
+      </details>
+    </main>
+
+    <footer class="site-footer">
+      <p data-i18n="footer.license">Código MIT · Pesos Apache-2.0</p>
+      <p data-i18n="footer.data">Datos: Amazon MASSIVE es-ES (CC BY 4.0)</p>
+      <p>
+        <a href="https://github.com/Eduardo12Pacheco/spanish-text-classifier-lora" data-i18n="footer.repo">
+          Repositorio
+        </a>
+      </p>
+    </footer>
   </body>
 </html>
