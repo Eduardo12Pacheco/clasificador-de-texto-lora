@@ -187,9 +187,11 @@ class OptunaSearcher:
             study.optimize(lambda trial: self._objective(trial, parsed), n_trials=remaining)
         after = len(study.trials)
 
-        best_params = dict(study.best_trial.params) if study.best_trial else {}
-        best_params = self._materialise_params(best_params)
-        best_value = float(study.best_value) if study.best_trial else float("nan")
+        best_trial = _best_trial(study)
+        best_params = self._materialise_params(dict(best_trial.params)) if best_trial else {}
+        best_value = (
+            float(best_trial.value) if best_trial and best_trial.value is not None else float("nan")
+        )
         self._write_outputs(study, best_params, n_trials)
         return SearchResult(
             search_dir=self._out_dir,
@@ -279,6 +281,7 @@ class OptunaSearcher:
             }
             for trial in study.trials
         ]
+        best_trial = _best_trial(study)
         payload = {
             "schema_version": 1,
             "study_name": self._study_name,
@@ -286,8 +289,10 @@ class OptunaSearcher:
             "requested_trials": requested_trials,
             "n_trials": len(trials),
             "best": {
-                "value": study.best_value if study.best_trial else None,
-                "trial": study.best_trial.number if study.best_trial else None,
+                "value": float(best_trial.value)
+                if best_trial and best_trial.value is not None
+                else None,
+                "trial": best_trial.number if best_trial else None,
                 "params": best_params,
             },
             "trials": trials,
@@ -303,6 +308,13 @@ class OptunaSearcher:
         with contextlib.suppress(Exception):
             # Plotting is optional evidence; a figure failure must not fail the search.
             _write_figures(study, self._out_dir)
+
+
+def _best_trial(study: optuna.Study) -> optuna.trial.FrozenTrial | None:
+    try:
+        return study.best_trial
+    except ValueError:
+        return None
 
 
 def _summary_markdown(payload: Mapping[str, object]) -> str:
