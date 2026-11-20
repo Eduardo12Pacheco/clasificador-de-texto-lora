@@ -1,0 +1,9 @@
+{
+  "agreement": 1.0,
+  "max_abs_logit_diff": 0.0039,
+  "max_allowed_logit_diff": 0.005,
+  "n_examples": 2033,
+  "passed": true,
+  "schema_version": 1,
+  "split": "dev"
+}

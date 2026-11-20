@@ -1,0 +1,67 @@
+{
+  "candidates": [
+    "int8_dynamic",
+    "int8_dynamic_per_channel",
+    "int8_dynamic_mlp_only",
+    "int8_static_qdq"
+  ],
+  "fp32": {
+    "accuracy": 0.8795,
+    "macro_f1": 0.8699,
+    "name": "fp32"
+  },
+  "n_examples": 2033,
+  "schema_version": 1,
+  "shipped_format": "fp32",
+  "split": "dev",
+  "variants": [
+    {
+      "accuracy": 0.849,
+      "agreement": 0.9139,
+      "gate_passed": false,
+      "macro_f1": 0.8223,
+      "macro_f1_drop": 0.0476,
+      "macro_f1_fp32": 0.8699,
+      "macro_f1_variant": 0.8223,
+      "name": "int8_dynamic",
+      "passed": false,
+      "size_bytes": 151317198
+    },
+    {
+      "accuracy": 0.8593,
+      "agreement": 0.9179,
+      "gate_passed": false,
+      "macro_f1": 0.8318,
+      "macro_f1_drop": 0.0381,
+      "macro_f1_fp32": 0.8699,
+      "macro_f1_variant": 0.8318,
+      "name": "int8_dynamic_per_channel",
+      "passed": false,
+      "size_bytes": 151997624
+    },
+    {
+      "accuracy": 0.8603,
+      "agreement": 0.9228,
+      "gate_passed": false,
+      "macro_f1": 0.843,
+      "macro_f1_drop": 0.0269,
+      "macro_f1_fp32": 0.8699,
+      "macro_f1_variant": 0.843,
+      "name": "int8_dynamic_mlp_only",
+      "passed": false,
+      "size_bytes": 309082247
+    },
+    {
+      "accuracy": 0.0246,
+      "agreement": 0.0251,
+      "gate_passed": false,
+      "macro_f1": 0.0083,
+      "macro_f1_drop": 0.8616,
+      "macro_f1_fp32": 0.8699,
+      "macro_f1_variant": 0.0083,
+      "name": "int8_static_qdq",
+      "passed": false,
+      "size_bytes": 152669567
+    }
+  ]
+}
