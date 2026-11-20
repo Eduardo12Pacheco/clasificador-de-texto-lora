@@ -14,6 +14,8 @@ import numpy as np
 from numpy.typing import NDArray
 
 from stc.application.dto import (
+    BaselineCandidate,
+    BaselineGrid,
     DatasetMeta,
     EncodedBatch,
     ExportReport,
@@ -29,6 +31,8 @@ from stc.domain.splits import Split
 
 __all__ = [
     "AccessLog",
+    "BaselineStore",
+    "BaselineTrainer",
     "Classifier",
     "ClassifierTrainer",
     "Clock",
@@ -36,6 +40,7 @@ __all__ = [
     "DatasetRepository",
     "ExperimentTracker",
     "HyperparameterSearcher",
+    "JsonSink",
     "ModelExporter",
     "ModelHub",
     "ModelStore",
@@ -130,6 +135,49 @@ class ClassifierTrainer(Protocol):
         ...
 
 
+class BaselineTrainer(Protocol):
+    """Fits and scores the classical TF-IDF + linear baseline grid."""
+
+    def evaluate_configs(
+        self,
+        train: Sequence[Example],
+        dev: Sequence[Example],
+        labels: LabelSpace,
+        grid: BaselineGrid,
+        *,
+        quick: bool = False,
+    ) -> Sequence[BaselineCandidate]:
+        """Fit every grid configuration and return its dev metrics."""
+        ...
+
+    def fit(
+        self,
+        train: Sequence[Example],
+        labels: LabelSpace,
+        params: Mapping[str, object],
+    ) -> Classifier:
+        """Fit one configuration and wrap it as a :class:`Classifier`."""
+        ...
+
+
+class BaselineStore(Protocol):
+    """Persists a fitted baseline directory with integrity metadata."""
+
+    def save(
+        self,
+        classifier: Classifier,
+        dest: Path,
+        *,
+        metadata: Mapping[str, object],
+    ) -> Mapping[str, object]:
+        """Write the baseline directory and return its manifest."""
+        ...
+
+    def load(self, source: Path) -> Classifier:
+        """Load a baseline directory after validating its manifest."""
+        ...
+
+
 class HyperparameterSearcher(Protocol):
     """Search hyper-parameters, optionally resuming a previous study."""
 
@@ -201,6 +249,18 @@ class ExperimentTracker(Protocol):
 
     def end_run(self) -> None:
         """Finalise the run."""
+        ...
+
+
+class JsonSink(Protocol):
+    """Writes deterministic JSON reports."""
+
+    def write_json(self, path: Path, payload: Mapping[str, object]) -> None:
+        """Write compact, key-sorted JSON."""
+        ...
+
+    def dumps(self, payload: Mapping[str, object]) -> str:
+        """Serialise ``payload`` deterministically."""
         ...
 
 
