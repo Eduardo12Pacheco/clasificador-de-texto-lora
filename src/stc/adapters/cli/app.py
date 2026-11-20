@@ -7,6 +7,7 @@ import typer
 from stc import __version__
 from stc.adapters.cli.commands.data import data_app
 from stc.adapters.cli.commands.evaluate import evaluate
+from stc.adapters.cli.commands.train import train_app
 from stc.domain.errors import DomainError
 
 APP_NAME = "stc"
@@ -18,6 +19,7 @@ app = typer.Typer(
     add_completion=False,
 )
 app.add_typer(data_app, name="data")
+app.add_typer(train_app, name="train")
 app.command("evaluate")(evaluate)
 
 

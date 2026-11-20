@@ -13,12 +13,15 @@ from stc.adapters.data.fixture_source import FixtureRepository
 from stc.adapters.data.jsonl_repository import JsonlDatasetRepository
 from stc.adapters.data.massive_archive import PINNED_SHA256, PINNED_URL, MassiveArchiveSource
 from stc.adapters.data.massive_parser import MassiveParser
+from stc.adapters.models.skops_store import SkopsBaselineStore
+from stc.adapters.models.tfidf_linear import TfidfLinearTrainer
 from stc.adapters.reporting.json_writer import JsonReportWriter
 from stc.adapters.storage.access_log import JsonlAccessLog
 from stc.application.ports import Classifier, DatasetRepository, RawDatasetSource
 from stc.application.use_cases.prepare_data import PrepareDataPipeline
+from stc.application.use_cases.train_baseline import TrainBaseline
 from stc.config import Settings
-from stc.domain.errors import ArtifactNotFoundError
+from stc.domain.errors import ArtifactNotFoundError, InvalidInputError
 
 
 @dataclass(frozen=True, slots=True)
@@ -71,6 +74,37 @@ def build_data_services(
         repository=repository,
         pipeline=pipeline,
         fixtures=FixtureRepository(),
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class BaselineServices:
+    """Everything ``stc train baseline`` needs, wired once."""
+
+    repository: DatasetRepository
+    use_case: TrainBaseline
+
+
+def build_baseline_services(
+    settings: Settings | None = None,
+    *,
+    dataset: str = "massive",
+) -> BaselineServices:
+    """Wire the baseline trainer, store and report writer for one CLI invocation."""
+    data = build_data_services(settings)
+    if dataset == "fixture":
+        repository: DatasetRepository = data.fixtures
+    elif dataset == "massive":
+        repository = data.repository
+    else:
+        raise InvalidInputError(f"unknown dataset: {dataset!r}; expected massive or fixture")
+    return BaselineServices(
+        repository=repository,
+        use_case=TrainBaseline(
+            TfidfLinearTrainer(),
+            SkopsBaselineStore(),
+            build_report_writer(),
+        ),
     )
 
 

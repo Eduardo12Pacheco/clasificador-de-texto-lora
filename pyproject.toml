@@ -249,6 +249,8 @@ ignore_imports = [
   "stc.bootstrap -> stc.adapters.data.jsonl_repository",
   "stc.bootstrap -> stc.adapters.data.massive_archive",
   "stc.bootstrap -> stc.adapters.data.massive_parser",
+  "stc.bootstrap -> stc.adapters.models.skops_store",
+  "stc.bootstrap -> stc.adapters.models.tfidf_linear",
   "stc.bootstrap -> stc.adapters.reporting.json_writer",
   "stc.bootstrap -> stc.adapters.storage.access_log",
 ]
