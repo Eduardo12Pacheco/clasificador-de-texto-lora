@@ -34,6 +34,9 @@ _TINY_INTERMEDIATE = 128
 
 
 def _build_tiny_model(n_labels: int, tokenizer: HfTokenizer) -> nn.Module:
+    # The fake test backbone must be reproducible across processes so exporting
+    # it (which reloads the base weights) yields bit-identical logits.
+    torch.manual_seed(0)
     config = BertConfig(
         vocab_size=tokenizer.vocab_size,
         hidden_size=_TINY_HIDDEN,

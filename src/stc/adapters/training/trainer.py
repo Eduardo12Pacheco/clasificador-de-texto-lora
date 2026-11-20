@@ -360,6 +360,17 @@ class _BaseTrainer:
     ) -> None:
         np.save(run_dir.dev_logits, dev_logits)
         shutil.copyfile(tokenizer_file, run_dir.tokenizer_json)
+        run_dir.labels_json.write_text(
+            json.dumps(
+                {"schema_version": 1, "intents": list(labels.intents)},
+                ensure_ascii=False,
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
         if self._save_artifacts:
             if config.method == "lora":
                 self._save_peft(model, run_dir.adapter_dir)

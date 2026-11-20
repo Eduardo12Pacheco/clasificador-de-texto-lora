@@ -35,6 +35,11 @@ class RunDir:
         return self.path / "tokenizer.json"
 
     @property
+    def labels_json(self) -> Path:
+        """Sorted intent order the run's logits are indexed by."""
+        return self.path / "labels.json"
+
+    @property
     def adapter_dir(self) -> Path:
         """PEFT adapter directory for LoRA runs."""
         return self.path / "adapter"
