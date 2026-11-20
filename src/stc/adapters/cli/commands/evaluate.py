@@ -9,15 +9,19 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
+from rich.console import Console
+from rich.table import Table
 
 from stc import bootstrap
 from stc.adapters.cli.errors import handle_domain_errors
 from stc.application.ports import Classifier
 from stc.application.services.dev_only_repository import DevOnlyRepository
 from stc.application.use_cases.evaluate_model import EvaluateModel
+from stc.application.use_cases.robustness import RobustnessEvaluator, RobustnessReport
 from stc.domain.access import LOCKED_MESSAGE, TestSplitGuard
 from stc.domain.errors import InvalidInputError, TestSplitLocked
 from stc.domain.examples import Example
+from stc.domain.perturbations import PERTURBATIONS
 from stc.domain.splits import Split
 
 _DATASETS = {"massive", "fixture"}
@@ -89,6 +93,13 @@ def evaluate(
             help="Authorise and audit one read of the locked test split.",
         ),
     ] = False,
+    robustness: Annotated[
+        bool,
+        typer.Option(
+            "--robustness",
+            help="Append the S9 perturbation table (dev only unless --final).",
+        ),
+    ] = False,
 ) -> None:
     """Evaluate a classifier and record every metric in a deterministic report."""
     if split is Split.TRAIN:
@@ -116,9 +127,20 @@ def evaluate(
         git_sha=_git_sha(),
     )
     payload = result.to_dict()
+    robustness_report = None
+    if robustness:
+        robustness_report = RobustnessEvaluator().run(
+            classifier,
+            examples,
+            list(PERTURBATIONS),
+            split=split,
+        )
+        payload["robustness"] = robustness_report.to_dict()
     writer = bootstrap.build_report_writer()
     if out is not None:
         writer.write_json(out / "evaluation.json", payload)
+        if robustness_report is not None:
+            writer.write_json(out / "robustness.json", robustness_report.to_dict())
     if as_json:
         typer.echo(writer.dumps(payload))
     else:
@@ -127,5 +149,25 @@ def evaluate(
             f"accuracy={payload['accuracy']} macro_f1={payload['macro_f1']} "
             f"top3={payload['top3_accuracy']} ece={payload['ece']}"
         )
+        if robustness_report is not None:
+            _print_robustness(robustness_report)
         if out is not None:
             typer.echo(f"wrote {out / 'evaluation.json'}")
+
+
+def _print_robustness(report: RobustnessReport) -> None:
+    table = Table(title="Robustness (changed subset)")
+    table.add_column("perturbation")
+    table.add_column("affected", justify="right")
+    table.add_column("accuracy before", justify="right")
+    table.add_column("accuracy after", justify="right")
+    table.add_column("delta", justify="right")
+    for row in report.perturbations:
+        table.add_row(
+            row.name,
+            str(row.n_affected),
+            f"{row.accuracy_before:.3f}",
+            f"{row.accuracy_after:.3f}",
+            f"{row.delta_accuracy:+.3f}",
+        )
+    Console().print(table)

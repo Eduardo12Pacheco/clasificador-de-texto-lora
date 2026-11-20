@@ -146,3 +146,42 @@ def test_train_split_is_not_evaluable() -> None:
     result = CliRunner().invoke(app, ["evaluate", "--split", "train", "--model", "x"])
 
     assert result.exit_code == 2
+
+
+def test_dev_evaluation_with_robustness_adds_the_perturbation_payload(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(evaluate_module, "_load_examples", lambda *_: make_examples())
+    monkeypatch.setattr(evaluate_module, "_load_classifier", lambda *_: FakeClassifier())
+    out = tmp_path / "reports"
+
+    result = CliRunner().invoke(
+        app,
+        [
+            "evaluate",
+            "--split",
+            "dev",
+            "--model",
+            "fake",
+            "--robustness",
+            "--out",
+            str(out),
+            "--json",
+        ],
+    )
+
+    assert result.exit_code == 0, result.stderr
+    payload = json.loads(ANSI_ESCAPE.sub("", result.stdout))
+    perturbations = payload["robustness"]["perturbations"]
+    assert [row["name"] for row in perturbations] == [
+        "no_accents",
+        "uppercase",
+        "typos",
+        "chat_abbrev",
+        "regionalize:mx",
+        "regionalize:ec",
+        "regionalize:ar",
+    ]
+    assert all("n_affected" in row for row in perturbations)
+    written = json.loads((out / "robustness.json").read_text(encoding="utf-8"))
+    assert written["split"] == "dev"
