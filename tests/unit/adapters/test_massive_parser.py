@@ -37,7 +37,10 @@ def row(
 
 
 def write_jsonl(path: Path, rows: list[dict[str, object]]) -> Path:
-    path.write_text("".join(json.dumps(item, ensure_ascii=False) + "\n" for item in rows))
+    path.write_text(
+        "".join(json.dumps(item, ensure_ascii=False) + "\n" for item in rows),
+        encoding="utf-8",
+    )
     return path
 
 
