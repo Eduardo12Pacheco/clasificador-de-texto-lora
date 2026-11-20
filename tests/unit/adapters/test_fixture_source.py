@@ -38,9 +38,7 @@ def test_fixture_meta_matches_the_rows(repository: FixtureRepository) -> None:
 
     assert meta.dataset_id == "massive-fixture"
     assert meta.tarball_sha256 == "fixture"
-    assert meta.processed_counts == {
-        split.value: len(repository.load(split)) for split in Split
-    }
+    assert meta.processed_counts == {split.value: len(repository.load(split)) for split in Split}
 
 
 def test_fixture_is_read_only(repository: FixtureRepository) -> None:
