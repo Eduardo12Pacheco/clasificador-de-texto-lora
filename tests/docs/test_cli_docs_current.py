@@ -46,3 +46,6 @@ def test_cli_reference_covers_every_command_group() -> None:
         assert f"## `{command}`" in text
     for code in range(7):
         assert f"| {code} |" in text
+    predict_block = text.split("## `stc predict`", maxsplit=1)[1].split("## `", maxsplit=1)[0]
+    assert "--top-k" in predict_block
+    assert "Classify Spanish virtual-assistant requests" in predict_block

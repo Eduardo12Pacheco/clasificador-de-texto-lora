@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
+import io
 import sys
 from collections.abc import Sequence
 from pathlib import Path
@@ -25,7 +27,11 @@ EXIT_CODES = (
 
 
 def _help_text(command: Command, context: Context) -> str:
-    text = command.get_help(context)
+    # Typer's vendored Click prints the help document instead of returning it.
+    buffer = io.StringIO()
+    with contextlib.redirect_stdout(buffer):
+        command.get_help(context)
+    text = buffer.getvalue()
     lines = [line.rstrip() for line in text.splitlines()]
     while lines and not lines[0]:
         lines.pop(0)
