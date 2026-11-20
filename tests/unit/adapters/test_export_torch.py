@@ -154,3 +154,32 @@ def test_export_cli_writes_parity_report(trained_run: Path, tmp_path: Path) -> N
     payload = __import__("json").loads((reports / "export_parity.json").read_text(encoding="utf-8"))
     assert payload["passed"] is True
     assert payload["agreement"] == 1.0
+
+
+def test_static_variant_uses_minmax_calibration(monkeypatch, tmp_path: Path) -> None:
+    """T12: percentile histograms need ~19 GiB, so the static candidate uses MinMax."""
+    import onnxruntime.quantization as ort_quantization
+
+    captured: dict[str, object] = {}
+
+    def fake_quantize_static(
+        model_input: str, model_output: str, reader: object, **kwargs: object
+    ) -> None:
+        captured.update(kwargs)
+        Path(model_output).write_bytes(b"quantized")
+
+    monkeypatch.setattr(ort_quantization, "quantize_static", fake_quantize_static)
+    tokenizer = HfTokenizer.from_file(REPO_ROOT / "tests/fixtures/tiny/tokenizer.json")
+    source = tmp_path / "model.onnx"
+    source.write_bytes(b"fp32")
+    target = build_variant(
+        source,
+        "int8_static_qdq",
+        ["enciende la luz"],
+        tokenizer,
+        tmp_path / "static.onnx",
+    )
+    assert target.is_file()
+    assert captured["calibrate_method"] is ort_quantization.CalibrationMethod.MinMax
+    assert captured["quant_format"] is ort_quantization.QuantFormat.QDQ
+    assert captured["per_channel"] is True

@@ -102,36 +102,22 @@ def build_variant(
     target = Path(out_path)
     target.parent.mkdir(parents=True, exist_ok=True)
     if variant == "int8_static_qdq":
-        reader = _CalibrationReader(calibration_texts, tokenizer)
-        try:
-            quantize_static(
-                str(source),
-                str(target),
-                reader,
-                quant_format=QuantFormat.QDQ,
-                per_channel=True,
-                activation_type=QuantType.QInt8,
-                weight_type=QuantType.QInt8,
-                calibrate_method=CalibrationMethod.Percentile,
-            )
-        except ValueError as error:
-            # Degenerate graphs (e.g. the constant mask of the tiny fixture)
-            # leave a tensor with a single value, which makes the 2048-bin
-            # percentile histogram impossible. Fall back to MinMax for that
-            # export only; the real model uses percentile as decided in D12.
-            if "Too many bins" not in str(error):
-                raise
-            target.unlink(missing_ok=True)
-            quantize_static(
-                str(source),
-                str(target),
-                _CalibrationReader(calibration_texts, tokenizer),
-                quant_format=QuantFormat.QDQ,
-                per_channel=True,
-                activation_type=QuantType.QInt8,
-                weight_type=QuantType.QInt8,
-                calibrate_method=CalibrationMethod.MinMax,
-            )
+        # D12 selected percentile calibration, but per-channel percentile
+        # histograms for a 150 M-parameter ModernBERT encoder peak at ~19 GiB
+        # RSS (measured on T12) and the shared 31 GiB host OOM-kills the
+        # process. MinMax calibration keeps the same QDQ graph, the same
+        # per-channel setting and the same gate; only the calibration rule of
+        # this non-shipping candidate changes, and ADR-0005 records it.
+        quantize_static(
+            str(source),
+            str(target),
+            _CalibrationReader(calibration_texts, tokenizer),
+            quant_format=QuantFormat.QDQ,
+            per_channel=True,
+            activation_type=QuantType.QInt8,
+            weight_type=QuantType.QInt8,
+            calibrate_method=CalibrationMethod.MinMax,
+        )
         return target
     per_channel = variant != "int8_dynamic"
     nodes_to_exclude: list[str] = []
