@@ -18,7 +18,6 @@ from stc.application.dto import (
     BaselineGrid,
     DatasetMeta,
     EncodedBatch,
-    ExportReport,
     ModelInfo,
     RawDatasetRef,
     ScreeningRun,
@@ -34,6 +33,7 @@ __all__ = [
     "AccessLog",
     "BaselineStore",
     "BaselineTrainer",
+    "BundleArchive",
     "Classifier",
     "ClassifierTrainer",
     "Clock",
@@ -45,6 +45,7 @@ __all__ = [
     "ModelExporter",
     "ModelHub",
     "ModelStore",
+    "OnnxModelLoader",
     "RawDatasetSource",
     "ReportWriter",
     "ScreeningRunner",
@@ -205,8 +206,69 @@ class ScreeningRunner(Protocol):
 class ModelExporter(Protocol):
     """Exports a trained run to a portable artifact."""
 
-    def export(self, run_dir: Path, out_dir: Path, *, quantize: str = "none") -> ExportReport:
-        """Export ``run_dir`` into ``out_dir``."""
+    def export(self, run_dir: Path, out_dir: Path) -> Path:
+        """Merge the trained run and write a verifiable bundle directory."""
+        ...
+
+    def score_logits(self, run_dir: Path, texts: Sequence[str]) -> NDArray[np.float32]:
+        """Score texts with the original torch model (parity reference)."""
+        ...
+
+    def build_variant(
+        self,
+        bundle_dir: Path,
+        variant: str,
+        calibration_texts: Sequence[str],
+        out_path: Path,
+    ) -> Path:
+        """Build one quantisation variant from the bundle's fp32 model."""
+        ...
+
+    def gate(
+        self,
+        fp32_scores: NDArray[np.float32],
+        variant_scores: NDArray[np.float32],
+        y_true: Sequence[int],
+    ) -> Mapping[str, object]:
+        """Apply the pre-registered S11 quality gate."""
+        ...
+
+    def ship_variant(self, bundle_dir: Path, variant: str, variant_path: Path) -> Path:
+        """Copy a passing variant into the bundle and update its manifest."""
+        ...
+
+
+class OnnxModelLoader(Protocol):
+    """Loads an ONNX classifier from a bundle, optionally from another model file."""
+
+    def load(
+        self,
+        bundle_dir: Path,
+        model_path: Path | None = None,
+        *,
+        threads: int | None = None,
+    ) -> Classifier:
+        """Return a classifier for ``bundle_dir``."""
+        ...
+
+
+class BundleArchive(Protocol):
+    """Bundle file-system operations shared by pull, pack and calibrate."""
+
+    def verify(self, bundle_dir: Path) -> Mapping[str, object]:
+        """Verify every manifest hash and return the manifest."""
+        ...
+
+    def unpack(self, archive: Path, dest: Path) -> Path:
+        """Safely extract a bundle archive and return its root."""
+        ...
+
+    def write_zip(self, bundle_dir: Path, out: Path) -> Path:
+        """Write a deterministic bundle zip."""
+        ...
+
+    def refresh_manifest(self, bundle_dir: Path) -> Mapping[str, object]:
+        """Re-hash every content file of a bundle."""
         ...
 
 

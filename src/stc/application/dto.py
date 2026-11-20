@@ -132,6 +132,36 @@ class ExportReport:
     quantization: Mapping[str, object]
 
 
+@dataclass(frozen=True, slots=True)
+class PullResult:
+    """An installed model bundle."""
+
+    path: Path
+    name: str
+    version: str
+
+
+@dataclass(frozen=True, slots=True)
+class PackResult:
+    """A deterministic release archive and its digest."""
+
+    path: Path
+    sha256: str
+    size_bytes: int
+    name: str
+    version: str
+
+
+@dataclass(frozen=True, slots=True)
+class ExportOutcome:
+    """The artifacts and evidence produced by ``stc export``."""
+
+    bundle_dir: Path
+    parity: Mapping[str, object]
+    quantization: Mapping[str, object]
+    shipped_format: str
+
+
 def _sequence(value: object, field_name: str) -> Sequence[object]:
     if isinstance(value, str | bytes) or not isinstance(value, Sequence):
         raise InvalidInputError(f"{field_name} must be a list")
