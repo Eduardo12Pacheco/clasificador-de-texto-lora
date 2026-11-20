@@ -57,6 +57,7 @@ class LeakageAudit:
     test_rows_in_train_label_conflict: int
     train_duplicate_groups: int
     train_duplicate_excess_rows: int
+    train_label_conflict_groups: int
     dev_duplicate_groups: int
     dev_duplicate_excess_rows: int
     test_duplicate_groups: int
@@ -72,6 +73,13 @@ def _duplicate_stats(examples: Sequence[Example]) -> tuple[int, int]:
     counts = Counter(_normalized_texts(examples))
     groups = [count for count in counts.values() if count > 1]
     return len(groups), sum(count - 1 for count in groups)
+
+
+def _label_conflict_groups(train: Sequence[Example]) -> int:
+    intents_by_text: dict[str, set[str]] = {}
+    for example in train:
+        intents_by_text.setdefault(normalize_for_dedup(example.text), set()).add(example.intent)
+    return sum(1 for intents in intents_by_text.values() if len(intents) > 1)
 
 
 def _train_intents_by_text(train: Sequence[Example]) -> dict[str, set[str]]:
@@ -143,6 +151,7 @@ def audit_splits(
         test_rows_in_train_label_conflict=test_conflicts,
         train_duplicate_groups=train_groups,
         train_duplicate_excess_rows=train_excess,
+        train_label_conflict_groups=_label_conflict_groups(train),
         dev_duplicate_groups=dev_groups,
         dev_duplicate_excess_rows=dev_excess,
         test_duplicate_groups=test_groups,

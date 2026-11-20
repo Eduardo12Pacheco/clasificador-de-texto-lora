@@ -133,6 +133,7 @@ def test_audit_splits_reports_the_documented_counts(
     assert audit.test_rows_in_train_label_conflict == 1
     assert audit.train_duplicate_groups == 3
     assert audit.train_duplicate_excess_rows == 3
+    assert audit.train_label_conflict_groups == 1
     assert audit.dev_duplicate_groups == 0
     assert audit.dev_duplicate_excess_rows == 0
     assert audit.test_duplicate_groups == 0
