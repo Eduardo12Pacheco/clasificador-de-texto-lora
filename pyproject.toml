@@ -90,6 +90,9 @@ select = ["E", "F", "I", "UP", "B", "SIM", "C4", "PT", "RUF", "N", "S", "ANN"]
 [tool.ruff.lint.per-file-ignores]
 # Tests favour readable fixtures and plain assertions over library-grade annotations.
 "tests/**/*.py" = ["ANN001", "ANN201", "ANN202", "ANN401", "S101", "S603", "S607", "PT011"]
+# Torch-marked modules call pytest.importorskip before importing the training adapters
+# on purpose, so the import order rule cannot be satisfied.
+"tests/**/*_torch.py" = ["E402"]
 # Repository scripts are dev utilities, not part of the typed public API.
 "scripts/*.py" = ["ANN001", "ANN201", "ANN202", "ANN401", "S603", "S607"]
 # D16 fixes these exception names; the capability token reads as a noun phrase.
@@ -124,6 +127,7 @@ module = [
   "matplotlib.*",
   "sklearn.*",
   "skops.*",
+  "tokenizers.*",
   "onnxruntime.*",
   "playwright.*",
 ]
