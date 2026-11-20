@@ -57,4 +57,19 @@ jobs:
           uv python install 3.12
           uv sync --locked --group dev --python 3.12
       - name: Run tests
-        run: uv run pytest -q -m "not e2e and not torch" --cov=src/stc
+        run: uv run pytest -q -m "not e2e and not torch"
+
+  test-torch:
+    name: test-torch (coverage gate)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install Python and training dependencies
+        run: |
+          uv python install 3.12
+          uv sync --locked --extra train --group dev --python 3.12
+      - name: Run the full suite with coverage
+        run: uv run pytest -q -m "not e2e" --cov=src/stc --cov-fail-under=85
