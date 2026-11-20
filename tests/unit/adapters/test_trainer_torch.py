@@ -11,6 +11,7 @@ torch = pytest.importorskip("torch")
 
 from stc.adapters.data.fixture_source import FixtureRepository
 from stc.adapters.text.hf_tokenizer import HfTokenizer
+from stc.adapters.tracking.jsonl_tracker import JsonlTracker
 from stc.adapters.tracking.null_tracker import NullTracker
 from stc.adapters.training.config import TrainingConfig
 from stc.adapters.training.model_factory import build_model
@@ -54,7 +55,9 @@ def test_lora_run_writes_artifacts_and_reduces_loss(tmp_path: Path) -> None:
     train, dev = _splits()
     run_dir = tmp_path / "seed-13"
 
-    result = LoraTrainer(device=CPU).fit(train, dev, _config(run_dir), NullTracker())
+    result = LoraTrainer(device=CPU).fit(
+        train, dev, _config(run_dir), JsonlTracker(tmp_path / "tracker.jsonl")
+    )
 
     assert result.metrics["dev_macro_f1"] >= 0.0
     assert (run_dir / "run.json").is_file()
@@ -66,6 +69,18 @@ def test_lora_run_writes_artifacts_and_reduces_loss(tmp_path: Path) -> None:
 
     metrics = json.loads((run_dir / "metrics.json").read_text(encoding="utf-8"))
     assert metrics["history"][1]["train_loss"] < metrics["history"][0]["train_loss"]
+    events = [
+        json.loads(line)
+        for line in (tmp_path / "tracker.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
+    assert any(event["event"] == "artifact" for event in events)
+    assert events[-1]["event"] == "end"
+    events = [
+        json.loads(line)
+        for line in (tmp_path / "tracker.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
+    assert any(event["event"] == "artifact" for event in events)
+    assert events[-1]["event"] == "end"
 
 
 def test_lora_trainable_fraction_and_head(tmp_path: Path) -> None:

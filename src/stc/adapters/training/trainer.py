@@ -185,6 +185,7 @@ class _BaseTrainer:
         epoch_seconds: list[float] = []
         bf16 = self._device.type == "cuda" and torch.cuda.is_bf16_supported()
         started = time.monotonic()
+        completed = False
         try:
             for epoch in range(1, config.epochs + 1):
                 epoch_start = time.monotonic()
@@ -226,8 +227,10 @@ class _BaseTrainer:
                 epoch_seconds.append(time.monotonic() - epoch_start)
                 if self._on_epoch_end is not None:
                     self._on_epoch_end(epoch, dev_metrics["macro_f1"])
+            completed = True
         finally:
-            tracker.end_run()
+            if not completed:
+                tracker.end_run()
         wall_seconds = time.monotonic() - started
         peak_vram = (
             float(torch.cuda.max_memory_allocated() / (1024**2))
@@ -251,6 +254,9 @@ class _BaseTrainer:
             labels,
             oom_retry,
         )
+        tracker.log_artifact(run_dir.run_json)
+        tracker.log_artifact(run_dir.metrics_json)
+        tracker.end_run()
         final = history[-1]
         metrics = {
             "dev_accuracy": final["accuracy"],
