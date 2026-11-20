@@ -39,14 +39,25 @@ jobs:
         run: uv run python scripts/check_no_weights.py
       - name: Validate workflows
         run: uv run python scripts/validate_workflows.py
+      - name: Check documentation links
+        run: uv run python scripts/check_links.py
+      - name: Check generated CLI and OpenAPI documents
+        run: |
+          uv run python scripts/gen_cli_docs.py
+          uv run python scripts/export_openapi.py
+          git diff --exit-code
 
   test:
-    name: test (${{ matrix.os }})
+    name: test (${{ matrix.os }}, Python ${{ matrix.python }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ["3.12"]
+        include:
+          - os: ubuntu-latest
+            python: "3.13"
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
@@ -54,8 +65,8 @@ jobs:
           enable-cache: true
       - name: Install Python and dependencies
         run: |
-          uv python install 3.12
-          uv sync --locked --group dev --python 3.12
+          uv python install ${{ matrix.python }}
+          uv sync --locked --group dev --python ${{ matrix.python }}
       - name: Run tests
         run: uv run pytest -q -m "not e2e and not torch"
 
@@ -71,5 +82,110 @@ jobs:
         run: |
           uv python install 3.12
           uv sync --locked --extra train --group dev --python 3.12
+      # The default torch wheel bundles CUDA and is needlessly large on a CPU runner.
+      # If the CPU index is unavailable, fall back to the already installed wheels.
+      - name: Prefer the CPU-only torch wheel
+        id: cpu-torch
+        continue-on-error: true
+        run: uv pip install --reinstall --no-deps torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Free runner disk for the fallback torch wheel
+        if: steps.cpu-torch.outcome == 'failure'
+        run: |
+          sudo rm -rf /usr/local/lib/android
+          uv sync --locked --extra train --group dev --python 3.12
       - name: Run the full suite with coverage
-        run: uv run pytest -q -m "not e2e" --cov=src/stc --cov-fail-under=85
+        run: uv run pytest -q -m "not e2e" --cov=src/stc --cov-report=xml --cov-fail-under=85
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: coverage.xml
+          if-no-files-found: ignore
+
+  e2e-ui:
+    name: e2e-ui
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install Python and dependencies
+        run: |
+          uv python install 3.12
+          uv sync --locked --extra train --group dev --python 3.12
+      - name: Install Chromium
+        run: uv run playwright install --with-deps chromium
+      - name: Run browser tests
+        run: uv run pytest -q -m e2e
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+
+  smoke-install:
+    name: smoke-install (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install Python
+        run: uv python install 3.12
+      - name: Install, run and uninstall the wheel (Linux/macOS)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: bash scripts/smoke_install.sh
+      - name: Install, run and uninstall the wheel (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/smoke_install.ps1
+
+  security:
+    name: security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan the full history for secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Export the runtime dependency set
+        run: uv export --locked --no-dev --no-hashes --format requirements-txt -o "$RUNNER_TEMP/req.txt"
+      - name: Audit runtime dependencies
+        run: uvx pip-audit -r "$RUNNER_TEMP/req.txt" --no-deps --disable-pip
+
+  docs:
+    name: docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install Python and dependencies
+        run: |
+          uv python install 3.12
+          uv sync --locked --group dev --python 3.12
+      - name: Run the documentation tests
+        run: uv run pytest -q tests/docs
+      - name: Enforce the README line budget
+        run: |
+          test "$(wc -l < README.md)" -le 150
+          if [ -f README.es.md ]; then test "$(wc -l < README.es.md)" -le 150; fi
