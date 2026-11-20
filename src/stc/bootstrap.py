@@ -538,6 +538,7 @@ def render_results(
     final_dir: Path | None = None,
     readme: Path | None = None,
     readme_es: Path | None = None,
+    registry_path: Path | None = None,
 ) -> tuple[Path, Path]:
     """Wire the T6 results renderer for ``stc report render``."""
     module = importlib.import_module("stc.adapters.reporting.results")
@@ -548,6 +549,7 @@ def render_results(
         final_dir=final_dir,
         readme=readme,
         readme_es=readme_es,
+        registry_path=registry_path,
     )
 
 

@@ -23,6 +23,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--final-dir", type=Path, default=None)
     parser.add_argument("--readme", type=Path, default=None)
     parser.add_argument("--readme-es", type=Path, default=None)
+    parser.add_argument(
+        "--registry",
+        type=Path,
+        default=None,
+        help="Committed model registry used for the bundle-size line.",
+    )
     args = parser.parse_args(argv)
     try:
         render_results(
@@ -31,6 +37,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             final_dir=args.final_dir,
             readme=args.readme,
             readme_es=args.readme_es,
+            registry_path=args.registry,
         )
     except (OSError, ValueError) as error:
         print(f"error: {error}", file=sys.stderr)

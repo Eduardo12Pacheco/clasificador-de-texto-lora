@@ -20,9 +20,12 @@ __all__ = [
     "END_MARKER",
     "START_MARKER",
     "build_summary",
+    "bundle_block",
     "render_block",
     "render_results",
     "render_table",
+    "runtime_block",
+    "runtime_paragraph",
 ]
 
 
@@ -48,7 +51,85 @@ def _number(value: object, name: str) -> float:
     return float(value)
 
 
-def build_summary(final_dir: Path) -> dict[str, object]:
+def _optional_mapping(path: Path) -> Mapping[str, object] | None:
+    """Load an optional JSON object, returning ``None`` when the file is absent."""
+    if not path.is_file():
+        return None
+    return _load(path)
+
+
+def runtime_block(final_dir: Path) -> dict[str, object] | None:
+    """Return the CPU latency summary from ``benchmark.json`` when present."""
+    payload = _optional_mapping(final_dir / "benchmark.json")
+    if payload is None:
+        return None
+    threads = payload.get("threads")
+    if not isinstance(threads, list):
+        raise ValueError("benchmark.threads: expected a list")
+    rows = [row for row in threads if isinstance(row, dict)]
+    if not rows:
+        return None
+    chosen = rows[-1]
+    for row in rows:
+        if row.get("threads") == 4:
+            chosen = row
+            break
+    block: dict[str, object] = {
+        "threads": int(_number(chosen.get("threads"), "benchmark.threads")),
+        "p50_ms": _number(chosen.get("p50_ms"), "benchmark.p50_ms"),
+        "p95_ms": _number(chosen.get("p95_ms"), "benchmark.p95_ms"),
+    }
+    cpu_model = payload.get("cpu_model")
+    if isinstance(cpu_model, str) and cpu_model:
+        block["cpu_model"] = cpu_model
+    version = payload.get("onnxruntime_version")
+    if isinstance(version, str) and version:
+        block["onnxruntime_version"] = version
+    throughput = chosen.get("batch32_throughput_per_s")
+    if not isinstance(throughput, bool) and isinstance(throughput, int | float):
+        block["batch32_throughput_per_s"] = float(throughput)
+    return block
+
+
+def bundle_block(registry_path: Path | None) -> dict[str, object] | None:
+    """Return the published bundle identity and size from the model registry."""
+    if registry_path is None:
+        return None
+    payload = _optional_mapping(registry_path)
+    if payload is None:
+        return None
+    models = payload.get("models")
+    if not isinstance(models, list) or not models:
+        return None
+    entry = models[0]
+    if not isinstance(entry, dict):
+        raise ValueError(f"{registry_path}: models[0] must be an object")
+    return {
+        "name": str(entry.get("name")),
+        "version": str(entry.get("version")),
+        "size_bytes": int(_number(entry.get("size_bytes"), "registry.size_bytes")),
+    }
+
+
+def _attach_optional(
+    summary: dict[str, object], final_dir: Path, registry_path: Path | None
+) -> bool:
+    """Attach runtime and bundle metadata, returning whether anything changed."""
+    changed = False
+    if "runtime" not in summary:
+        runtime = runtime_block(final_dir)
+        if runtime is not None:
+            summary["runtime"] = runtime
+            changed = True
+    if "bundle" not in summary:
+        bundle = bundle_block(registry_path)
+        if bundle is not None:
+            summary["bundle"] = bundle
+            changed = True
+    return changed
+
+
+def build_summary(final_dir: Path, *, registry_path: Path | None = None) -> dict[str, object]:
     """Read the final reports and aggregate the summary the docs consume."""
     metrics = _load(final_dir / "metrics.json")
     comparison = _load(final_dir / "comparison.json")
@@ -126,7 +207,7 @@ def build_summary(final_dir: Path) -> dict[str, object]:
     macro_delta = _mapping(delta.get("macro_f1"), "comparison.delta.macro_f1")
     mcnemar = _mapping(comparison_block.get("mcnemar"), "comparison.mcnemar")
     sentences = _mapping(comparison_block.get("verdict_sentences"), "verdict_sentences")
-    return {
+    summary: dict[str, object] = {
         "schema_version": 1,
         "models": summary_models,
         "comparison": {
@@ -144,6 +225,8 @@ def build_summary(final_dir: Path) -> dict[str, object]:
             "mcnemar_p": _number(mcnemar.get("p"), "mcnemar.p"),
         },
     }
+    _attach_optional(summary, final_dir, registry_path)
+    return summary
 
 
 def _fmt(value: float) -> str:
@@ -190,7 +273,50 @@ def render_block(summary: Mapping[str, object], language: str) -> str:
     if not isinstance(sentence, str) or not sentence:
         raise ValueError(f"summary.comparison.{sentence_key} is empty")
     heading = "Resultados" if language == "es" else "Results"
-    return f"### {heading}\n\n{render_table(summary)}\n\n{sentence}"
+    environment = runtime_paragraph(summary, language)
+    body = f"### {heading}\n\n{render_table(summary)}\n\n{sentence}"
+    if environment:
+        body += f"\n\n{environment}"
+    return body
+
+
+def runtime_paragraph(summary: Mapping[str, object], language: str) -> str:
+    """Render the generated CPU-latency and bundle-size line, when reported."""
+    parts: list[str] = []
+    runtime = summary.get("runtime")
+    if isinstance(runtime, dict):
+        p50 = _number(runtime.get("p50_ms"), "runtime.p50_ms")
+        p95 = _number(runtime.get("p95_ms"), "runtime.p95_ms")
+        threads = int(_number(runtime.get("threads"), "runtime.threads"))
+        throughput = runtime.get("batch32_throughput_per_s")
+        cpu_model = runtime.get("cpu_model")
+        if language == "es":
+            text = (
+                f"Inferencia en CPU: {p50:.1f} ms p50 / {p95:.1f} ms p95 por frase "
+                f"con {threads} hilos"
+            )
+            if not isinstance(throughput, bool) and isinstance(throughput, int | float):
+                text += f" (rendimiento batch-32 de {float(throughput):.1f} frases/s)"
+            if isinstance(cpu_model, str) and cpu_model:
+                text += f" en {cpu_model}"
+        else:
+            text = (
+                f"CPU inference: {p50:.1f} ms p50 / {p95:.1f} ms p95 per utterance "
+                f"at {threads} threads"
+            )
+            if not isinstance(throughput, bool) and isinstance(throughput, int | float):
+                text += f" (batch-32 throughput {float(throughput):.1f} utterances/s)"
+            if isinstance(cpu_model, str) and cpu_model:
+                text += f" on {cpu_model}"
+        parts.append(text + ".")
+    bundle = summary.get("bundle")
+    if isinstance(bundle, dict):
+        megabytes = _number(bundle.get("size_bytes"), "bundle.size_bytes") / 1_000_000
+        if language == "es":
+            parts.append(f"Bundle ONNX fp32 de {megabytes:.1f} MB.")
+        else:
+            parts.append(f"fp32 ONNX bundle: {megabytes:.1f} MB.")
+    return " ".join(parts)
 
 
 def _write_summary(path: Path, summary: Mapping[str, object]) -> None:
@@ -229,14 +355,17 @@ def render_results(
     final_dir: Path | None = None,
     readme: Path | None = None,
     readme_es: Path | None = None,
+    registry_path: Path | None = None,
 ) -> tuple[Path, Path]:
     """Rebuild the summary when stale and render the table and README blocks."""
     resolved_final = final_dir if final_dir is not None else summary_path.parent / "final"
     if _is_outdated(summary_path, resolved_final):
-        summary = build_summary(resolved_final)
+        summary = build_summary(resolved_final, registry_path=registry_path)
         _write_summary(summary_path, summary)
     else:
         summary = _load(summary_path)
+        if _attach_optional(summary, resolved_final, registry_path):
+            _write_summary(summary_path, summary)
     table = render_table(summary)
     table_path.parent.mkdir(parents=True, exist_ok=True)
     table_path.write_text(table + "\n", encoding="utf-8", newline="\n")

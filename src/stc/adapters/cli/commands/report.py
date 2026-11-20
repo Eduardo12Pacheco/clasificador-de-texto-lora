@@ -175,6 +175,10 @@ def render(
         Path | None,
         typer.Option("--final-dir", help="Final-report directory (default: sibling of --summary)."),
     ] = None,
+    registry_path: Annotated[
+        Path | None,
+        typer.Option("--registry", help="Committed model registry for the bundle-size line."),
+    ] = None,
 ) -> None:
     """Rebuild the summary when needed and render the table and README blocks."""
     try:
@@ -184,6 +188,7 @@ def render(
             final_dir=final_dir,
             readme=readme,
             readme_es=readme_es,
+            registry_path=registry_path,
         )
     except (OSError, ValueError) as error:
         raise InvalidInputError(str(error)) from error

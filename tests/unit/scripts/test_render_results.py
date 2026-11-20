@@ -17,7 +17,18 @@ PREFIX = (
 )
 
 
-def _run(tmp_path: Path, *, readme: Path | None = None, readme_es: Path | None = None):
+def _write_json(path: Path, payload: object) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+
+def _run(
+    tmp_path: Path,
+    *,
+    readme: Path | None = None,
+    readme_es: Path | None = None,
+    registry: Path | None = None,
+):
     command = [
         sys.executable,
         str(SCRIPT),
@@ -32,6 +43,8 @@ def _run(tmp_path: Path, *, readme: Path | None = None, readme_es: Path | None =
         command += ["--readme", str(readme)]
     if readme_es is not None:
         command += ["--readme-es", str(readme_es)]
+    if registry is not None:
+        command += ["--registry", str(registry)]
     return subprocess.run(command, capture_output=True, text=True, check=False)
 
 
@@ -147,3 +160,78 @@ def test_package_renderer_and_cli_render_share_the_same_output(
     assert cli_summary.read_text(encoding="utf-8") == direct_summary.read_text(encoding="utf-8")
     assert cli_table.read_text(encoding="utf-8") == direct_table.read_text(encoding="utf-8")
     assert "### Results" in readme.read_text(encoding="utf-8")
+
+
+def test_runtime_and_bundle_details_are_in_summary_and_readme(
+    tmp_path: Path, final_reports
+) -> None:
+    final_reports()
+    _write_json(
+        tmp_path / "final" / "benchmark.json",
+        {
+            "schema_version": 1,
+            "cpu_model": "Test CPU",
+            "onnxruntime_version": "1.32.0",
+            "threads": [
+                {
+                    "threads": 4,
+                    "p50_ms": 15.8014,
+                    "p95_ms": 19.8951,
+                    "batch32_throughput_per_s": 93.1966,
+                },
+            ],
+        },
+    )
+    registry = tmp_path / "model_registry.json"
+    _write_json(
+        registry,
+        {
+            "registry_version": 1,
+            "models": [
+                {
+                    "name": "stc-es-intent",
+                    "version": "0.1.0",
+                    "size_bytes": 570007756,
+                    "url": "https://example.invalid/model.zip",
+                    "sha256": "a" * 64,
+                    "license": "Apache-2.0",
+                }
+            ],
+        },
+    )
+    readme = tmp_path / "README.md"
+    readme.write_text(PREFIX, encoding="utf-8")
+    readme_es = tmp_path / "README.es.md"
+    readme_es.write_text(PREFIX, encoding="utf-8")
+
+    result = _run(tmp_path, readme=readme, readme_es=readme_es, registry=registry)
+
+    assert result.returncode == 0, result.stderr
+    summary = json.loads((tmp_path / "summary.json").read_text(encoding="utf-8"))
+    assert summary["runtime"] == {
+        "cpu_model": "Test CPU",
+        "onnxruntime_version": "1.32.0",
+        "threads": 4,
+        "p50_ms": 15.8014,
+        "p95_ms": 19.8951,
+        "batch32_throughput_per_s": 93.1966,
+    }
+    assert summary["bundle"]["size_bytes"] == 570007756
+    text = readme.read_text(encoding="utf-8")
+    assert "15.8 ms p50 / 19.9 ms p95" in text
+    assert "570.0 MB" in text
+    assert "Test CPU" in text
+    spanish = readme_es.read_text(encoding="utf-8")
+    assert "Inferencia en CPU" in spanish
+    assert "per utterance" not in spanish
+
+
+def test_missing_runtime_and_registry_are_omitted(tmp_path: Path, final_reports) -> None:
+    final_reports()
+
+    result = _run(tmp_path)
+
+    assert result.returncode == 0, result.stderr
+    summary = json.loads((tmp_path / "summary.json").read_text(encoding="utf-8"))
+    assert "runtime" not in summary
+    assert "bundle" not in summary

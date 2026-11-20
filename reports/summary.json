@@ -1,4 +1,9 @@
 {
+  "bundle": {
+    "name": "stc-es-intent",
+    "size_bytes": 570007756,
+    "version": "0.1.0"
+  },
   "comparison": {
     "delta_accuracy": 0.0256,
     "delta_accuracy_lower": 0.0134,
@@ -152,6 +157,14 @@
         "weighted_f1": 0.8664
       }
     }
+  },
+  "runtime": {
+    "batch32_throughput_per_s": 93.1966,
+    "cpu_model": "12th Gen Intel(R) Core(TM) i5-12400T",
+    "onnxruntime_version": "1.32.0",
+    "p50_ms": 15.8014,
+    "p95_ms": 19.8951,
+    "threads": 4
   },
   "schema_version": 1
 }

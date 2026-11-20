@@ -514,6 +514,8 @@ stc
 │ --readme-es        <path>  Spanish README whose RESULTS block is replaced.   │
 │ --final-dir        <path>  Final-report directory (default: sibling of       │
 │                            --summary).                                       │
+│ --registry         <path>  Committed model registry for the bundle-size      │
+│                            line.                                             │
 │ --help             <bool>  Show this message and exit.                       │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ```
