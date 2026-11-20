@@ -30,6 +30,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Nine ADRs, a generated model card, an error-analysis document, GitHub Release
   model distribution with sha256 verification, and a smoke-phrase fixture for
   release verification.
+- Initial uv project scaffold with a typed package layout, hexagon boundaries
+  enforced by import-linter and an AST test, and a Typer CLI entrypoint.
+- Quality/test GitHub Actions skeleton, repository artifact policy and workflow
+  validation.
+- Architecture, evaluation, training and data guides, a generated CLI/API
+  reference, and tests that guard links, ADR structure, quoted paths and the
+  documented training commands.
 
 ### Changed
 
@@ -44,10 +51,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Screening releases the previous backbone before loading the next candidate and
   the OOM retry no longer keeps the failed model's GPU tensors alive.
 
-
-### Added
-
-- Initial uv project scaffold with typed package layout, hexagon boundaries enforced by
-  import-linter and an AST test, and a Typer CLI entrypoint.
-- Quality/test GitHub Actions skeleton, repository artifact policy and workflow validation.
-- MIT licence, upstream notices, contributing, security and changelog stubs.

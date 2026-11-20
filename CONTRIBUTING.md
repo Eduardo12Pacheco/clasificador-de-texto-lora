@@ -48,6 +48,10 @@ uv run pytest -q -m e2e
 
 ## Test-first and boundaries
 
+Read `docs/ARCHITECTURE.md` before changing a layer and `docs/EVALUATION.md`
+before changing a metric or a split rule. The GPU pipeline is documented in
+`docs/TRAINING.md`.
+
 - Write the failing test first, then the smallest implementation that passes.
 - Keep the hexagon intact: `domain` is pure Python plus NumPy, `application` owns ports
   and use cases, adapters hold I/O. `lint-imports` and

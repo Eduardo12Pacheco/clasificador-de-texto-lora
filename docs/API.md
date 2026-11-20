@@ -8,7 +8,7 @@ calibrated classifier as `stc predict`. It never downloads models or data.
 
 ```bash
 stc serve                       # 127.0.0.1 and STC_API_PORT (19080 by default)
-stc serve --host 127.0.0.1 --port 8000 --model stc-es-intent
+stc serve --host 127.0.0.1 --port 19080 --model stc-es-intent
 ```
 
 Binding a non-loopback address prints a warning: the service has no
@@ -27,7 +27,7 @@ authentication and is intended for local use.
 ### Predict
 
 ```bash
-curl -s -X POST http://127.0.0.1:8000/v1/predict \
+curl -s -X POST http://127.0.0.1:19080/v1/predict \
   -H 'content-type: application/json' \
   -d '{"texts": ["apaga la luz", "despiértame a las cinco"], "top_k": 2, "model": "default"}'
 ```
