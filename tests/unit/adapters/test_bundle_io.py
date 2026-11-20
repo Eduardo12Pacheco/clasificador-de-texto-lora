@@ -73,6 +73,19 @@ def test_refresh_manifest_hashes_new_companions(bundle: Path) -> None:
     assert (bundle / "manifest.json").read_text(encoding="utf-8").endswith("\n")
 
 
+def test_refresh_manifest_hashes_a_nested_baseline_manifest(bundle: Path) -> None:
+    baseline = bundle / "baseline"
+    baseline.mkdir()
+    (baseline / "manifest.json").write_text('{"kind": "tfidf-linear"}', encoding="utf-8")
+    (baseline / "baseline.skops").write_bytes(b"fake baseline")
+
+    manifest = refresh_manifest(bundle)
+
+    paths = {entry["path"] for entry in manifest["files"]}
+    assert {"baseline/manifest.json", "baseline/baseline.skops"} <= paths
+    verify_bundle(bundle)
+
+
 def test_read_manifest_rejects_an_unsupported_version(bundle: Path) -> None:
     payload = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
     payload["bundle_version"] = 99

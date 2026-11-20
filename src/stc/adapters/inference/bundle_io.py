@@ -214,8 +214,9 @@ def bundle_info(bundle: Path, manifest: Mapping[str, object], labels: LabelSpace
 
 def _hash_entries(root: Path) -> list[dict[str, object]]:
     entries: list[dict[str, object]] = []
+    root_manifest = root / MANIFEST_NAME
     for path in sorted(root.rglob("*")):
-        if not path.is_file() or path.name == MANIFEST_NAME:
+        if not path.is_file() or path == root_manifest:
             continue
         relative = path.relative_to(root).as_posix()
         entries.append(
