@@ -1,0 +1,32 @@
+{
+  "backbone": "BSC-LT/MrBERT-es",
+  "best": {
+    "dev_macro_f1": 0.8645,
+    "lr": 0.0001
+  },
+  "epochs": 4,
+  "runs": [
+    {
+      "dev_accuracy": 0.8716,
+      "dev_macro_f1": 0.8428,
+      "dev_nll": 0.5837,
+      "lr": 0.0,
+      "run": "artifacts/full_ft/lr-2e-05"
+    },
+    {
+      "dev_accuracy": 0.8682,
+      "dev_macro_f1": 0.8371,
+      "dev_nll": 0.6325,
+      "lr": 0.0,
+      "run": "artifacts/full_ft/lr-3e-05"
+    },
+    {
+      "dev_accuracy": 0.8795,
+      "dev_macro_f1": 0.8645,
+      "dev_nll": 0.6426,
+      "lr": 0.0001,
+      "run": "artifacts/full_ft/lr-5e-05"
+    }
+  ],
+  "schema_version": 1
+}
