@@ -6,6 +6,7 @@ import typer
 
 from stc import __version__
 from stc.adapters.cli.commands.data import data_app
+from stc.adapters.cli.commands.evaluate import evaluate
 from stc.domain.errors import DomainError
 
 APP_NAME = "stc"
@@ -17,6 +18,7 @@ app = typer.Typer(
     add_completion=False,
 )
 app.add_typer(data_app, name="data")
+app.command("evaluate")(evaluate)
 
 
 def _version_callback(value: bool) -> None:

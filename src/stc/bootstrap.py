@@ -2,17 +2,23 @@
 
 from __future__ import annotations
 
+import importlib
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 from stc import __version__, config
 from stc.adapters.data.fixture_source import FixtureRepository
 from stc.adapters.data.jsonl_repository import JsonlDatasetRepository
 from stc.adapters.data.massive_archive import PINNED_SHA256, PINNED_URL, MassiveArchiveSource
 from stc.adapters.data.massive_parser import MassiveParser
-from stc.application.ports import DatasetRepository, RawDatasetSource
+from stc.adapters.reporting.json_writer import JsonReportWriter
+from stc.adapters.storage.access_log import JsonlAccessLog
+from stc.application.ports import Classifier, DatasetRepository, RawDatasetSource
 from stc.application.use_cases.prepare_data import PrepareDataPipeline
 from stc.config import Settings
+from stc.domain.errors import ArtifactNotFoundError
 
 
 @dataclass(frozen=True, slots=True)
@@ -66,3 +72,25 @@ def build_data_services(
         pipeline=pipeline,
         fixtures=FixtureRepository(),
     )
+
+
+def build_report_writer() -> JsonReportWriter:
+    """Wire the deterministic JSON report writer for a CLI invocation."""
+    return JsonReportWriter()
+
+
+def build_access_log(path: Path) -> JsonlAccessLog:
+    """Wire the append-only test-access audit log for a CLI invocation."""
+    return JsonlAccessLog(path)
+
+
+def load_classifier(model: str) -> Classifier:
+    """Resolve a model path or registry name to a classifier (training task adds kinds)."""
+    path = Path(model)
+    if not path.exists():
+        raise ArtifactNotFoundError(
+            f"model not found: {model}; run: stc train baseline to create one"
+        )
+    module = importlib.import_module("stc.adapters.models.tfidf_linear")
+    loader = cast(Callable[[Path], Classifier], module.load_baseline)
+    return loader(path)

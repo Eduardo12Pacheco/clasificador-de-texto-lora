@@ -9,7 +9,7 @@ from typing import Protocol
 from stc.domain.errors import TestSplitLocked
 from stc.domain.splits import Split
 
-_LOCKED_MESSAGE = "test split is locked; pass --final to record an audited evaluation"
+LOCKED_MESSAGE = "test split is locked; pass --final to record an audited evaluation"
 
 
 class Clock(Protocol):
@@ -54,4 +54,4 @@ class TestSplitGuard:
 def require_test_grant(split: Split, grant: TestAccessGrant | None) -> None:
     """Refuse to read the test split unless a capability token is present."""
     if split is Split.TEST and grant is None:
-        raise TestSplitLocked(_LOCKED_MESSAGE)
+        raise TestSplitLocked(LOCKED_MESSAGE)
