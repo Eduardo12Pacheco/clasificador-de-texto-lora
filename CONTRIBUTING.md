@@ -64,6 +64,48 @@ attribution lines. Branch from `main`; do not force-push.
 
 ## Releases
 
-Releases are tag-driven and owned by the maintainer: push `main`, tag `vX.Y.Z`, let CI
-build the wheel and sdist, then attach the model bundle with `scripts/publish_model.sh`
-when the release task calls for it.
+Releases are tag-driven and the model assets are attached manually. Never commit or
+upload weights from CI.
+
+1. Confirm the version in `pyproject.toml` and the model bundle in
+   `src/stc/model_registry.json` agree with the release you are cutting.
+2. Push `main`, then create and push the annotated tag:
+
+   ```bash
+   git tag -a v0.1.0 -m "v0.1.0"
+   git push origin main
+   git push origin v0.1.0
+   ```
+
+3. The `Release` workflow checks that the tag matches the package version, builds the
+   wheel and sdist, generates release notes from Conventional Commits with git-cliff,
+   writes `SHA256SUMS` and creates the GitHub Release. It refuses any asset above
+   100 MB.
+4. Attach the verified model bundle to that release:
+
+   ```bash
+   scripts/publish_model.sh v0.1.0
+   ```
+
+   The helper requires an authenticated `gh`, an existing release, and a bundle whose
+   sha256 equals the registry entry. It uploads `dist-model/stc-es-intent-*.zip` and
+   `dist-model/SHA256SUMS-model.txt`; it never touches git.
+5. The `Verify release` workflow runs on the published release (and can be dispatched
+   with a tag): it installs the released wheel on Linux, Windows and macOS, waits for
+   the model asset, pulls and verifies the bundle, checks
+   `tests/fixtures/smoke_phrases.json` and runs `stc doctor`.
+
+Local installation behaves like the released package:
+
+```bash
+bash scripts/smoke_install.sh --check   # prerequisites only
+bash scripts/smoke_install.sh           # build, install, exercise, verify torch is absent
+bash scripts/smoke_install.sh --uninstall
+pwsh ./scripts/smoke_install.ps1 -Check # Windows equivalent
+```
+
+The smoke installation uses a temporary `UV_TOOL_DIR` and `STC_HOME`, so it never
+replaces your normal `stc`. CI runs the same scripts in the `smoke-install` matrix job.
+
+Security-relevant checks before a release: `gitleaks git --no-banner`, the dependency
+audit described in `SECURITY.md`, and `uv run python scripts/validate_workflows.py`.
