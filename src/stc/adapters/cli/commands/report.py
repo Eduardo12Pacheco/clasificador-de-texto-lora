@@ -9,11 +9,11 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
-from rich.console import Console
 from rich.table import Table
 
 from stc import bootstrap
 from stc.adapters.cli.errors import handle_domain_errors
+from stc.adapters.cli.rendering import console
 from stc.application.ports import DatasetRepository, ReportWriter
 from stc.application.use_cases.final_report import FinalReport
 from stc.domain.access import TestSplitGuard
@@ -60,6 +60,7 @@ def _repository(dataset: str) -> DatasetRepository:
 @report_app.command("final")
 @handle_domain_errors
 def final(
+    ctx: typer.Context,
     bundle: Annotated[
         Path,
         typer.Option("--bundle", help="Shipped ONNX bundle directory."),
@@ -126,7 +127,7 @@ def final(
             f"{_number(payload, 'accuracy'):.4f}",
             f"{_number(payload, 'macro_f1'):.4f}",
         )
-    Console().print(table)
+    console(ctx).print(table)
     typer.echo(f"verdict: {result.verdict}")
     typer.echo(result.verdict_sentences["en"])
     typer.echo(f"wrote {out}")

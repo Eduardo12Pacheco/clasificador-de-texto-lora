@@ -14,11 +14,11 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
-from rich.console import Console
 from rich.table import Table
 
 from stc import __version__, bootstrap
 from stc.adapters.cli.errors import handle_domain_errors
+from stc.adapters.cli.rendering import console
 from stc.config import Settings
 
 
@@ -189,6 +189,7 @@ def build_environment_report(*, gpu: bool) -> dict[str, object]:
 
 @handle_domain_errors
 def doctor(
+    ctx: typer.Context,
     gpu: Annotated[
         bool,
         typer.Option("--gpu", help="Probe CUDA, bf16, driver and training libraries."),
@@ -217,7 +218,7 @@ def doctor(
         else:
             rendered = str(value)
         table.add_row(key, rendered)
-    Console().print(table)
+    console(ctx).print(table)
 
 
 def python_version() -> str:
