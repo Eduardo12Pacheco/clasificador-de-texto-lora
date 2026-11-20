@@ -55,197 +55,610 @@ stc
 ## `stc`
 
 ```text
+ Usage: stc [OPTIONS] COMMAND [ARGS]...
 
+ Spanish virtual-assistant intent classifier.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --version           <bool>  Show the installed version and exit.             │
+│ --debug             <bool>  Show tracebacks for unexpected failures.         │
+│ --quiet             <bool>  Suppress tables and non-essential output.        │
+│ --log-format        <str>   Structured log format: console or json.          │
+│ --help              <bool>  Show this message and exit.                      │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ evaluate   Evaluate a classifier and record every metric in a deterministic  │
+│            report.                                                           │
+│ export     Merge a trained run, export ONNX (opset 17) and measure parity    │
+│            and int8 quality.                                                 │
+│ calibrate  Fit D10 temperature scaling and the review threshold on dev       │
+│            scores.                                                           │
+│ benchmark  Record p50/p95 latency per thread count and batch-32 throughput.  │
+│ doctor     Print environment diagnostics; ``--gpu`` adds the training stack. │
+│ predict    Classify Spanish virtual-assistant requests and flag uncertain    │
+│            ones.                                                             │
+│ serve      Serve the FastAPI app and the bundled UI on the local machine.    │
+│ data       Download, verify, prepare and audit the MASSIVE dataset.          │
+│ train      Train the classical baseline or a transformer classifier.         │
+│ bundle     Pack, verify and inspect model release bundles.                   │
+│ model      Install, list and verify model bundles.                           │
+│ report     Compose the audited final report and render its results.          │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc benchmark`
 
 ```text
+ Usage: stc benchmark [OPTIONS]
 
+ Record p50/p95 latency per thread count and batch-32 throughput.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ *  --bundle         <path>  Exported model bundle directory. [required]      │
+│    --threads        <str>   Comma-separated ORT intra-op thread counts, e.g. │
+│                             1,4.                                             │
+│                             [default: 1,4]                                   │
+│    --runs           <int>   Single-utterance measurements per thread count.  │
+│                             [default: 200]                                   │
+│    --out            <path>  Destination benchmark.json.                      │
+│                             [default: reports/final/benchmark.json]          │
+│    --dataset        <str>   Dataset whose dev texts are benchmarked.         │
+│                             [default: massive]                               │
+│    --help           <bool>  Show this message and exit.                      │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc bundle`
 
 ```text
+ Usage: stc bundle [OPTIONS] COMMAND [ARGS]...
 
+ Pack, verify and inspect model release bundles.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help        <bool>  Show this message and exit.                            │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ pack          Assemble the D13 release layout and write a deterministic zip. │
+│ pack-adapter  Zip the LoRA adapter with run metadata for release.            │
+│ verify        Verify every manifest hash of a bundle directory.              │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc bundle pack`
 
 ```text
+ Usage: stc bundle pack [OPTIONS]
 
+ Assemble the D13 release layout and write a deterministic zip.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ *  --bundle                 <path>  Bundle directory produced by stc export. │
+│                                     [required]                               │
+│ *  --out                    <path>  Destination release zip. [required]      │
+│    --baseline               <path>  Optional baseline directory to embed.    │
+│    --model-card             <path>  Optional MODEL_CARD.md to embed.         │
+│    --update-registry        <path>  Registry JSON to upsert the release      │
+│                                     entry into.                              │
+│    --url                    <str>   Release asset URL recorded in the        │
+│                                     registry.                                │
+│    --help                   <bool>  Show this message and exit.              │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc bundle pack-adapter`
 
 ```text
+ Usage: stc bundle pack-adapter [OPTIONS]
 
+ Zip the LoRA adapter with run metadata for release.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ *  --run         <path>  Finished training run with an adapter/ directory.   │
+│                          [required]                                          │
+│ *  --out         <path>  Destination adapter zip. [required]                 │
+│    --help        <bool>  Show this message and exit.                         │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc bundle verify`
 
 ```text
+ Usage: stc bundle verify [OPTIONS] {path}
 
+ Verify every manifest hash of a bundle directory.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────╮
+│ *    path      <path>  Bundle directory to verify. [required]                │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help        <bool>  Show this message and exit.                            │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc calibrate`
 
 ```text
+ Usage: stc calibrate [OPTIONS]
 
+ Fit D10 temperature scaling and the review threshold on dev scores.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ *  --bundle          <path>  Exported model bundle directory. [required]     │
+│    --baseline        <path>  Optional baseline directory to calibrate too.   │
+│    --dataset         <str>   Dataset used to fit on dev. [default: massive]  │
+│    --reports         <path>  Directory for calibration_dev.json.             │
+│                              [default: reports/final]                        │
+│    --help            <bool>  Show this message and exit.                     │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc data`
 
 ```text
+ Usage: stc data [OPTIONS] COMMAND [ARGS]...
 
+ Download, verify, prepare and audit the MASSIVE dataset.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help        <bool>  Show this message and exit.                            │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ fetch    Download the pinned archive, verify size and sha256, then extract   │
+│          it.                                                                 │
+│ verify   Re-hash the cached archive and confirm it still matches the pin.    │
+│ prepare  Clean the train split, keep dev/test intact and persist all three.  │
+│ audit    Write the leakage and duplication audit report.                     │
+│ fixture  Inspect the CC BY 4.0 sample bundled with the package.              │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc data audit`
 
 ```text
+ Usage: stc data audit [OPTIONS]
 
+ Write the leakage and duplication audit report.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --out         <path>  Directory for data_audit.json and data_audit.md.       │
+│                       [default: reports]                                     │
+│ --help        <bool>  Show this message and exit.                            │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc data fetch`
 
 ```text
+ Usage: stc data fetch [OPTIONS]
 
+ Download the pinned archive, verify size and sha256, then extract it.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --url           <str>   Override the pinned archive URL (tests and mirrors). │
+│ --sha256        <str>   Override the expected archive sha256.                │
+│ --force         <bool>  Re-download even when a verified cache exists.       │
+│ --help          <bool>  Show this message and exit.                          │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc data fixture`
 
 ```text
+ Usage: stc data fixture [OPTIONS] COMMAND [ARGS]...
 
+ Inspect the CC BY 4.0 sample bundled with the package.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help        <bool>  Show this message and exit.                            │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ info  Print the row counts and size of the bundled fixture.                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc data fixture info`
 
 ```text
+ Usage: stc data fixture info [OPTIONS]
 
+ Print the row counts and size of the bundled fixture.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help        <bool>  Show this message and exit.                            │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc data prepare`
 
 ```text
+ Usage: stc data prepare [OPTIONS]
 
+ Clean the train split, keep dev/test intact and persist all three.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help        <bool>  Show this message and exit.                            │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc data verify`
 
 ```text
+ Usage: stc data verify [OPTIONS]
 
+ Re-hash the cached archive and confirm it still matches the pin.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help        <bool>  Show this message and exit.                            │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc doctor`
 
 ```text
+ Usage: stc doctor [OPTIONS]
 
+ Print environment diagnostics; ``--gpu`` adds the training stack.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --gpu         <bool>  Probe CUDA, bf16, driver and training libraries.       │
+│ --json        <bool>  Emit the environment report as JSON.                   │
+│ --help        <bool>  Show this message and exit.                            │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc evaluate`
 
 ```text
+ Usage: stc evaluate [OPTIONS]
 
+ Evaluate a classifier and record every metric in a deterministic report.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ *  --model             <str>             Path to a baseline directory or a   │
+│                                          registry name.                      │
+│                                          [required]                          │
+│    --split             <train|dev|test>  Split to evaluate: dev (default) or │
+│                                          test.                               │
+│                                          [default: dev]                      │
+│    --dataset           <str>             Dataset to read: massive (default)  │
+│                                          or fixture.                         │
+│                                          [default: massive]                  │
+│    --out               <path>            Directory for evaluation.json.      │
+│    --json              <bool>            Print the evaluation payload as     │
+│                                          JSON.                               │
+│    --final             <bool>            Authorise and audit one read of the │
+│                                          locked test split.                  │
+│    --robustness        <bool>            Append the S9 perturbation table    │
+│                                          (dev only unless --final).          │
+│    --help              <bool>            Show this message and exit.         │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc export`
 
 ```text
+ Usage: stc export [OPTIONS]
 
+ Merge a trained run, export ONNX (opset 17) and measure parity and int8
+ quality.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ *  --run             <path>  Finished training run directory (contains       │
+│                              run.json).                                      │
+│                              [required]                                      │
+│    --out             <path>  Directory for the exported ONNX bundle.         │
+│                              [default: artifacts/bundle]                     │
+│    --quantize        <str>   Quantisation matrix: none (default) or all.     │
+│                              [default: none]                                 │
+│    --reports         <path>  Directory for export_parity.json and            │
+│                              quantisation results.                           │
+│    --dataset         <str>   Dataset for the dev parity/Gate evaluation.     │
+│                              [default: massive]                              │
+│    --help            <bool>  Show this message and exit.                     │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc model`
 
 ```text
+ Usage: stc model [OPTIONS] COMMAND [ARGS]...
 
+ Install, list and verify model bundles.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help        <bool>  Show this message and exit.                            │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ pull    Install a bundle from the registry or a local zip, verifying sha256. │
+│ list    List every installed model bundle.                                   │
+│ info    Show metadata of installed bundles.                                  │
+│ verify  Verify a bundle directory or an installed model's manifest and       │
+│         hashes.                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc model info`
 
 ```text
+ Usage: stc model info [OPTIONS] [name]
 
+ Show metadata of installed bundles.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────╮
+│   name      <str>  Model name (all installed models when omitted).           │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help        <bool>  Show this message and exit.                            │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc model list`
 
 ```text
+ Usage: stc model list [OPTIONS]
 
+ List every installed model bundle.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help        <bool>  Show this message and exit.                            │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc model pull`
 
 ```text
+ Usage: stc model pull [OPTIONS] [name]
 
+ Install a bundle from the registry or a local zip, verifying sha256.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────╮
+│   name      <str>  Model name to install from the registry.                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --from-file        <path>  Install a local bundle zip instead of             │
+│                            downloading.                                      │
+│ --version          <str>   Registry version to install (latest by default).  │
+│ --registry         <path>  Registry JSON path (defaults to the packaged      │
+│                            one).                                             │
+│ --help             <bool>  Show this message and exit.                       │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc model verify`
 
 ```text
+ Usage: stc model verify [OPTIONS] [target]
 
+ Verify a bundle directory or an installed model's manifest and hashes.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────╮
+│   target      <str>  Installed model name or bundle directory (default:      │
+│                      STC_MODEL).                                             │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help        <bool>  Show this message and exit.                            │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc predict`
 
 ```text
+ Usage: stc predict [OPTIONS] [texts]...
 
+ Classify Spanish virtual-assistant requests and flag uncertain ones.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────╮
+│   texts...      <list[str]>  Texts to classify; use - to read stdin.         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --file         <path>  Read one text per line ('-' reads stdin).             │
+│ --model        <str>   Model name, path or 'baseline' (default: STC_MODEL).  │
+│ --top-k        <int>   Number of calibrated candidates per text.             │
+│                        [default: 3]                                          │
+│ --json         <bool>  Print the schema-versioned prediction document.       │
+│ --help         <bool>  Show this message and exit.                           │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc report`
 
 ```text
+ Usage: stc report [OPTIONS] COMMAND [ARGS]...
 
+ Compose the audited final report and render its results.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help        <bool>  Show this message and exit.                            │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ final   Read the locked test split once and write every audited report       │
+│         artifact.                                                            │
+│ render  Rebuild the summary when needed and render the table and README      │
+│         blocks.                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc report final`
 
 ```text
+ Usage: stc report final [OPTIONS]
 
+ Read the locked test split once and write every audited report artifact.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ *  --bundle          <path>  Shipped ONNX bundle directory. [required]       │
+│ *  --baseline        <path>  Fitted baseline directory. [required]           │
+│ *  --out             <path>  Directory for the final report files.           │
+│                              [required]                                      │
+│ *  --figures         <path>  Directory for the report figures. [required]    │
+│    --dataset         <str>   Dataset to read: massive (default) or fixture.  │
+│                              [default: massive]                              │
+│    --help            <bool>  Show this message and exit.                     │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc report render`
 
 ```text
+ Usage: stc report render [OPTIONS]
 
+ Rebuild the summary when needed and render the table and README blocks.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --summary          <path>  Summary JSON path (rebuilt when stale).           │
+│                            [default: reports/summary.json]                   │
+│ --table            <path>  Markdown results table to write.                  │
+│                            [default: reports/results_table.md]               │
+│ --readme           <path>  English README whose RESULTS block is replaced.   │
+│ --readme-es        <path>  Spanish README whose RESULTS block is replaced.   │
+│ --final-dir        <path>  Final-report directory (default: sibling of       │
+│                            --summary).                                       │
+│ --help             <bool>  Show this message and exit.                       │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc serve`
 
 ```text
+ Usage: stc serve [OPTIONS]
 
+ Serve the FastAPI app and the bundled UI on the local machine.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --host         <str>   Interface to bind (default: STC_API_HOST).            │
+│ --port         <int>   Port to bind (default: STC_API_PORT).                 │
+│ --model        <str>   Model name, path or 'baseline' (default: STC_MODEL).  │
+│ --help         <bool>  Show this message and exit.                           │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc train`
 
 ```text
+ Usage: stc train [OPTIONS] COMMAND [ARGS]...
 
+ Train the classical baseline or a transformer classifier.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help        <bool>  Show this message and exit.                            │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ baseline  Grid-tune the TF-IDF + linear baseline on dev and persist the      │
+│           winner.                                                            │
+│ lora      Fine-tune LoRA on every seed, select the shipped seed on dev and   │
+│           persist it.                                                        │
+│ full-ft   Run the full fine-tuning reference grid on dev (D7).               │
+│ search    Search the D7 LoRA space with Optuna TPE and write the search      │
+│           reports.                                                           │
+│ screen    Screen the candidate backbones x seeds and apply the D6 selection  │
+│           rule.                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc train baseline`
 
 ```text
+ Usage: stc train baseline [OPTIONS]
 
+ Grid-tune the TF-IDF + linear baseline on dev and persist the winner.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --dataset        <str>   Dataset to read: massive (default) or fixture.      │
+│                          [default: massive]                                  │
+│ --out            <path>  Directory for the fitted baseline artifacts.        │
+│                          [default: artifacts/baseline]                       │
+│ --config         <path>  TOML grid file (defaults to configs/baseline.toml   │
+│                          when present).                                      │
+│ --quick          <bool>  Fit only the first two SVC configs (smoke tests).   │
+│ --reports        <path>  Directory for search.json and dev_metrics.json      │
+│                          (defaults to --out).                                │
+│ --help           <bool>  Show this message and exit.                         │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc train full-ft`
 
 ```text
+ Usage: stc train full-ft [OPTIONS]
 
+ Run the full fine-tuning reference grid on dev (D7).
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ *  --backbone        <str>   Hugging Face backbone id. [required]            │
+│    --lrs             <str>   Comma-separated learning rates, e.g.            │
+│                              2e-5,3e-5,5e-5.                                 │
+│                              [default: 2e-5,3e-5,5e-5]                       │
+│    --epochs          <int>   Epochs per learning rate (D7 fixes 4).          │
+│                              [default: 4]                                    │
+│    --dataset         <str>   Dataset to read: massive (default) or fixture.  │
+│                              [default: massive]                              │
+│    --out             <path>  Directory for per-lr runs and full_ft.json.     │
+│                              [default: artifacts/full_ft]                    │
+│    --tracker         <str>   Comma-separated trackers: jsonl,mlflow,null.    │
+│    --help            <bool>  Show this message and exit.                     │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc train lora`
 
 ```text
+ Usage: stc train lora [OPTIONS]
 
+ Fine-tune LoRA on every seed, select the shipped seed on dev and persist it.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --config          <path>  TOML training recipe (must contain a  table).      │
+│                           [default: configs/smoke.toml]                      │
+│ --dataset         <str>   Dataset to read: massive (default) or fixture.     │
+│                           [default: massive]                                 │
+│ --backbone        <str>   Override the backbone id from the config.          │
+│ --seeds           <str>   Comma-separated seeds, e.g. 13,42,2026.            │
+│                           [default: 13]                                      │
+│ --out             <path>  Directory for seed runs and selected.json.         │
+│                           [default: artifacts/final]                         │
+│ --tracker         <str>   Comma-separated trackers: jsonl,mlflow,null.       │
+│ --help            <bool>  Show this message and exit.                        │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc train screen`
 
 ```text
+ Usage: stc train screen [OPTIONS]
 
+ Screen the candidate backbones x seeds and apply the D6 selection rule.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --config         <path>  TOML screening recipe with  and .                   │
+│                          [default: configs/screening.toml]                   │
+│ --dataset        <str>   Dataset to read: massive (default) or fixture.      │
+│                          [default: massive]                                  │
+│ --out            <path>  Directory for per-run artifacts and selection.json. │
+│                          [default: artifacts/screening]                      │
+│ --tracker        <str>   Comma-separated trackers: jsonl,mlflow,null.        │
+│ --help           <bool>  Show this message and exit.                         │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `stc train search`
 
 ```text
+ Usage: stc train search [OPTIONS]
 
+ Search the D7 LoRA space with Optuna TPE and write the search reports.
+
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --config          <path>  TOML file with ,  and .                            │
+│                           [default: configs/lora_search.toml]                │
+│ --trials          <int>   Total trial budget (defaults to the config value). │
+│ --resume          <bool>  Continue an existing Optuna study.                 │
+│ --backbone        <str>   Override the backbone id from the config.          │
+│ --dataset         <str>   Dataset to read: massive (default) or fixture.     │
+│                           [default: massive]                                 │
+│ --out             <path>  Directory for the Optuna study and search reports. │
+│                           [default: artifacts/search]                        │
+│ --tracker         <str>   Comma-separated trackers: jsonl,mlflow,null.       │
+│ --help            <bool>  Show this message and exit.                        │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
