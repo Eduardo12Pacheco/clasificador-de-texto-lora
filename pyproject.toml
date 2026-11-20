@@ -92,6 +92,8 @@ select = ["E", "F", "I", "UP", "B", "SIM", "C4", "PT", "RUF", "N", "S", "ANN"]
 "tests/**/*.py" = ["ANN001", "ANN201", "ANN202", "ANN401", "S101", "S603", "S607", "PT011"]
 # Repository scripts are dev utilities, not part of the typed public API.
 "scripts/*.py" = ["ANN001", "ANN201", "ANN202", "ANN401", "S603", "S607"]
+# D16 fixes these exception names; the capability token reads as a noun phrase.
+"src/stc/domain/errors.py" = ["N818"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["stc"]
