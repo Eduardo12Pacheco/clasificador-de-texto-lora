@@ -75,10 +75,14 @@ def _duplicate_stats(examples: Sequence[Example]) -> tuple[int, int]:
     return len(groups), sum(count - 1 for count in groups)
 
 
-def _label_conflict_groups(train: Sequence[Example]) -> int:
+def _label_conflict_groups(train: Sequence[Example], evaluation_texts: set[str]) -> int:
+    """Count D3 stage-2 groups, i.e. after the overlap-with-eval rows are removed."""
     intents_by_text: dict[str, set[str]] = {}
     for example in train:
-        intents_by_text.setdefault(normalize_for_dedup(example.text), set()).add(example.intent)
+        text = normalize_for_dedup(example.text)
+        if text in evaluation_texts:
+            continue
+        intents_by_text.setdefault(text, set()).add(example.intent)
     return sum(1 for intents in intents_by_text.values() if len(intents) > 1)
 
 
@@ -139,6 +143,7 @@ def audit_splits(
 
     dev_texts = set(_normalized_texts(dev))
     test_texts = set(_normalized_texts(test))
+    evaluation_texts = dev_texts | test_texts
 
     return LeakageAudit(
         train_rows=len(train),
@@ -151,7 +156,7 @@ def audit_splits(
         test_rows_in_train_label_conflict=test_conflicts,
         train_duplicate_groups=train_groups,
         train_duplicate_excess_rows=train_excess,
-        train_label_conflict_groups=_label_conflict_groups(train),
+        train_label_conflict_groups=_label_conflict_groups(train, evaluation_texts),
         dev_duplicate_groups=dev_groups,
         dev_duplicate_excess_rows=dev_excess,
         test_duplicate_groups=test_groups,

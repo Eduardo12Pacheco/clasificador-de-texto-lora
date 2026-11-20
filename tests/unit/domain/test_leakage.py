@@ -198,3 +198,16 @@ def test_clean_train_properties(
     for row in cleaned.rows:
         by_text.setdefault(normalize_for_dedup(row.text), set()).add(row.intent)
     assert all(len(intents) == 1 for intents in by_text.values())
+
+
+def test_label_conflict_groups_exclude_rows_removed_as_overlap() -> None:
+    train = [
+        make_example(1, "texto compartido", "alarm_set"),
+        make_example(2, "Texto compartido!", "play_music"),
+    ]
+    dev = [make_example(100, "texto compartido", "alarm_set")]
+
+    audit = audit_splits(train, dev, [])
+
+    assert audit.train_duplicate_groups == 1
+    assert audit.train_label_conflict_groups == 0
