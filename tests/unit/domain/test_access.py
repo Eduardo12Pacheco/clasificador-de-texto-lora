@@ -40,6 +40,16 @@ def test_guard_issues_grant_from_clock() -> None:
     )
 
 
+def test_guard_records_the_scored_model_sha256() -> None:
+    grant = TestSplitGuard().grant(
+        "final-report",
+        "stc-es-intent",
+        FixedClock(NOW),
+        model_sha256="0123456789abcdef",
+    )
+    assert grant.model_sha256 == "0123456789abcdef"
+
+
 def test_test_split_without_grant_is_locked() -> None:
     with pytest.raises(SplitLockedError) as excinfo:
         require_test_grant(Split.TEST, None)

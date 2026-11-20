@@ -22,7 +22,7 @@ from stc.adapters.data.massive_archive import PINNED_SHA256, PINNED_URL, Massive
 from stc.adapters.data.massive_parser import MassiveParser
 from stc.adapters.hub.github_release import GithubReleaseHub
 from stc.adapters.hub.registry import ModelRegistry, RegistryEntry
-from stc.adapters.inference.bundle_io import BundleArchiveAdapter, read_manifest
+from stc.adapters.inference.bundle_io import BundleArchiveAdapter, read_manifest, sha256_file
 from stc.adapters.inference.onnx_classifier import OnnxClassifier, load_onnx_classifier
 from stc.adapters.models.skops_store import SkopsBaselineStore
 from stc.adapters.models.tfidf_linear import TfidfLinearTrainer, load_baseline
@@ -152,6 +152,27 @@ def load_classifier(model: str, settings: Settings | None = None) -> Classifier:
     resolved = settings if settings is not None else build_settings()
     path = build_model_resolver(resolved).resolve(model)
     return load_classifier_from_path(path, model, resolved)
+
+
+def artifact_sha256(path: Path) -> str:
+    """Return the sha256 of the primary scored artifact in a model directory.
+
+    Bundles expose the ONNX file named by their manifest; a baseline directory
+    exposes ``baseline.skops``. The hash is what the audit log records so a test
+    read can be tied to the exact weights that produced it.
+    """
+    root = Path(path)
+    if (root / "baseline.skops").is_file():
+        return sha256_file(root / "baseline.skops")
+    if (root / "manifest.json").is_file():
+        manifest = read_manifest(root)
+        onnx_section = manifest.get("onnx")
+        relative = onnx_section.get("file") if isinstance(onnx_section, Mapping) else None
+        declared = relative if isinstance(relative, str) and relative else "model.onnx"
+        candidate = root / declared
+        if candidate.is_file():
+            return sha256_file(candidate)
+    return "unknown"
 
 
 def load_classifier_from_path(

@@ -27,6 +27,7 @@ class JsonlAccessLog:
             "command": entry.command,
             "git_sha": entry.git_sha,
             "model_id": entry.grant.model_id,
+            "model_sha256": entry.grant.model_sha256,
             "n_examples": entry.n_examples,
             "purpose": entry.grant.purpose,
             "timestamp": entry.grant.issued_at.isoformat(),

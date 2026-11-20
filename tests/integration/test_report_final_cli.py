@@ -100,6 +100,7 @@ def test_report_final_writes_every_validated_file_and_one_audit_line(
     assert len(lines) == 1
     entry = json.loads(lines[0])
     assert entry["n_examples"] > 0
+    assert entry["model_sha256"] != "unknown"
     assert "stc report final" in entry["command"]
 
     validated = subprocess.run(

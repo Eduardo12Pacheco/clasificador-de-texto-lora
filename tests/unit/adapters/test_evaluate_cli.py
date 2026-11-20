@@ -82,6 +82,7 @@ def test_missing_model_with_final_exits_four() -> None:
 def test_dev_evaluation_prints_json(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setattr(evaluate_module, "_load_examples", lambda *_: make_examples())
     monkeypatch.setattr(evaluate_module, "_load_classifier", lambda *_: FakeClassifier())
+    monkeypatch.setattr(evaluate_module, "_model_sha256", lambda *_: "fake-sha256")
 
     result = CliRunner().invoke(app, ["evaluate", "--split", "dev", "--model", "fake", "--json"])
 
@@ -96,6 +97,7 @@ def test_dev_evaluation_prints_json(monkeypatch: pytest.MonkeyPatch, tmp_path: P
 def test_dev_evaluation_writes_a_report(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setattr(evaluate_module, "_load_examples", lambda *_: make_examples())
     monkeypatch.setattr(evaluate_module, "_load_classifier", lambda *_: FakeClassifier())
+    monkeypatch.setattr(evaluate_module, "_model_sha256", lambda *_: "fake-sha256")
     out = tmp_path / "reports"
 
     result = CliRunner().invoke(
@@ -112,6 +114,7 @@ def test_final_evaluation_writes_exactly_one_audit_line(
 ) -> None:
     monkeypatch.setattr(evaluate_module, "_load_examples", lambda *_: make_examples())
     monkeypatch.setattr(evaluate_module, "_load_classifier", lambda *_: FakeClassifier())
+    monkeypatch.setattr(evaluate_module, "_model_sha256", lambda *_: "fake-sha256")
     log_path = tmp_path / "test_access_log.jsonl"
     monkeypatch.setattr(evaluate_module, "_access_log_path", lambda: log_path)
 
@@ -133,6 +136,7 @@ def test_final_evaluation_writes_exactly_one_audit_line(
     assert len(lines) == 1
     entry = json.loads(lines[0])
     assert entry["n_examples"] == 2
+    assert entry["model_sha256"] == "fake-sha256"
     assert "stc evaluate" in entry["command"]
 
 
@@ -153,6 +157,7 @@ def test_dev_evaluation_with_robustness_adds_the_perturbation_payload(
 ) -> None:
     monkeypatch.setattr(evaluate_module, "_load_examples", lambda *_: make_examples())
     monkeypatch.setattr(evaluate_module, "_load_classifier", lambda *_: FakeClassifier())
+    monkeypatch.setattr(evaluate_module, "_model_sha256", lambda *_: "fake-sha256")
     out = tmp_path / "reports"
 
     result = CliRunner().invoke(

@@ -93,6 +93,7 @@ def final(
         "final report",
         model_artifact.classifier.info.model_id,
         _SystemClock(),
+        model_sha256=bootstrap.artifact_sha256(model_artifact.path),
     )
     access_log = bootstrap.build_access_log(_access_log_path())
     writer: ReportWriter = bootstrap.build_report_writer()

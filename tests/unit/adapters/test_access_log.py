@@ -19,6 +19,7 @@ def make_entry(index: int, command: str = "stc evaluate --split test --final") -
         purpose="final evaluation",
         model_id=f"model-{index}",
         issued_at=datetime(2026, 1, 2, 3, 4, 5, tzinfo=UTC),
+        model_sha256=f"sha-{index}",
     )
     return TestAccessEntry(
         grant=grant,
@@ -43,6 +44,7 @@ def test_record_appends_one_json_line_per_entry(tmp_path: Path) -> None:
     assert first["n_examples"] == 100
     assert second["command"] == "stc report final"
     assert second["model_id"] == "model-1"
+    assert second["model_sha256"] == "sha-1"
     assert first["timestamp"] == "2026-01-02T03:04:05+00:00"
     assert first["purpose"] == "final evaluation"
     assert first["git_sha"] == "abc1234"

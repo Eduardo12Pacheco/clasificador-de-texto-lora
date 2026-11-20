@@ -27,6 +27,7 @@ class TestAccessGrant:
     purpose: str
     model_id: str
     issued_at: datetime
+    model_sha256: str = "unknown"
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,12 +43,20 @@ class TestAccessEntry:
 class TestSplitGuard:
     """Issue test-access grants to the few explicitly audited use cases."""
 
-    def grant(self, purpose: str, model_id: str, clock: Clock) -> TestAccessGrant:
-        """Issue a grant stamped with ``clock.now()``."""
+    def grant(
+        self,
+        purpose: str,
+        model_id: str,
+        clock: Clock,
+        *,
+        model_sha256: str = "unknown",
+    ) -> TestAccessGrant:
+        """Issue a grant stamped with ``clock.now()`` and the scored model hash."""
         return TestAccessGrant(
             purpose=purpose,
             model_id=model_id,
             issued_at=clock.now(),
+            model_sha256=model_sha256,
         )
 
 

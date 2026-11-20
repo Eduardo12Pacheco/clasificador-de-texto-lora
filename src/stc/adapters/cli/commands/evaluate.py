@@ -64,6 +64,13 @@ def _load_classifier(model: str) -> Classifier:
     return bootstrap.load_classifier(model)
 
 
+def _model_sha256(model: str) -> str:
+    """Hash the resolved artifact that the audited read actually scores."""
+    settings = bootstrap.build_settings()
+    path = bootstrap.build_model_resolver(settings).resolve(model)
+    return bootstrap.artifact_sha256(path)
+
+
 @handle_domain_errors
 def evaluate(
     model: Annotated[
@@ -114,7 +121,12 @@ def evaluate(
     command = f"stc evaluate --split {split.value} --model {model}"
     if split is Split.TEST:
         command += " --final"
-        grant = TestSplitGuard().grant("final evaluation", classifier.info.model_id, _SystemClock())
+        grant = TestSplitGuard().grant(
+            "final evaluation",
+            classifier.info.model_id,
+            _SystemClock(),
+            model_sha256=_model_sha256(model),
+        )
         access_log = bootstrap.build_access_log(_access_log_path())
 
     result = EvaluateModel().run(
