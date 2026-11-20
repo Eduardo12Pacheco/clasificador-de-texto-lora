@@ -1,0 +1,31 @@
+# Tiny CPU recipe used by the torch-marked tests and the smoke acceptance run.
+[base]
+backbone = "stc-tiny-test"
+tokenizer_path = "tests/fixtures/tiny/tokenizer.json"
+method = "lora"
+r = 4
+alpha = 8
+lora_dropout = 0.05
+epochs = 2
+batch_size = 16
+lr = 1e-2
+weight_decay = 0.0
+warmup_ratio = 0.0
+class_weighting = "none"
+grad_accum = 1
+max_length = 64
+seed = 13
+
+[search]
+n_trials = 3
+
+[space]
+r = [4]
+alpha_multiplier = [2]
+lora_dropout = [0.05]
+lr = [1e-2, 1e-2]
+weight_decay = [0.0]
+epochs = [2]
+batch_size = [16]
+warmup_ratio = [0.0]
+class_weighting = ["none"]
