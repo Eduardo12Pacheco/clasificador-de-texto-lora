@@ -17,6 +17,11 @@ immutable once accepted; later changes are appended as an addendum or a new ADR.
 | [0008](0008-experiment-tracking.md) | Experiment tracking | Accepted |
 | [0009](0009-synthetic-dialect-robustness.md) | Synthetic dialect robustness probe | Accepted |
 
+ADR-0003, ADR-0005 and ADR-0006 carry measured-results addenda from the GPU run
+and the audited final evaluation. The numbers in those addenda come from the
+committed files under `reports/experiments` and `reports/final`; the commands
+that regenerate them are in `docs/TRAINING.md` and `docs/EVALUATION.md`.
+
 Every ADR uses the template below.
 
 ## Template
