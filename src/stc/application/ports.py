@@ -52,6 +52,10 @@ class RawDatasetSource(Protocol):
         """Return a verified raw dataset rooted at ``dest``."""
         ...
 
+    def verify(self, dest: Path) -> str:
+        """Re-verify a cached dataset and return its sha256."""
+        ...
+
 
 class DatasetParser(Protocol):
     """Parses a raw dataset file into the three official splits."""

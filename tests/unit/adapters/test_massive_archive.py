@@ -10,7 +10,12 @@ from pathlib import Path
 import pytest
 
 from stc.adapters.data.massive_archive import MassiveArchiveSource
-from stc.domain.errors import ChecksumMismatchError, IntegrityError, OfflineError
+from stc.domain.errors import (
+    ArtifactNotFoundError,
+    ChecksumMismatchError,
+    IntegrityError,
+    OfflineError,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -200,6 +205,34 @@ def test_symlink_members_are_rejected(tmp_path: Path, archive: tuple[Path, str, 
         make_source(path, sha256, size).fetch(dest)
 
     assert not (dest / "es-ES.jsonl").is_symlink()
+
+
+def test_verify_rehashes_the_cached_archive(tmp_path: Path, archive: tuple[Path, str, int]) -> None:
+    path, sha256, size = archive
+    dest = tmp_path / "raw" / "massive-1.0"
+    source = make_source(path, sha256, size)
+    source.fetch(dest)
+
+    assert source.verify(dest) == sha256
+
+
+def test_verify_detects_a_tampered_archive(tmp_path: Path, archive: tuple[Path, str, int]) -> None:
+    path, sha256, size = archive
+    dest = tmp_path / "raw" / "massive-1.0"
+    source = make_source(path, sha256, size)
+    source.fetch(dest)
+    cached = tmp_path / "raw" / "massive-1.0.tar.gz"
+    cached.write_bytes(cached.read_bytes() + b"tampered")
+
+    with pytest.raises(ChecksumMismatchError):
+        source.verify(dest)
+
+
+def test_verify_without_cache_raises_artifact_not_found(tmp_path: Path) -> None:
+    source = MassiveArchiveSource()
+
+    with pytest.raises(ArtifactNotFoundError):
+        source.verify(tmp_path / "raw" / "massive-1.0")
 
 
 def test_missing_required_member_is_rejected(tmp_path: Path) -> None:

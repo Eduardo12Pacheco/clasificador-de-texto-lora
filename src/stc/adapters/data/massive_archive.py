@@ -16,7 +16,13 @@ import urllib.request
 from pathlib import Path, PurePosixPath
 
 from stc.application.dto import RawDatasetRef
-from stc.domain.errors import ChecksumMismatchError, DomainError, IntegrityError, OfflineError
+from stc.domain.errors import (
+    ArtifactNotFoundError,
+    ChecksumMismatchError,
+    DomainError,
+    IntegrityError,
+    OfflineError,
+)
 
 PINNED_URL = "https://amazon-massive-nlu-dataset.s3.amazonaws.com/amazon-massive-dataset-1.0.tar.gz"
 PINNED_SHA256 = "7df623fd2d300a4d235d6ee5bd396c9a28258d3a0ccb29abdb054506eba153f8"
@@ -73,6 +79,29 @@ class MassiveArchiveSource:
             raise
         part.replace(archive)
         return self._ref(destination, cached=False)
+
+    def verify(self, dest: Path) -> str:
+        """Re-hash the cached archive and confirm it still matches the pin."""
+        destination = Path(dest)
+        verified = destination / _VERIFIED_FILE
+        if not verified.is_file():
+            raise ArtifactNotFoundError(
+                f"no verified dataset at {destination}; run `stc data fetch`"
+            )
+        recorded = verified.read_text(encoding="utf-8").strip()
+        archive = destination.parent / f"{destination.name}.tar.gz"
+        if not archive.is_file():
+            raise IntegrityError(f"cached archive is missing: {archive.name}")
+        digest = hashlib.sha256()
+        with archive.open("rb") as handle:
+            while chunk := handle.read(_CHUNK_SIZE):
+                digest.update(chunk)
+        actual = digest.hexdigest()
+        if actual != recorded or actual != self.sha256:
+            raise ChecksumMismatchError(
+                f"cached archive checksum mismatch: expected {self.sha256}, got {actual}"
+            )
+        return actual
 
     def _ref(self, destination: Path, *, cached: bool) -> RawDatasetRef:
         return RawDatasetRef(
