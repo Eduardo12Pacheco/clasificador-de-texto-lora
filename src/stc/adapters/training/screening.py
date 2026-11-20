@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gc
 import json
 import statistics
 import time
@@ -145,7 +146,13 @@ class ScreeningRunner:
         results: list[ScreeningRun] = []
         for backbone in self._config.backbones:
             for seed in self._config.seeds:
-                results.append(self._run_one(backbone, seed))
+                try:
+                    results.append(self._run_one(backbone, seed))
+                finally:
+                    # Candidate backbones are large (Qwen3-0.6B is a decoder);
+                    # release the previous model before loading the next one.
+                    gc.collect()
+                    torch.cuda.empty_cache()
         return results
 
     def _run_one(self, backbone: str, seed: int) -> ScreeningRun:

@@ -68,3 +68,34 @@ def test_screening_writes_runs_and_resumes(tmp_path: Path) -> None:
 
     assert second[0].dev_macro_f1 == pytest.approx(row.dev_macro_f1)
     assert second[0].exportable is False
+
+
+def test_screening_releases_memory_between_runs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = FixtureRepository()
+    config = ScreeningConfig.from_mapping(_payload())
+    calls = {"gc": 0, "cache": 0}
+
+    def count_gc() -> int:
+        calls["gc"] += 1
+        return 0
+
+    def count_cache() -> None:
+        calls["cache"] += 1
+
+    monkeypatch.setattr("stc.adapters.training.screening.gc.collect", count_gc)
+    monkeypatch.setattr(torch.cuda, "empty_cache", count_cache)
+    runner = ScreeningRunner(
+        list(repository.load(Split.TRAIN)),
+        list(repository.load(Split.DEV)),
+        tmp_path,
+        config,
+        tracker_factory=lambda run_dir: NullTracker(),
+        device=CPU,
+    )
+
+    runner.run()
+
+    assert calls["gc"] >= 1
+    assert calls["cache"] >= 1
