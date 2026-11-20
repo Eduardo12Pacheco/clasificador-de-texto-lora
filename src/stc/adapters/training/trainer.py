@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gc
 import json
 import math
 import platform
@@ -123,9 +124,13 @@ class _BaseTrainer:
         except torch.cuda.OutOfMemoryError:
             if self._device.type != "cuda":
                 raise
-            torch.cuda.empty_cache()
-            retried = replace(config, batch_size=16, grad_accum=2)
-            return self._fit_once(train, dev, retried, tracker, oom_retry=True)
+        # Leave the ``except`` block before collecting: its traceback keeps the
+        # failed model (and its partially moved GPU tensors) alive, so the retry
+        # would otherwise stack a second model on the leaked allocations.
+        gc.collect()
+        torch.cuda.empty_cache()
+        retried = replace(config, batch_size=16, grad_accum=2)
+        return self._fit_once(train, dev, retried, tracker, oom_retry=True)
 
     def _fit_once(
         self,

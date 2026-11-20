@@ -144,3 +144,40 @@ def test_class_weighting_path_runs(tmp_path: Path) -> None:
     )
 
     assert "dev_macro_f1" in result.metrics
+
+
+def test_oom_retry_halves_batch_and_collects_garbage(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    trainer = LoraTrainer(device=torch.device("cuda"))
+    config = TrainingConfig.from_mapping(_config(tmp_path / "oom", batch_size=32))
+    calls: list[tuple[int, int, bool]] = []
+    collections = {"gc": 0}
+
+    def fake_fit_once(
+        train: object,
+        dev: object,
+        attempt: TrainingConfig,
+        tracker: object,
+        *,
+        oom_retry: bool = False,
+    ) -> str:
+        del train, dev, tracker
+        calls.append((attempt.batch_size, attempt.grad_accum, oom_retry))
+        if len(calls) == 1:
+            raise torch.cuda.OutOfMemoryError("simulated")
+        return "retried"
+
+    def count_gc() -> int:
+        collections["gc"] += 1
+        return 0
+
+    monkeypatch.setattr(trainer, "_fit_once", fake_fit_once)
+    monkeypatch.setattr("stc.adapters.training.trainer.gc.collect", count_gc)
+    monkeypatch.setattr(torch.cuda, "empty_cache", lambda: None)
+
+    result = trainer._fit_with_oom_retry([], [], config, NullTracker())
+
+    assert result == "retried"
+    assert calls == [(32, 1, False), (16, 2, True)]
+    assert collections["gc"] >= 1
