@@ -32,6 +32,7 @@ __all__ = [
     "Classifier",
     "ClassifierTrainer",
     "Clock",
+    "DatasetParser",
     "DatasetRepository",
     "ExperimentTracker",
     "HyperparameterSearcher",
@@ -49,6 +50,14 @@ class RawDatasetSource(Protocol):
 
     def fetch(self, dest: Path, *, force: bool = False) -> RawDatasetRef:
         """Return a verified raw dataset rooted at ``dest``."""
+        ...
+
+
+class DatasetParser(Protocol):
+    """Parses a raw dataset file into the three official splits."""
+
+    def parse(self, path: Path) -> Mapping[Split, tuple[Example, ...]]:
+        """Read ``path`` and validate every row it contains."""
         ...
 
 
