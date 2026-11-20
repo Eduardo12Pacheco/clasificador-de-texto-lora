@@ -115,5 +115,5 @@ def predict(request: Request, payload: PredictRequest) -> PredictResponse:
 
 @router.get("/", include_in_schema=False)
 def index() -> FileResponse:
-    """Serve the bundled web page (the full UI lands in T10)."""
+    """Serve the bundled intent-classifier UI."""
     return FileResponse(WEB_ROOT / "index.html", media_type="text/html")
