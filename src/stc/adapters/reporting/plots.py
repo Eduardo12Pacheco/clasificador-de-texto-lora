@@ -12,7 +12,13 @@ from numpy.typing import NDArray
 from stc.domain.calibration import ReliabilityBins
 from stc.domain.errors import MissingExtraError
 
-__all__ = ["plot_confusion_matrix", "plot_per_class_f1", "plot_reliability_diagram"]
+__all__ = [
+    "PlotReportWriter",
+    "plot_confusion_matrix",
+    "plot_per_class_f1",
+    "plot_reliability_diagram",
+    "plot_robustness",
+]
 
 _MISSING_MATPLOTLIB = (
     "plotting needs the 'train' extra: uv tool install 'spanish-text-classifier-lora[train]'"
@@ -97,3 +103,43 @@ def plot_per_class_f1(
     axis.set_xlabel("F1")
     axis.set_title("Per-intent F1")
     _save(plt, figure, path)
+
+
+def plot_robustness(report: object, path: Path) -> None:
+    """Plot accuracy before/after for each perturbation."""
+    perturbations = getattr(report, "perturbations", ())
+    names = [row.name for row in perturbations]
+    before = [row.accuracy_before for row in perturbations]
+    after = [row.accuracy_after for row in perturbations]
+    plt = _pyplot()
+    figure, axis = plt.subplots(figsize=(max(6.0, len(names) * 0.9), 4.0))
+    positions = np.arange(len(names))
+    axis.bar(positions - 0.2, before, width=0.4, label="before", color="#94a3b8")
+    axis.bar(positions + 0.2, after, width=0.4, label="after", color="#4f46e5")
+    axis.set_xticks(positions)
+    axis.set_xticklabels(names, rotation=30, ha="right", fontsize=7)
+    axis.set_ylim(0.0, 1.0)
+    axis.set_ylabel("accuracy on affected subset")
+    axis.set_title("Robustness")
+    axis.legend(frameon=False)
+    _save(plt, figure, path)
+
+
+class PlotReportWriter:
+    """Adapter that renders the final report's figures with matplotlib."""
+
+    def reliability_diagram(self, bins: ReliabilityBins, path: Path) -> None:
+        """Render a reliability diagram."""
+        plot_reliability_diagram(bins, path)
+
+    def confusion_matrix(self, matrix: object, intents: Sequence[str], path: Path) -> None:
+        """Render a row-normalised confusion matrix."""
+        plot_confusion_matrix(matrix, intents, path)  # type: ignore[arg-type]
+
+    def per_class_f1(self, intents: Sequence[str], f1_scores: Sequence[float], path: Path) -> None:
+        """Render per-intent F1 bars."""
+        plot_per_class_f1(intents, f1_scores, path)
+
+    def robustness(self, report: object, path: Path) -> None:
+        """Render the before/after robustness bars."""
+        plot_robustness(report, path)
