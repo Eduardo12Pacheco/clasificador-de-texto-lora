@@ -17,6 +17,7 @@ SCRIPTS = [
     "check_error_analysis.py",
     "collect_experiment_reports.py",
     "make_tiny_fixtures.py",
+    "check_links.py",
 ]
 
 
