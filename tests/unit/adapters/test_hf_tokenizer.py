@@ -6,6 +6,9 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from tokenizers import Tokenizer
+from tokenizers.models import WordLevel
+from tokenizers.pre_tokenizers import Whitespace
 
 from stc.adapters.text.hf_tokenizer import HfTokenizer, resolve_tokenizer_file
 from stc.domain.errors import InvalidInputError
@@ -46,6 +49,20 @@ def test_truncation_respects_max_length() -> None:
 
     assert encoded.input_ids.shape == (1, 3)
     assert encoded.attention_mask.sum() == 3
+
+
+def test_decoder_tokenizer_falls_back_to_end_of_text_for_padding(tmp_path: Path) -> None:
+    vocabulary = {"<|endoftext|>": 0, "hola": 1, "[UNK]": 2}
+    tokenizer = Tokenizer(WordLevel(vocabulary, unk_token="[UNK]"))  # noqa: S106
+    tokenizer.pre_tokenizer = Whitespace()
+    path = tmp_path / "tokenizer.json"
+    tokenizer.save(str(path))
+
+    loaded = HfTokenizer.from_file(path)
+    encoded = loaded.encode_batch(["hola"])
+
+    assert loaded.pad_id == 0
+    assert encoded.input_ids.tolist() == [[1]]
 
 
 def test_empty_batch_has_a_valid_empty_shape() -> None:

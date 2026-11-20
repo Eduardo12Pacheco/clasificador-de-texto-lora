@@ -14,6 +14,12 @@ from stc.domain.errors import InvalidInputError
 
 __all__ = ["HfTokenizer", "resolve_tokenizer_file"]
 
+# Encoder tokenizers use ``<pad>`` (MrBERT-es id 1, RoBERTa id 1). Decoder
+# tokenizers such as Qwen3 have no ``<pad>`` entry; their canonical padding
+# token is ``<|endoftext|>``. The remaining candidates cover other common
+# special-token vocabularies without changing encoder behaviour.
+_PAD_TOKEN_FALLBACKS = ("<|endoftext|>", "</s>", "<unk>")
+
 
 class HfTokenizer:
     """Encode text with a backbone ``tokenizer.json`` and dynamic padding.
@@ -35,10 +41,8 @@ class HfTokenizer:
         self._tokenizer = tokenizer
         self._tokenizer.enable_truncation(max_length=max_length)
         self._max_length = max_length
-        token_id = tokenizer.token_to_id(pad_token)
-        if token_id is None:
-            raise InvalidInputError(f"tokenizer has no {pad_token!r} padding token")
-        self._pad_id: int = int(token_id)
+        token_id = _resolve_pad_id(tokenizer, pad_token)
+        self._pad_id: int = token_id
 
     @classmethod
     def from_file(
@@ -89,6 +93,16 @@ class HfTokenizer:
                 input_ids[row, :length] = _as_int64(encoding.ids)
                 attention_mask[row, :length] = 1
         return EncodedBatch(input_ids=input_ids, attention_mask=attention_mask)
+
+
+def _resolve_pad_id(tokenizer: Tokenizer, preferred: str) -> int:
+    """Return ``preferred`` or the first known special-token fallback."""
+    for candidate in (preferred, *_PAD_TOKEN_FALLBACKS):
+        token_id = tokenizer.token_to_id(candidate)
+        if token_id is not None:
+            return int(token_id)
+    known = ", ".join(repr(name) for name in (preferred, *_PAD_TOKEN_FALLBACKS))
+    raise InvalidInputError(f"tokenizer has none of the padding tokens: {known}")
 
 
 def _as_int64(values: Sequence[int]) -> NDArray[np.int64]:
