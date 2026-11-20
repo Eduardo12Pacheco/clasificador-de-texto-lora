@@ -1,0 +1,25 @@
+{
+  "batch_size": 32,
+  "cpu_model": "12th Gen Intel(R) Core(TM) i5-12400T",
+  "onnxruntime_version": "1.32.0",
+  "runs": 200,
+  "schema_version": 1,
+  "threads": [
+    {
+      "batch32_throughput_per_s": 28.8524,
+      "mean_ms": 31.6028,
+      "n_runs": 200,
+      "p50_ms": 30.3174,
+      "p95_ms": 43.934,
+      "threads": 1
+    },
+    {
+      "batch32_throughput_per_s": 93.1966,
+      "mean_ms": 16.261,
+      "n_runs": 200,
+      "p50_ms": 15.8014,
+      "p95_ms": 19.8951,
+      "threads": 4
+    }
+  ]
+}

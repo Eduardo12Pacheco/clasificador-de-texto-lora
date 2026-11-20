@@ -81,3 +81,16 @@ by every interface. D4 forbids using the test split for any of these choices.
   `predict`/`predict_proba`/`needs_review` implementation.
 - `docs/adr/0004-evaluation-protocol-and-leakage-policy.md` — dev-only model
   selection, which this ADR follows.
+
+## Results (T12, real models)
+
+Fitted on dev (2,033 utterances) with the D10 rule, then applied unchanged to the audited test split. `reports/final/calibration_dev.json` and `reports/final/calibration_test.json` hold the numbers.
+
+| Model | T | τ | Dev ECE before → after | Dev NLL before → after | Test ECE before → after | Test coverage at τ | Test selective accuracy |
+|---|---|---|---|---|---|---|---|
+| TF-IDF baseline | 0.7454 | 0.7195 | 0.0832 → 0.0265 | 0.6366 → 0.5842 | 0.0849 → 0.0253 | 0.7690 | 0.9353 |
+| LoRA transformer | 2.2872 | 0.7655 | 0.0826 → 0.0169 | 0.7695 → 0.4814 | 0.0938 → 0.0181 | 0.8083 | 0.9509 |
+
+The transformer is under-confident after fine-tuning (T > 1), the linear baseline is over-confident (T < 1). Temperature scaling cuts the transformer's test ECE by 81 % and its test NLL by 38 %, without changing any argmax. At the dev-chosen τ the transformer covers 80.8 % of test utterances at 95.1 % selective accuracy; the baseline covers 76.9 % at 93.5 %. The `needs_review` flag uses exactly these thresholds through `CalibratedClassifier` in the CLI, API and UI.
+
+One caveat is visible in the error analysis: some high-confidence mistakes (for example `ex-612` and `ex-1639`) look like gold-label noise rather than calibration failure. Temperature scaling cannot repair a wrong ranking; the thresholds only decide when to abstain.
