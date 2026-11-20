@@ -1,0 +1,31 @@
+# D7 LoRA search recipe for the owner's GPU (T11).
+[base]
+backbone = "BSC-LT/MrBERT-es"
+method = "lora"
+r = 16
+alpha = 32
+lora_dropout = 0.05
+epochs = 4
+batch_size = 32
+lr = 3e-4
+weight_decay = 0.01
+warmup_ratio = 0.06
+class_weighting = "none"
+grad_accum = 1
+max_length = 64
+seed = 13
+
+[search]
+n_trials = 24
+seed = 13
+
+[space]
+r = [8, 16, 32, 64]
+alpha_multiplier = [1, 2]
+lora_dropout = [0.0, 0.05, 0.1]
+lr = [1e-4, 1e-3]
+weight_decay = [0.0, 0.01, 0.1]
+epochs = [4, 6, 8, 10]
+batch_size = [16, 32, 64]
+warmup_ratio = [0.0, 0.06, 0.1]
+class_weighting = ["none", "sqrt_inv_freq"]
