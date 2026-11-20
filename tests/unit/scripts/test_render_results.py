@@ -102,3 +102,48 @@ def test_missing_markers_is_an_error(tmp_path: Path, final_reports) -> None:
 
     assert result.returncode == 1
     assert "marker" in result.stderr
+
+
+def test_package_renderer_and_cli_render_share_the_same_output(
+    tmp_path: Path, final_reports
+) -> None:
+    from typer.testing import CliRunner
+
+    from stc.adapters.cli.app import app
+    from stc.adapters.reporting.results import render_results
+
+    final_reports()
+    direct_summary = tmp_path / "direct" / "summary.json"
+    direct_table = tmp_path / "direct" / "results_table.md"
+    render_results(
+        summary_path=direct_summary,
+        table_path=direct_table,
+        final_dir=tmp_path / "final",
+    )
+
+    cli_dir = tmp_path / "cli"
+    cli_summary = cli_dir / "summary.json"
+    cli_table = cli_dir / "results_table.md"
+    readme = cli_dir / "README.md"
+    readme.parent.mkdir(parents=True)
+    readme.write_text(PREFIX, encoding="utf-8")
+    result = CliRunner().invoke(
+        app,
+        [
+            "report",
+            "render",
+            "--summary",
+            str(cli_summary),
+            "--table",
+            str(cli_table),
+            "--readme",
+            str(readme),
+            "--final-dir",
+            str(tmp_path / "final"),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert cli_summary.read_text(encoding="utf-8") == direct_summary.read_text(encoding="utf-8")
+    assert cli_table.read_text(encoding="utf-8") == direct_table.read_text(encoding="utf-8")
+    assert "### Results" in readme.read_text(encoding="utf-8")

@@ -14,6 +14,7 @@ from stc.adapters.cli.commands.evaluate import evaluate
 from stc.adapters.cli.commands.export import export
 from stc.adapters.cli.commands.model import model_app
 from stc.adapters.cli.commands.predict import predict
+from stc.adapters.cli.commands.report import report_app
 from stc.adapters.cli.commands.serve import serve
 from stc.adapters.cli.commands.train import train_app
 from stc.adapters.cli.rendering import CliState
@@ -33,6 +34,7 @@ app.add_typer(data_app, name="data")
 app.add_typer(train_app, name="train")
 app.add_typer(bundle_app, name="bundle")
 app.add_typer(model_app, name="model")
+app.add_typer(report_app, name="report")
 app.command("evaluate")(evaluate)
 app.command("export")(export)
 app.command("calibrate")(calibrate)
