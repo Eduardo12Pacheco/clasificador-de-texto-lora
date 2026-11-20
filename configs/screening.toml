@@ -1,0 +1,22 @@
+# D7 screening recipe: same LoRA setup for three candidate backbones, two seeds.
+[base]
+method = "lora"
+r = 16
+alpha = 32
+lora_dropout = 0.05
+epochs = 4
+batch_size = 32
+weight_decay = 0.01
+warmup_ratio = 0.06
+class_weighting = "none"
+grad_accum = 1
+max_length = 64
+
+[screening]
+backbones = [
+  "BSC-LT/MrBERT-es",
+  "bertin-project/bertin-roberta-base-spanish",
+  "Qwen/Qwen3-0.6B",
+]
+seeds = [13, 42]
+learning_rates = { "BSC-LT/MrBERT-es" = 3e-4, "bertin-project/bertin-roberta-base-spanish" = 3e-4, "Qwen/Qwen3-0.6B" = 1e-4 }

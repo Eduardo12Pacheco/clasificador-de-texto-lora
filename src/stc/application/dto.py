@@ -308,3 +308,36 @@ class BaselineCandidate:
             "n_features": self.n_features,
             "fit_seconds": self.fit_seconds,
         }
+
+
+@dataclass(frozen=True, slots=True)
+class ScreeningRun:
+    """One backbone x seed screening result (T7/T11 contract)."""
+
+    backbone: str
+    seed: int
+    dev_macro_f1: float
+    dev_accuracy: float
+    trainable_params: int
+    epoch_seconds: float
+    peak_vram_mib: float
+    cpu_latency_ms_p50: float
+    exportable: bool
+    run_dir: Path
+    oom_retry: bool = False
+
+    def to_dict(self) -> dict[str, object]:
+        """Return the JSON-serialisable run row."""
+        return {
+            "backbone": self.backbone,
+            "seed": self.seed,
+            "dev_macro_f1": self.dev_macro_f1,
+            "dev_accuracy": self.dev_accuracy,
+            "trainable_params": self.trainable_params,
+            "epoch_seconds": self.epoch_seconds,
+            "peak_vram_mib": self.peak_vram_mib,
+            "cpu_latency_ms_p50": self.cpu_latency_ms_p50,
+            "exportable": self.exportable,
+            "run_dir": str(self.run_dir),
+            "oom_retry": self.oom_retry,
+        }

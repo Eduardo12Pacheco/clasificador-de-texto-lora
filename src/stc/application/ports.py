@@ -21,6 +21,7 @@ from stc.application.dto import (
     ExportReport,
     ModelInfo,
     RawDatasetRef,
+    ScreeningRun,
     SearchResult,
     TrainedRun,
 )
@@ -46,6 +47,7 @@ __all__ = [
     "ModelStore",
     "RawDatasetSource",
     "ReportWriter",
+    "ScreeningRunner",
     "Tokenizer",
 ]
 
@@ -189,6 +191,14 @@ class HyperparameterSearcher(Protocol):
         resume: bool = False,
     ) -> SearchResult:
         """Run or resume a search and return its best trial."""
+        ...
+
+
+class ScreeningRunner(Protocol):
+    """Train every backbone x seed pair of a screening config."""
+
+    def run(self) -> Sequence[ScreeningRun]:
+        """Run or resume screening and return one row per run."""
         ...
 
 
