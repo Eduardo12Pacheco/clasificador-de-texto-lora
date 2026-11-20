@@ -9,8 +9,8 @@ import pytest
 torch = pytest.importorskip("torch")
 from typer.testing import CliRunner
 
-from stc.adapters.cli.app import app
 import stc.adapters.training.trainer as trainer_module
+from stc.adapters.cli.app import app
 
 pytestmark = pytest.mark.torch
 
