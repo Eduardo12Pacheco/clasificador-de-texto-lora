@@ -236,6 +236,14 @@ allow_indirect_imports = true
 [[tool.importlinter.contracts]]
 name = "Adapters are independent of each other"
 type = "independence"
+# The composition root is the one place allowed to wire adapters together;
+# ignoring its outgoing edges keeps direct adapter-to-adapter imports illegal.
+ignore_imports = [
+  "stc.bootstrap -> stc.adapters.data.fixture_source",
+  "stc.bootstrap -> stc.adapters.data.jsonl_repository",
+  "stc.bootstrap -> stc.adapters.data.massive_archive",
+  "stc.bootstrap -> stc.adapters.data.massive_parser",
+]
 modules = [
   "stc.adapters.api",
   "stc.adapters.cli",

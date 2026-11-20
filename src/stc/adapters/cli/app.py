@@ -5,6 +5,8 @@ from typing import Annotated
 import typer
 
 from stc import __version__
+from stc.adapters.cli.commands.data import data_app
+from stc.domain.errors import DomainError
 
 APP_NAME = "stc"
 
@@ -14,6 +16,7 @@ app = typer.Typer(
     no_args_is_help=True,
     add_completion=False,
 )
+app.add_typer(data_app, name="data")
 
 
 def _version_callback(value: bool) -> None:
@@ -39,4 +42,8 @@ def main_callback(
 
 def main() -> None:
     """Run the command-line application."""
-    app()
+    try:
+        app()
+    except DomainError as error:
+        typer.echo(f"error: {error.message}", err=True)
+        raise typer.Exit(code=error.exit_code) from error
