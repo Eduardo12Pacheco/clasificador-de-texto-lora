@@ -1,0 +1,249 @@
+[build-system]
+requires = ["hatchling>=1.33.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "spanish-text-classifier-lora"
+version = "0.1.0"
+description = "LoRA-tuned Spanish intent classifier with a CPU-only ONNX inference path."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Eduardo Pacheco" }]
+keywords = ["nlp", "spanish", "intent-classification", "lora", "onnx", "machine-learning"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Text Processing :: Linguistic",
+  "Typing :: Typed",
+]
+dependencies = [
+  "numpy>=2.5.5",
+  "scipy>=1.18.1",
+  "scikit-learn>=1.9.1",
+  "skops>=0.16.0",
+  "onnxruntime>=1.32.0",
+  "tokenizers>=0.22.0,<=0.23.0",
+  "typer>=0.29.2",
+  "rich>=15.0.0",
+  "pydantic>=2.14.4",
+  "pydantic-settings>=2.16.3",
+  "fastapi>=0.165.0",
+  "uvicorn>=0.54.0",
+  "structlog>=26.1.0",
+  "platformdirs>=4.14.7",
+]
+
+[project.optional-dependencies]
+train = [
+  "torch>=2.15.0",
+  "transformers>=4.57.6,<5",
+  "peft>=0.22.0",
+  "onnx>=1.23.2",
+  "optuna>=5.1.0",
+  "mlflow>=3.18.0",
+  "matplotlib>=3.11.2",
+]
+
+[project.scripts]
+stc = "stc.adapters.cli.app:main"
+
+[project.urls]
+Homepage = "https://github.com/Eduardo12Pacheco/spanish-text-classifier-lora"
+Repository = "https://github.com/Eduardo12Pacheco/spanish-text-classifier-lora"
+Issues = "https://github.com/Eduardo12Pacheco/spanish-text-classifier-lora/issues"
+Changelog = "https://github.com/Eduardo12Pacheco/spanish-text-classifier-lora/blob/main/CHANGELOG.md"
+
+[dependency-groups]
+dev = [
+  "pytest>=9.2.0",
+  "pytest-cov>=7.1.0",
+  "hypothesis>=6.170.16",
+  "httpx>=0.28.1",
+  "ruff>=0.17.6",
+  "mypy>=2.4.1",
+  "import-linter>=2.17",
+  "pip-audit>=2.10.1",
+  "playwright>=1.65.2",
+  "pillow>=13.0.0",
+  "pre-commit>=4.7.0",
+  "pyyaml>=6.0.3",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/stc"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests", "scripts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4", "PT", "RUF", "N", "S", "ANN"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests favour readable fixtures and plain assertions over library-grade annotations.
+"tests/**/*.py" = ["ANN001", "ANN201", "ANN202", "ANN401", "S101", "S603", "S607", "PT011"]
+# Repository scripts are dev utilities, not part of the typed public API.
+"scripts/*.py" = ["ANN001", "ANN201", "ANN202", "ANN401", "S603", "S607"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["stc"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src"]
+warn_unused_configs = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+# Heavy training/inference libraries stay optional; typing results are identical
+# whether or not the `train` extra is installed.
+module = [
+  "torch.*",
+  "transformers.*",
+  "peft.*",
+  "optuna.*",
+  "mlflow.*",
+  "onnx.*",
+  "matplotlib.*",
+  "sklearn.*",
+  "skops.*",
+  "onnxruntime.*",
+  "playwright.*",
+]
+ignore_missing_imports = true
+follow_imports = "skip"
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers --strict-config"
+testpaths = ["tests"]
+markers = [
+  "unit: fast isolated tests of a single layer",
+  "integration: tests wiring two or more adapters together",
+  "contract: tests that pin an external interface such as OpenAPI",
+  "e2e: tests that drive a real CLI, API or browser",
+  "torch: tests that need the optional train extra",
+  "slow: tests that take several seconds",
+]
+
+[tool.coverage.run]
+source = ["src/stc"]
+omit = ["*/__main__.py"]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
+skip_covered = true
+
+[tool.importlinter]
+root_package = "stc"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "Hexagonal layer direction"
+type = "layers"
+layers = ["stc.adapters", "stc.application", "stc.domain"]
+
+[[tool.importlinter.contracts]]
+name = "Domain depends on no outer layer"
+type = "forbidden"
+source_modules = ["stc.domain"]
+forbidden_modules = ["stc.application", "stc.adapters", "stc.config"]
+
+[[tool.importlinter.contracts]]
+name = "Domain imports no third-party libraries"
+type = "forbidden"
+source_modules = ["stc.domain"]
+forbidden_modules = [
+  "sklearn",
+  "scipy",
+  "torch",
+  "onnxruntime",
+  "fastapi",
+  "typer",
+  "pydantic",
+  "tokenizers",
+  "skops",
+  "mlflow",
+  "optuna",
+  "transformers",
+  "peft",
+  "matplotlib",
+  "structlog",
+  "rich",
+  "platformdirs",
+]
+
+[[tool.importlinter.contracts]]
+name = "Application does not import adapters"
+type = "forbidden"
+source_modules = ["stc.application"]
+forbidden_modules = ["stc.adapters"]
+
+[[tool.importlinter.contracts]]
+name = "Application imports no third-party libraries"
+type = "forbidden"
+source_modules = ["stc.application"]
+forbidden_modules = [
+  "sklearn",
+  "scipy",
+  "torch",
+  "onnxruntime",
+  "fastapi",
+  "typer",
+  "pydantic",
+  "tokenizers",
+  "skops",
+  "mlflow",
+  "optuna",
+  "transformers",
+  "peft",
+  "matplotlib",
+  "structlog",
+  "rich",
+  "platformdirs",
+]
+
+[[tool.importlinter.contracts]]
+name = "Runtime packages stay torch-free and training-free"
+type = "forbidden"
+source_modules = [
+  "stc.domain",
+  "stc.application",
+  "stc.adapters.inference",
+  "stc.adapters.cli",
+  "stc.adapters.api",
+  "stc.adapters.data",
+  "stc.adapters.models",
+  "stc.adapters.hub",
+  "stc.adapters.storage",
+  "stc.adapters.text",
+  "stc.adapters.reporting",
+]
+forbidden_modules = ["torch", "transformers", "peft", "optuna", "mlflow", "onnx"]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "Adapters are independent of each other"
+type = "independence"
+modules = [
+  "stc.adapters.api",
+  "stc.adapters.cli",
+  "stc.adapters.data",
+  "stc.adapters.export",
+  "stc.adapters.hub",
+  "stc.adapters.inference",
+  "stc.adapters.models",
+  "stc.adapters.reporting",
+  "stc.adapters.storage",
+  "stc.adapters.tracking",
+  "stc.adapters.training",
+]

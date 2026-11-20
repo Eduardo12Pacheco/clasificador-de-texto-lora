@@ -1,0 +1,8 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Pinned dataset checksum quoted in documentation and audit reports."
+regexes = [
+  '''7df623fd2d300a4d235d6ee5bd396c9a28258d3a0ccb29abdb054506eba153f8''',
+]
