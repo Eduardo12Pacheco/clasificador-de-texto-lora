@@ -1,0 +1,483 @@
+{
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "LabelsOut": {
+        "description": "``GET /v1/labels`` payload.",
+        "properties": {
+          "intents": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Intents",
+            "type": "array"
+          },
+          "n_intents": {
+            "title": "N Intents",
+            "type": "integer"
+          },
+          "n_scenarios": {
+            "title": "N Scenarios",
+            "type": "integer"
+          },
+          "scenarios": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Scenarios",
+            "type": "array"
+          }
+        },
+        "required": [
+          "intents",
+          "scenarios",
+          "n_intents",
+          "n_scenarios"
+        ],
+        "title": "LabelsOut",
+        "type": "object"
+      },
+      "ModelBlockOut": {
+        "description": "Cheap model identity embedded in prediction responses.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "quantization": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantization"
+          },
+          "review_threshold": {
+            "title": "Review Threshold",
+            "type": "number"
+          },
+          "temperature": {
+            "title": "Temperature",
+            "type": "number"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "version",
+          "quantization",
+          "temperature",
+          "review_threshold"
+        ],
+        "title": "ModelBlockOut",
+        "type": "object"
+      },
+      "ModelInfoOut": {
+        "description": "``GET /v1/model`` payload, read from the manifest and calibration.",
+        "properties": {
+          "baseline_available": {
+            "title": "Baseline Available",
+            "type": "boolean"
+          },
+          "dev_ece_after": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dev Ece After"
+          },
+          "dev_ece_before": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dev Ece Before"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "license": {
+            "title": "License",
+            "type": "string"
+          },
+          "n_intents": {
+            "title": "N Intents",
+            "type": "integer"
+          },
+          "n_scenarios": {
+            "title": "N Scenarios",
+            "type": "integer"
+          },
+          "parameters": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parameters"
+          },
+          "quantization": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantization"
+          },
+          "review_threshold": {
+            "title": "Review Threshold",
+            "type": "number"
+          },
+          "temperature": {
+            "title": "Temperature",
+            "type": "number"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "kind",
+          "quantization",
+          "parameters",
+          "license",
+          "n_intents",
+          "n_scenarios",
+          "temperature",
+          "review_threshold",
+          "dev_ece_before",
+          "dev_ece_after",
+          "baseline_available"
+        ],
+        "title": "ModelInfoOut",
+        "type": "object"
+      },
+      "PredictRequest": {
+        "additionalProperties": false,
+        "description": "A bounded batch of utterances to classify.",
+        "properties": {
+          "model": {
+            "default": "default",
+            "enum": [
+              "default",
+              "baseline"
+            ],
+            "title": "Model",
+            "type": "string"
+          },
+          "texts": {
+            "items": {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 64,
+            "minItems": 1,
+            "title": "Texts",
+            "type": "array"
+          },
+          "top_k": {
+            "default": 3,
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Top K",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "texts"
+        ],
+        "title": "PredictRequest",
+        "type": "object"
+      },
+      "PredictResponse": {
+        "description": "The documented ``POST /v1/predict`` response.",
+        "properties": {
+          "latency_ms": {
+            "title": "Latency Ms",
+            "type": "number"
+          },
+          "model": {
+            "$ref": "#/components/schemas/ModelBlockOut"
+          },
+          "predictions": {
+            "items": {
+              "$ref": "#/components/schemas/PredictionOut"
+            },
+            "title": "Predictions",
+            "type": "array"
+          },
+          "schema_version": {
+            "default": 1,
+            "title": "Schema Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model",
+          "predictions",
+          "latency_ms"
+        ],
+        "title": "PredictResponse",
+        "type": "object"
+      },
+      "PredictionOut": {
+        "description": "The top prediction for one input text.",
+        "properties": {
+          "confidence": {
+            "title": "Confidence",
+            "type": "number"
+          },
+          "index": {
+            "title": "Index",
+            "type": "integer"
+          },
+          "intent": {
+            "title": "Intent",
+            "type": "string"
+          },
+          "needs_review": {
+            "title": "Needs Review",
+            "type": "boolean"
+          },
+          "scenario": {
+            "title": "Scenario",
+            "type": "string"
+          },
+          "top_k": {
+            "items": {
+              "$ref": "#/components/schemas/ScoredLabelOut"
+            },
+            "title": "Top K",
+            "type": "array"
+          }
+        },
+        "required": [
+          "index",
+          "intent",
+          "scenario",
+          "confidence",
+          "needs_review",
+          "top_k"
+        ],
+        "title": "PredictionOut",
+        "type": "object"
+      },
+      "ScoredLabelOut": {
+        "description": "One candidate intent with its calibrated probability.",
+        "properties": {
+          "intent": {
+            "title": "Intent",
+            "type": "string"
+          },
+          "probability": {
+            "title": "Probability",
+            "type": "number"
+          },
+          "scenario": {
+            "title": "Scenario",
+            "type": "string"
+          }
+        },
+        "required": [
+          "intent",
+          "scenario",
+          "probability"
+        ],
+        "title": "ScoredLabelOut",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Calibrated Spanish intent classification over ONNX Runtime.",
+    "title": "Spanish text classifier",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/healthz": {
+      "get": {
+        "description": "Liveness probe that also reports whether the model finished loading.",
+        "operationId": "healthz_healthz_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Healthz Healthz Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Healthz"
+      }
+    },
+    "/v1/labels": {
+      "get": {
+        "description": "Expose the fixed label space the served model was trained on.",
+        "operationId": "labels_v1_labels_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabelsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Labels"
+      }
+    },
+    "/v1/model": {
+      "get": {
+        "description": "Describe the served artifact and its calibration.",
+        "operationId": "model_info_v1_model_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelInfoOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Model Info"
+      }
+    },
+    "/v1/predict": {
+      "post": {
+        "description": "Classify a bounded batch and return calibrated top-k predictions.",
+        "operationId": "predict_v1_predict_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PredictRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PredictResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Predict"
+      }
+    }
+  }
+}
