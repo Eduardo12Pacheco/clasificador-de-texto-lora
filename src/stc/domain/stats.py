@@ -59,8 +59,15 @@ def _validate_bootstrap(B: int, alpha: float) -> None:
 def _percentile_interval(
     estimate: float, values: NDArray[np.float64], alpha: float
 ) -> ConfidenceInterval:
-    lower, upper = np.percentile(values, [100.0 * alpha / 2.0, 100.0 * (1.0 - alpha / 2.0)])
-    return ConfidenceInterval(estimate=estimate, lower=float(lower), upper=float(upper))
+    raw_lower, raw_upper = np.percentile(values, [100.0 * alpha / 2.0, 100.0 * (1.0 - alpha / 2.0)])
+    # A percentile interval of a small or discrete bootstrap distribution can
+    # exclude the observed statistic. Reports must never show an interval that
+    # contradicts its own point estimate, so clamp to it.
+    return ConfidenceInterval(
+        estimate=estimate,
+        lower=min(float(raw_lower), estimate),
+        upper=max(float(raw_upper), estimate),
+    )
 
 
 def bootstrap_ci(
