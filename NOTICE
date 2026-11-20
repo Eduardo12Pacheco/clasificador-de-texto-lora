@@ -17,6 +17,10 @@ BSC-LT/MrBERT-es (base encoder; released weights are an Apache-2.0 derivative)
   Licensed under the Apache License, Version 2.0.
   https://huggingface.co/BSC-LT/MrBERT-es
 
+A deterministic 593-row sample of the dataset ships in
+src/stc/_fixture/massive_es_sample/ under the same CC BY 4.0 terms; it is
+selected and reformatted by this project, as stated in its NOTICE.md.
+
 The exact dataset revision, checksum and lineage are documented in
 docs/DATA.md. The model card for released weights states the modifications
 made by this project.

@@ -22,7 +22,6 @@ artifacts/
 runs/
 logs/
 mlruns/
-/reports/
 *.egg
 
 # Local uv cache for constrained /tmp environments

@@ -8,10 +8,12 @@ immutable once accepted; later changes are appended as an addendum or a new ADR.
 | ADR | Title | Status |
 |---|---|---|
 | [0001](0001-hexagonal-architecture.md) | Hexagonal architecture with enforced dependency direction | Accepted |
+| [0002](0002-task-and-dataset-selection.md) | Task and dataset selection | Accepted |
+| [0004](0004-evaluation-protocol-and-leakage-policy.md) | Evaluation protocol and leakage policy | Accepted |
 
-ADRs 0002–0009 are introduced by the tasks that make the corresponding
-decisions (dataset selection, backbone, evaluation protocol, inference,
-calibration, distribution, experiment tracking, synthetic robustness).
+ADR-0003 (backbone and adaptation method) is introduced by the training task;
+0005–0009 follow with inference, calibration, distribution, tracking and the
+synthetic robustness suite. Every ADR uses the template below.
 
 ## Template
 
