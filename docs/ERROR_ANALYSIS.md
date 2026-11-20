@@ -2,7 +2,7 @@
 
 This document analyses the 603 utterances in `reports/final/errors.json` where at
 least one of the two shipped classifiers is wrong: the TF-IDF baseline and the
-LoRA transformer. The LoRA model makes 340 errors (11.4 % of the 2,974 test
+LoRA transformer. The LoRA model makes 397 errors (13.3 % of the 2,974 test
 utterances); the baseline makes 473 (15.9 %). Both models are wrong on 267
 utterances, only the baseline is wrong on 206 and only the LoRA model is wrong
 on 130. Confidences below are calibrated.
