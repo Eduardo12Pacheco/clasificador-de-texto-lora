@@ -16,19 +16,28 @@ from stc.adapters.data.fixture_source import FixtureRepository
 from stc.adapters.data.jsonl_repository import JsonlDatasetRepository
 from stc.adapters.data.massive_archive import PINNED_SHA256, PINNED_URL, MassiveArchiveSource
 from stc.adapters.data.massive_parser import MassiveParser
+from stc.adapters.hub.github_release import GithubReleaseHub
+from stc.adapters.hub.registry import ModelRegistry, RegistryEntry
+from stc.adapters.inference.bundle_io import BundleArchiveAdapter, read_manifest
+from stc.adapters.inference.onnx_classifier import OnnxClassifier, load_onnx_classifier
 from stc.adapters.models.skops_store import SkopsBaselineStore
-from stc.adapters.models.tfidf_linear import TfidfLinearTrainer
+from stc.adapters.models.tfidf_linear import TfidfLinearTrainer, load_baseline
 from stc.adapters.reporting.json_writer import JsonReportWriter
 from stc.adapters.storage.access_log import JsonlAccessLog
+from stc.adapters.storage.fs_model_store import FsModelStore
 from stc.application.ports import (
     Classifier,
     ClassifierTrainer,
     DatasetRepository,
     ExperimentTracker,
     HyperparameterSearcher,
+    ModelExporter,
+    OnnxModelLoader,
     RawDatasetSource,
     ScreeningRunner,
 )
+from stc.application.services.classifier_factory import ClassifierFactory
+from stc.application.services.model_resolver import ModelResolver
 from stc.application.services.tracker_factory import TrackerFactory
 from stc.application.use_cases.prepare_data import PrepareDataPipeline
 from stc.application.use_cases.train_baseline import TrainBaseline
@@ -131,16 +140,127 @@ def build_access_log(path: Path) -> JsonlAccessLog:
     return JsonlAccessLog(path)
 
 
-def load_classifier(model: str) -> Classifier:
-    """Resolve a model path or registry name to a classifier (training task adds kinds)."""
-    path = Path(model)
-    if not path.exists():
+def load_classifier(model: str, settings: Settings | None = None) -> Classifier:
+    """Resolve a model path, installed name or ``baseline`` to a classifier."""
+    resolved = settings if settings is not None else build_settings()
+    path = build_model_resolver(resolved).resolve(model)
+    if (path / "baseline.skops").is_file():
+        kind = "tfidf-linear"
+    elif (path / "manifest.json").is_file():
+        kind = str(read_manifest(path)["kind"])
+    else:
         raise ArtifactNotFoundError(
-            f"model not found: {model}; run: stc train baseline to create one"
+            f"model not found: {model}; run: stc model pull {model} "
+            "(or stc train baseline for a local baseline)"
         )
-    module = importlib.import_module("stc.adapters.models.tfidf_linear")
-    loader = cast(Callable[[Path], Classifier], module.load_baseline)
-    return loader(path)
+    return build_classifier_factory(resolved).create(kind, path)
+
+
+def build_classifier_factory(settings: Settings | None = None) -> ClassifierFactory:
+    """Register every classifier adapter behind the pure Strategy factory."""
+    resolved = settings if settings is not None else build_settings()
+
+    def onnx(path: Path) -> Classifier:
+        return OnnxClassifier.from_bundle(path, threads=resolved.threads)
+
+    def baseline(path: Path) -> Classifier:
+        return load_baseline(path)
+
+    return ClassifierFactory({"onnx-seqcls": onnx, "tfidf-linear": baseline})
+
+
+def build_model_store(settings: Settings | None = None) -> FsModelStore:
+    """Wire the filesystem model store under ``STC_HOME``."""
+    resolved = settings if settings is not None else build_settings()
+    return FsModelStore(resolved.resolve_home() / "models", bundle=build_bundle_archive())
+
+
+def build_model_resolver(settings: Settings | None = None) -> ModelResolver:
+    """Resolve CLI model selectors against the store and ``artifacts/``."""
+    resolved = settings if settings is not None else build_settings()
+    return ModelResolver(
+        build_model_store(resolved),
+        default_name=resolved.model,
+        baseline_dir=Path("artifacts") / "baseline",
+    )
+
+
+def build_bundle_archive() -> BundleArchiveAdapter:
+    """Wire the bundle filesystem helper shared by pull, pack and calibrate."""
+    return BundleArchiveAdapter()
+
+
+def build_model_hub(settings: Settings | None = None) -> GithubReleaseHub:
+    """Wire the release downloader, honouring ``STC_OFFLINE``."""
+    resolved = settings if settings is not None else build_settings()
+    return GithubReleaseHub(build_bundle_archive(), offline=resolved.offline)
+
+
+class _OnnxLoader:
+    """Default-thread ONNX loader injected into the export use case."""
+
+    def __init__(self, threads: int) -> None:
+        self._threads = threads
+
+    def load(
+        self,
+        bundle_dir: Path,
+        model_path: Path | None = None,
+        *,
+        threads: int | None = None,
+    ) -> Classifier:
+        return load_onnx_classifier(
+            bundle_dir,
+            model_path,
+            threads=self._threads if threads is None else threads,
+        )
+
+
+def build_onnx_loader(settings: Settings | None = None) -> OnnxModelLoader:
+    """Return a loader that applies the configured ORT thread count."""
+    resolved = settings if settings is not None else build_settings()
+    return _OnnxLoader(resolved.threads)
+
+
+def build_registry(path: Path) -> ModelRegistry:
+    """Load the committed model registry metadata."""
+    return ModelRegistry.from_file(path)
+
+
+def upsert_registry_entry(
+    path: Path,
+    *,
+    name: str,
+    version: str,
+    url: str,
+    sha256: str,
+    size_bytes: int,
+    license: str,
+) -> None:
+    """Insert or replace one release entry in the registry JSON."""
+    registry = ModelRegistry.from_file(path) if path.is_file() else ModelRegistry.empty()
+    registry.upsert(
+        RegistryEntry(
+            name=name,
+            version=version,
+            url=url,
+            sha256=sha256,
+            size_bytes=size_bytes,
+            license=license,
+        )
+    ).save(path)
+
+
+def build_exporter() -> ModelExporter:
+    """Wire the ONNX exporter lazily, with the shared tiny/HF model builder."""
+    module = importlib.import_module("stc.adapters.export.onnx_export")
+
+    def base_loader(backbone: str, n_labels: int, tokenizer: object) -> object:
+        factory = importlib.import_module("stc.adapters.training.model_factory")
+        return factory.build_base_model(backbone, n_labels, tokenizer=tokenizer)
+
+    exporter = cast(Callable[[Callable[..., object]], ModelExporter], module.OnnxExporter)
+    return exporter(base_loader)
 
 
 TRAIN_EXTRA_MESSAGE = (

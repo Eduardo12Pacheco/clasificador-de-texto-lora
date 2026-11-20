@@ -1,0 +1,31 @@
+spanish-text-classifier-lora — model bundle NOTICE
+==================================================
+
+This distribution contains a fine-tuned intent-classification model produced
+by the spanish-text-classifier-lora project, version {version}.
+
+Base model
+----------
+Base model: {base_model}
+Base model licence: {base_license}
+The model was modified by LoRA fine-tuning on the MASSIVE 1.0 es-ES dataset.
+The released weights are distributed under the Apache License, Version 2.0
+(see LICENSE).
+
+Training data
+-------------
+Amazon MASSIVE 1.0 (es-ES), licensed under CC BY 4.0, Copyright Amazon.com
+Inc. MASSIVE is human-localised from SLURP (CC BY 4.0). The repository bundles
+only a small sample excerpt for tests; the full dataset is downloaded from the
+pinned upstream URL and verified by sha256.
+
+Third-party software
+--------------------
+This bundle is consumed with onnxruntime and tokenizers. Their licences are
+distributed with those packages and are not part of this archive.
+
+Modifications
+-------------
+The base model was adapted with LoRA (low-rank adapters) and merged for
+CPU-only ONNX inference. No other changes were made to the base weights beyond
+the adapter merge.

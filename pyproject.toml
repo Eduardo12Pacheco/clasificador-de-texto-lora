@@ -97,6 +97,9 @@ select = ["E", "F", "I", "UP", "B", "SIM", "C4", "PT", "RUF", "N", "S", "ANN"]
 "scripts/*.py" = ["ANN001", "ANN201", "ANN202", "ANN401", "S603", "S607"]
 # D16 fixes these exception names; the capability token reads as a noun phrase.
 "src/stc/domain/errors.py" = ["N818"]
+# torch/onnx are optional extras without usable static types here; the exporter
+# keeps those imports inside methods and its public surface is the port.
+"src/stc/adapters/export/onnx_export.py" = ["ANN401"]
 # matplotlib is an optional extra without static types; the guarded import keeps
 # it out of the runtime path and the module is tested through the missing-extra branch.
 "src/stc/adapters/reporting/plots.py" = ["ANN401"]
@@ -253,10 +256,15 @@ ignore_imports = [
   "stc.bootstrap -> stc.adapters.data.jsonl_repository",
   "stc.bootstrap -> stc.adapters.data.massive_archive",
   "stc.bootstrap -> stc.adapters.data.massive_parser",
+  "stc.bootstrap -> stc.adapters.hub.github_release",
+  "stc.bootstrap -> stc.adapters.hub.registry",
+  "stc.bootstrap -> stc.adapters.inference.bundle_io",
+  "stc.bootstrap -> stc.adapters.inference.onnx_classifier",
   "stc.bootstrap -> stc.adapters.models.skops_store",
   "stc.bootstrap -> stc.adapters.models.tfidf_linear",
   "stc.bootstrap -> stc.adapters.reporting.json_writer",
   "stc.bootstrap -> stc.adapters.storage.access_log",
+  "stc.bootstrap -> stc.adapters.storage.fs_model_store",
 ]
 modules = [
   "stc.adapters.api",
