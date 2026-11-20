@@ -18,6 +18,7 @@ SCRIPTS = [
     "collect_experiment_reports.py",
     "make_tiny_fixtures.py",
     "check_links.py",
+    "capture_cli_svg.py",
 ]
 
 
