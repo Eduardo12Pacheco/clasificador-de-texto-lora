@@ -1,0 +1,157 @@
+{
+  "comparison": {
+    "delta_accuracy": 0.0256,
+    "delta_accuracy_lower": 0.0134,
+    "delta_accuracy_upper": 0.0377,
+    "delta_macro_f1": 0.0131,
+    "delta_macro_f1_lower": -0.0084,
+    "delta_macro_f1_upper": 0.0344,
+    "mcnemar_b": 206,
+    "mcnemar_c": 130,
+    "mcnemar_p": 0.0,
+    "verdict": "tie",
+    "verdict_sentence_en": "The LoRA transformer and the TF-IDF baseline perform within statistical noise on the audited test split (Δmacro-F1 +0.0131 (95 % CI [-0.0084, +0.0344]), McNemar p = 0.000); the outcome is a tie.",
+    "verdict_sentence_es": "El transformer con LoRA y la línea base TF-IDF rinden dentro del ruido estadístico en el test auditado (Δmacro-F1 +0.0131 (95 % CI [-0.0084, +0.0344]), McNemar p = 0.000); el resultado es un empate."
+  },
+  "models": {
+    "baseline": {
+      "calibration": {
+        "brier_after": 0.2386,
+        "brier_before": 0.2528,
+        "coverage_at_threshold": 0.769,
+        "ece_after": 0.0253,
+        "ece_before": 0.0849,
+        "nll_after": 0.63,
+        "nll_before": 0.6749,
+        "review_threshold": 0.7195,
+        "selective_accuracy": 0.9353,
+        "temperature": 0.7454
+      },
+      "robustness": {
+        "chat_abbrev": {
+          "accuracy_after": 0.8375,
+          "accuracy_before": 0.8512,
+          "delta_accuracy": -0.0136,
+          "n_affected": 954
+        },
+        "no_accents": {
+          "accuracy_after": 0.8247,
+          "accuracy_before": 0.8597,
+          "delta_accuracy": -0.0351,
+          "n_affected": 1540
+        },
+        "regionalize:ar": {
+          "accuracy_after": 0.8436,
+          "accuracy_before": 0.8827,
+          "delta_accuracy": -0.0391,
+          "n_affected": 614
+        },
+        "regionalize:ec": {
+          "accuracy_after": 0.8373,
+          "accuracy_before": 0.9157,
+          "delta_accuracy": -0.0783,
+          "n_affected": 166
+        },
+        "regionalize:mx": {
+          "accuracy_after": 0.7885,
+          "accuracy_before": 0.9167,
+          "delta_accuracy": -0.1282,
+          "n_affected": 156
+        },
+        "typos": {
+          "accuracy_after": 0.8099,
+          "accuracy_before": 0.8439,
+          "delta_accuracy": -0.034,
+          "n_affected": 647
+        },
+        "uppercase": {
+          "accuracy_after": 0.841,
+          "accuracy_before": 0.841,
+          "delta_accuracy": 0.0,
+          "n_affected": 2974
+        }
+      },
+      "test": {
+        "accuracy": 0.841,
+        "accuracy_lower": 0.8268,
+        "accuracy_upper": 0.8534,
+        "macro_f1": 0.8175,
+        "macro_f1_lower": 0.7919,
+        "macro_f1_upper": 0.833,
+        "scenario_accuracy": 0.8937,
+        "top3_accuracy": 0.9459,
+        "weighted_f1": 0.8423
+      }
+    },
+    "lora": {
+      "calibration": {
+        "brier_after": 0.1956,
+        "brier_before": 0.2203,
+        "coverage_at_threshold": 0.8083,
+        "ece_after": 0.0181,
+        "ece_before": 0.0938,
+        "nll_after": 0.5103,
+        "nll_before": 0.8251,
+        "review_threshold": 0.7655,
+        "selective_accuracy": 0.9509,
+        "temperature": 2.2872
+      },
+      "robustness": {
+        "chat_abbrev": {
+          "accuracy_after": 0.8679,
+          "accuracy_before": 0.8669,
+          "delta_accuracy": 0.001,
+          "n_affected": 954
+        },
+        "no_accents": {
+          "accuracy_after": 0.8519,
+          "accuracy_before": 0.8857,
+          "delta_accuracy": -0.0338,
+          "n_affected": 1540
+        },
+        "regionalize:ar": {
+          "accuracy_after": 0.8664,
+          "accuracy_before": 0.8795,
+          "delta_accuracy": -0.013,
+          "n_affected": 614
+        },
+        "regionalize:ec": {
+          "accuracy_after": 0.8614,
+          "accuracy_before": 0.8494,
+          "delta_accuracy": 0.012,
+          "n_affected": 166
+        },
+        "regionalize:mx": {
+          "accuracy_after": 0.8077,
+          "accuracy_before": 0.8397,
+          "delta_accuracy": -0.0321,
+          "n_affected": 156
+        },
+        "typos": {
+          "accuracy_after": 0.8223,
+          "accuracy_before": 0.8764,
+          "delta_accuracy": -0.0541,
+          "n_affected": 647
+        },
+        "uppercase": {
+          "accuracy_after": 0.6274,
+          "accuracy_before": 0.8665,
+          "delta_accuracy": -0.2391,
+          "n_affected": 2974
+        }
+      },
+      "test": {
+        "accuracy": 0.8665,
+        "accuracy_lower": 0.8544,
+        "accuracy_upper": 0.8786,
+        "macro_f1": 0.8305,
+        "macro_f1_lower": 0.8064,
+        "macro_f1_upper": 0.8458,
+        "scenario_accuracy": 0.9072,
+        "top3_accuracy": 0.9597,
+        "weighted_f1": 0.8664
+      }
+    }
+  },
+  "schema_version": 1
+}

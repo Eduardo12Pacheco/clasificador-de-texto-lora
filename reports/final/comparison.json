@@ -1,0 +1,31 @@
+{
+  "delta": {
+    "accuracy": {
+      "estimate": 0.0256,
+      "lower": 0.0134,
+      "upper": 0.0377
+    },
+    "macro_f1": {
+      "estimate": 0.0131,
+      "lower": -0.0084,
+      "upper": 0.0344
+    }
+  },
+  "mcnemar": {
+    "b": 206,
+    "c": 130,
+    "p": 0.0
+  },
+  "models": [
+    "baseline",
+    "lora"
+  ],
+  "n_examples": 2974,
+  "schema_version": 1,
+  "split": "test",
+  "verdict": "tie",
+  "verdict_sentences": {
+    "en": "The LoRA transformer and the TF-IDF baseline perform within statistical noise on the audited test split (Δmacro-F1 +0.0131 (95 % CI [-0.0084, +0.0344]), McNemar p = 0.000); the outcome is a tie.",
+    "es": "El transformer con LoRA y la línea base TF-IDF rinden dentro del ruido estadístico en el test auditado (Δmacro-F1 +0.0131 (95 % CI [-0.0084, +0.0344]), McNemar p = 0.000); el resultado es un empate."
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "models": {
+    "baseline": {
+      "after": {
+        "brier": 0.2386,
+        "ece": 0.0253,
+        "nll": 0.63
+      },
+      "before": {
+        "brier": 0.2528,
+        "ece": 0.0849,
+        "nll": 0.6749
+      },
+      "coverage_at_threshold": 0.769,
+      "review_threshold": 0.7195,
+      "selective_accuracy": 0.9353,
+      "temperature": 0.7454
+    },
+    "lora": {
+      "after": {
+        "brier": 0.1956,
+        "ece": 0.0181,
+        "nll": 0.5103
+      },
+      "before": {
+        "brier": 0.2203,
+        "ece": 0.0938,
+        "nll": 0.8251
+      },
+      "coverage_at_threshold": 0.8083,
+      "review_threshold": 0.7655,
+      "selective_accuracy": 0.9509,
+      "temperature": 2.2872
+    }
+  },
+  "n_examples": 2974,
+  "schema_version": 1,
+  "split": "test"
+}

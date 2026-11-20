@@ -1,0 +1,1 @@
+{"command": "stc report final --bundle artifacts/bundle --baseline artifacts/baseline --dataset massive", "git_sha": "c6523f4c4699a64029cca03e3eb14df06cf67cc2", "model_id": "stc-es-intent", "model_sha256": "8a438c1c5cfa02ab8020cf34610af1bb2772f02cae8e49ee69bd7eff9675fbd5", "n_examples": 2974, "purpose": "final report", "timestamp": "2026-11-20T17:02:19.586576+00:00"}
