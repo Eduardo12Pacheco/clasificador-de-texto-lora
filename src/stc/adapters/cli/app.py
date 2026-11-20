@@ -14,6 +14,7 @@ from stc.adapters.cli.commands.evaluate import evaluate
 from stc.adapters.cli.commands.export import export
 from stc.adapters.cli.commands.model import model_app
 from stc.adapters.cli.commands.predict import predict
+from stc.adapters.cli.commands.serve import serve
 from stc.adapters.cli.commands.train import train_app
 from stc.adapters.cli.rendering import CliState
 from stc.config import Settings
@@ -38,6 +39,7 @@ app.command("calibrate")(calibrate)
 app.command("benchmark")(benchmark)
 app.command("doctor")(doctor)
 app.command("predict")(predict)
+app.command("serve")(serve)
 
 _DEBUG = False
 

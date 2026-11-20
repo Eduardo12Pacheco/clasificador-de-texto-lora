@@ -19,6 +19,7 @@ from rich.table import Table
 
 from stc import __version__, bootstrap
 from stc.adapters.cli.errors import handle_domain_errors
+from stc.config import Settings
 
 
 def _git_sha() -> str:
@@ -83,8 +84,53 @@ def _package_version(name: str) -> str:
         return "not installed"
 
 
+def _onnxruntime_environment() -> dict[str, object]:
+    try:
+        import onnxruntime as ort
+    except ImportError as error:  # pragma: no cover - exercised through monkeypatching
+        raise ImportError("onnxruntime is not importable") from error
+    return {
+        "version": str(ort.__version__),
+        "providers": sorted(ort.get_available_providers()),
+    }
+
+
+def _settings_payload(settings: Settings) -> dict[str, object]:
+    names = (
+        "model",
+        "log_level",
+        "tracker",
+        "mlflow_uri",
+        "threads",
+        "offline",
+        "seed",
+        "api_host",
+        "api_port",
+        "api_max_batch",
+        "api_max_chars",
+    )
+    return {name: getattr(settings, name) for name in names}
+
+
+def _installed_models_payload(settings: Settings) -> list[dict[str, object]]:
+    try:
+        installed = bootstrap.build_model_store(settings).list_installed()
+    except Exception:
+        return []
+    return [
+        {
+            "name": info.model_id,
+            "version": info.version,
+            "kind": info.kind,
+            "quantization": info.quantization,
+        }
+        for info in installed
+    ]
+
+
 def build_environment_report(*, gpu: bool) -> dict[str, object]:
-    """Collect the environment payload documented for T7/T11."""
+    """Collect the environment payload documented for T7/T11/T9."""
+    settings = bootstrap.build_settings()
     payload: dict[str, object] = {
         "schema_version": 1,
         "stc_version": __version__,
@@ -106,6 +152,14 @@ def build_environment_report(*, gpu: bool) -> dict[str, object]:
                 "numpy",
             )
         },
+        "onnxruntime": _onnxruntime_environment(),
+        "settings": _settings_payload(settings),
+        "paths": {
+            "home": str(settings.resolve_home()),
+            "data_dir": str(settings.resolve_data_dir()),
+            "models": str(settings.resolve_home() / "models"),
+        },
+        "installed_models": _installed_models_payload(settings),
     }
     if not gpu:
         payload["gpu_requested"] = False
@@ -145,7 +199,11 @@ def doctor(
     ] = False,
 ) -> None:
     """Print environment diagnostics; ``--gpu`` adds the training stack."""
-    payload = build_environment_report(gpu=gpu)
+    try:
+        payload = build_environment_report(gpu=gpu)
+    except ImportError as error:
+        typer.echo(f"error: {error}", err=True)
+        raise typer.Exit(code=1) from error
     if as_json:
         typer.echo(json.dumps(payload, sort_keys=True))
         return
