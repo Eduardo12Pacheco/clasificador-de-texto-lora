@@ -1,0 +1,11 @@
+{
+  "per_backbone_means": {
+    "BSC-LT/MrBERT-es": 0.8313,
+    "Qwen/Qwen3-0.6B": 0.8418,
+    "bertin-project/bertin-roberta-base-spanish": 0.7997
+  },
+  "rule": "among exportable candidates choose the highest mean dev macro-F1; MrBERT-es wins when within 1.0 point of bertin; bertin wins only when it is more than 1.0 point ahead",
+  "rule_branch": "mrbert_ahead",
+  "schema_version": 1,
+  "selected": "BSC-LT/MrBERT-es"
+}

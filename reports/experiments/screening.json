@@ -1,0 +1,77 @@
+{
+  "runs": [
+    {
+      "backbone": "BSC-LT/MrBERT-es",
+      "cpu_latency_ms_p50": 77.4987,
+      "dev_accuracy": 0.8583,
+      "dev_macro_f1": 0.8309,
+      "epoch_seconds": 33.5012,
+      "exportable": true,
+      "oom_retry": false,
+      "peak_vram_mib": 1666.0767,
+      "seed": 13,
+      "trainable_params": 3496056
+    },
+    {
+      "backbone": "BSC-LT/MrBERT-es",
+      "cpu_latency_ms_p50": 155.3226,
+      "dev_accuracy": 0.8751,
+      "dev_macro_f1": 0.8317,
+      "epoch_seconds": 30.2721,
+      "exportable": true,
+      "oom_retry": false,
+      "peak_vram_mib": 1666.0767,
+      "seed": 42,
+      "trainable_params": 3496056
+    },
+    {
+      "backbone": "bertin-project/bertin-roberta-base-spanish",
+      "cpu_latency_ms_p50": 79.0816,
+      "dev_accuracy": 0.849,
+      "dev_macro_f1": 0.8019,
+      "epoch_seconds": 22.9096,
+      "exportable": true,
+      "oom_retry": false,
+      "peak_vram_mib": 1666.0767,
+      "seed": 13,
+      "trainable_params": 3927672
+    },
+    {
+      "backbone": "bertin-project/bertin-roberta-base-spanish",
+      "cpu_latency_ms_p50": 86.6737,
+      "dev_accuracy": 0.8436,
+      "dev_macro_f1": 0.7975,
+      "epoch_seconds": 20.0354,
+      "exportable": true,
+      "oom_retry": false,
+      "peak_vram_mib": 1666.0767,
+      "seed": 42,
+      "trainable_params": 3927672
+    },
+    {
+      "backbone": "Qwen/Qwen3-0.6B",
+      "cpu_latency_ms_p50": 317.6722,
+      "dev_accuracy": 0.8623,
+      "dev_macro_f1": 0.8453,
+      "epoch_seconds": 227.6087,
+      "exportable": false,
+      "oom_retry": true,
+      "peak_vram_mib": 6707.1714,
+      "seed": 13,
+      "trainable_params": 10153984
+    },
+    {
+      "backbone": "Qwen/Qwen3-0.6B",
+      "cpu_latency_ms_p50": 132.1705,
+      "dev_accuracy": 0.8534,
+      "dev_macro_f1": 0.8383,
+      "epoch_seconds": 158.7228,
+      "exportable": false,
+      "oom_retry": true,
+      "peak_vram_mib": 6707.1714,
+      "seed": 42,
+      "trainable_params": 10153984
+    }
+  ],
+  "schema_version": 1
+}
