@@ -37,6 +37,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Architecture, evaluation, training and data guides, a generated CLI/API
   reference, and tests that guard links, ADR structure, quoted paths and the
   documented training commands.
+- Bilingual READMEs with a generated results block, screenshots and a demo GIF
+  captured from the real installed bundle, plus guards against report drift.
 
 ### Changed
 
