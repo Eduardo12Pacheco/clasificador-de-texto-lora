@@ -151,8 +151,6 @@ def test_export_cli_writes_parity_report(trained_run: Path, tmp_path: Path) -> N
     )
     assert result.exit_code == 0, result.output
     assert "passed=True" in result.output
-    payload = __import__("json").loads(
-        (reports / "export_parity.json").read_text(encoding="utf-8")
-    )
+    payload = __import__("json").loads((reports / "export_parity.json").read_text(encoding="utf-8"))
     assert payload["passed"] is True
     assert payload["agreement"] == 1.0
