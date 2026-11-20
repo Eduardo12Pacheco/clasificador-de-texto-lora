@@ -5,11 +5,15 @@ from __future__ import annotations
 import hashlib
 import importlib
 import importlib.util
+import json
 import subprocess
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import cast
+from typing import TYPE_CHECKING, cast
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
 from stc import __version__, config
 from stc.adapters.data.fixture_source import FixtureRepository
@@ -22,7 +26,7 @@ from stc.adapters.inference.bundle_io import BundleArchiveAdapter, read_manifest
 from stc.adapters.inference.onnx_classifier import OnnxClassifier, load_onnx_classifier
 from stc.adapters.models.skops_store import SkopsBaselineStore
 from stc.adapters.models.tfidf_linear import TfidfLinearTrainer, load_baseline
-from stc.adapters.reporting.json_writer import JsonReportWriter
+from stc.adapters.reporting.writers import CompositeReportWriter
 from stc.adapters.storage.access_log import JsonlAccessLog
 from stc.adapters.storage.fs_model_store import FsModelStore
 from stc.application.ports import (
@@ -36,12 +40,15 @@ from stc.application.ports import (
     RawDatasetSource,
     ScreeningRunner,
 )
+from stc.application.services.calibrated_classifier import CalibratedClassifier
 from stc.application.services.classifier_factory import ClassifierFactory
 from stc.application.services.model_resolver import ModelResolver
 from stc.application.services.tracker_factory import TrackerFactory
+from stc.application.use_cases.final_report import FinalReportFigureWriter
 from stc.application.use_cases.prepare_data import PrepareDataPipeline
 from stc.application.use_cases.train_baseline import TrainBaseline
 from stc.config import Settings
+from stc.domain.calibration import Calibration
 from stc.domain.errors import ArtifactNotFoundError, InvalidInputError, MissingExtraError
 from stc.domain.examples import Example
 
@@ -130,9 +137,9 @@ def build_baseline_services(
     )
 
 
-def build_report_writer() -> JsonReportWriter:
-    """Wire the deterministic JSON report writer for a CLI invocation."""
-    return JsonReportWriter()
+def build_report_writer() -> CompositeReportWriter:
+    """Wire the deterministic JSON/CSV/Markdown report writer for a CLI invocation."""
+    return CompositeReportWriter()
 
 
 def build_access_log(path: Path) -> JsonlAccessLog:
@@ -144,6 +151,16 @@ def load_classifier(model: str, settings: Settings | None = None) -> Classifier:
     """Resolve a model path, installed name or ``baseline`` to a classifier."""
     resolved = settings if settings is not None else build_settings()
     path = build_model_resolver(resolved).resolve(model)
+    return load_classifier_from_path(path, model, resolved)
+
+
+def load_classifier_from_path(
+    path: Path,
+    model: str,
+    settings: Settings | None = None,
+) -> Classifier:
+    """Build the classifier adapter for an already resolved artifact directory."""
+    resolved = settings if settings is not None else build_settings()
     if (path / "baseline.skops").is_file():
         kind = "tfidf-linear"
     elif (path / "manifest.json").is_file():
@@ -154,6 +171,73 @@ def load_classifier(model: str, settings: Settings | None = None) -> Classifier:
             "(or stc train baseline for a local baseline)"
         )
     return build_classifier_factory(resolved).create(kind, path)
+
+
+@dataclass(frozen=True, slots=True)
+class CalibratedArtifact:
+    """A resolved model plus the calibration stored next to it (D10)."""
+
+    classifier: CalibratedClassifier
+    path: Path
+    calibration: Calibration | None
+    calibration_payload: Mapping[str, object]
+
+
+def _read_calibration(path: Path) -> tuple[Calibration | None, Mapping[str, object]]:
+    calibration_path = path / "calibration.json"
+    if not calibration_path.is_file():
+        return None, {}
+    try:
+        payload = json.loads(calibration_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        message = f"calibration file is not valid JSON: {calibration_path}"
+        raise InvalidInputError(message) from error
+    if not isinstance(payload, Mapping):
+        message = f"calibration file must be a JSON object: {calibration_path}"
+        raise InvalidInputError(message)
+    calibration = Calibration.from_dict(cast(Mapping[str, object], payload))
+    return calibration, cast(Mapping[str, object], payload)
+
+
+def load_calibrated_classifier(
+    model: str,
+    settings: Settings | None = None,
+) -> CalibratedArtifact:
+    """Resolve a selector and apply the temperature/review policy stored beside it.
+
+    A model without ``calibration.json`` is served with the identity
+    temperature and a review threshold of zero (nothing is flagged), which keeps
+    prediction usable before ``stc calibrate`` runs while never inventing a
+    threshold.
+    """
+    resolved = settings if settings is not None else build_settings()
+    path = build_model_resolver(resolved).resolve(model)
+    inner = load_classifier_from_path(path, model, resolved)
+    calibration, payload = _read_calibration(path)
+    effective = (
+        calibration
+        if calibration is not None
+        else Calibration(
+            temperature=1.0,
+            review_threshold=0.0,
+        )
+    )
+    return CalibratedArtifact(
+        classifier=CalibratedClassifier(inner, effective),
+        path=path,
+        calibration=calibration,
+        calibration_payload=payload,
+    )
+
+
+def baseline_available(settings: Settings | None = None) -> bool:
+    """Return whether the ``baseline`` selector resolves to an artifact."""
+    resolved = settings if settings is not None else build_settings()
+    try:
+        build_model_resolver(resolved).resolve("baseline")
+    except ArtifactNotFoundError:
+        return False
+    return True
 
 
 def build_classifier_factory(settings: Settings | None = None) -> ClassifierFactory:
@@ -415,3 +499,43 @@ def repository_identity() -> tuple[str, str]:
     except OSError:
         lock_sha = "unknown"
     return git_sha, lock_sha
+
+
+def build_final_report_figures() -> FinalReportFigureWriter | None:
+    """Wire the optional matplotlib figure writer, or ``None`` without the extra."""
+    if importlib.util.find_spec("matplotlib") is None:
+        return None
+    module = importlib.import_module("stc.adapters.reporting.plots")
+    factory = cast(Callable[[], FinalReportFigureWriter], module.PlotReportWriter)
+    return factory()
+
+
+def render_results(
+    *,
+    summary_path: Path,
+    table_path: Path,
+    final_dir: Path | None = None,
+    readme: Path | None = None,
+    readme_es: Path | None = None,
+) -> tuple[Path, Path]:
+    """Wire the T6 results renderer for ``stc report render``."""
+    module = importlib.import_module("stc.adapters.reporting.results")
+    renderer = cast(Callable[..., tuple[Path, Path]], module.render_results)
+    return renderer(
+        summary_path=summary_path,
+        table_path=table_path,
+        final_dir=final_dir,
+        readme=readme,
+        readme_es=readme_es,
+    )
+
+
+def build_api_app(settings: Settings, *, model_selector: str | None = None) -> FastAPI:
+    """Wire the FastAPI adapter without making adaptations depend on each other."""
+    app_module = importlib.import_module("stc.adapters.api.app")
+    provider_module = importlib.import_module("stc.adapters.api.provider")
+    provider = provider_module.BootstrapClassifierProvider(
+        settings,
+        default_selector=model_selector,
+    )
+    return cast("FastAPI", app_module.create_app(settings, provider))

@@ -262,7 +262,7 @@ ignore_imports = [
   "stc.bootstrap -> stc.adapters.inference.onnx_classifier",
   "stc.bootstrap -> stc.adapters.models.skops_store",
   "stc.bootstrap -> stc.adapters.models.tfidf_linear",
-  "stc.bootstrap -> stc.adapters.reporting.json_writer",
+  "stc.bootstrap -> stc.adapters.reporting.writers",
   "stc.bootstrap -> stc.adapters.storage.access_log",
   "stc.bootstrap -> stc.adapters.storage.fs_model_store",
 ]
