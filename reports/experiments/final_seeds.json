@@ -1,0 +1,30 @@
+{
+  "dev_macro_f1_mean": 0.8636,
+  "dev_macro_f1_std": 0.0059,
+  "schema_version": 1,
+  "seeds": [
+    {
+      "dev_accuracy": 0.8741,
+      "dev_macro_f1": 0.8627,
+      "dev_nll": 0.7857,
+      "run": "artifacts/final/seed-13",
+      "seed": 13
+    },
+    {
+      "dev_accuracy": 0.8795,
+      "dev_macro_f1": 0.8699,
+      "dev_nll": 0.7695,
+      "run": "artifacts/final/seed-42",
+      "seed": 42
+    },
+    {
+      "dev_accuracy": 0.8746,
+      "dev_macro_f1": 0.8583,
+      "dev_nll": 0.7673,
+      "run": "artifacts/final/seed-2026",
+      "seed": 2026
+    }
+  ],
+  "selected_run": "artifacts/final/seed-42",
+  "selected_seed": 42
+}
