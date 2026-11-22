@@ -9,8 +9,8 @@ Requirements: Python 3.12 (managed by `uv`), git, and optionally an NVIDIA GPU f
 training tests.
 
 ```bash
-git clone https://github.com/Eduardo12Pacheco/spanish-text-classifier-lora.git
-cd spanish-text-classifier-lora
+git clone https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora.git
+cd clasificador-de-texto-lora
 uv sync --locked --group dev
 uv run stc --version
 ```

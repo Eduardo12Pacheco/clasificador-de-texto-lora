@@ -19,7 +19,7 @@ SUMMARY = REPO_ROOT / "reports" / "summary.json"
 READMES = {"en": REPO_ROOT / "README.md", "es": REPO_ROOT / "README.es.md"}
 QUICKSTART = [
     'uv tool install "spanish-text-classifier-lora @ '
-    "https://github.com/Eduardo12Pacheco/spanish-text-classifier-lora/releases/download/"
+    "https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/releases/download/"
     'v0.1.0/spanish_text_classifier_lora-0.1.0-py3-none-any.whl"',
     "stc model pull",
     'stc predict "despiértame a las cinco de la mañana"',

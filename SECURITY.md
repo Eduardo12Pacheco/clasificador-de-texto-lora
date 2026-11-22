@@ -10,7 +10,7 @@
 
 Please do not open a public issue for a suspected vulnerability. Use GitHub private
 vulnerability reporting ("Report a vulnerability" in the Security tab) on
-`Eduardo12Pacheco/spanish-text-classifier-lora`, or the repository's private Security
+`Eduardo12Pacheco/clasificador-de-texto-lora`, or the repository's private Security
 Advisory form. Include the affected version, reproduction steps and impact. We aim to
 acknowledge reports within seven days.
 

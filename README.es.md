@@ -4,7 +4,7 @@ Enruta peticiones breves de asistentes virtuales en español hacia 60 intencione
 escenarios con un encoder MrBERT-es ajustado con LoRA y una ruta de inferencia ONNX
 solo para CPU.
 
-[![CI](https://github.com/Eduardo12Pacheco/spanish-text-classifier-lora/actions/workflows/ci.yml/badge.svg)](https://github.com/Eduardo12Pacheco/spanish-text-classifier-lora/actions/workflows/ci.yml)
+[![CI](https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/actions/workflows/ci.yml/badge.svg)](https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/actions/workflows/ci.yml)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](pyproject.toml)
 [![Cobertura mínima](https://img.shields.io/badge/coverage-%E2%89%A5%2085%25-brightgreen.svg)](pyproject.toml)
@@ -70,7 +70,7 @@ diez patrones nombrados, y [docs/adr/](docs/adr/README.md) para las decisiones.
 Linux y macOS:
 
 ```bash
-uv tool install "spanish-text-classifier-lora @ https://github.com/Eduardo12Pacheco/spanish-text-classifier-lora/releases/download/v0.1.0/spanish_text_classifier_lora-0.1.0-py3-none-any.whl"
+uv tool install "spanish-text-classifier-lora @ https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/releases/download/v0.1.0/spanish_text_classifier_lora-0.1.0-py3-none-any.whl"
 stc model pull
 stc predict "despiértame a las cinco de la mañana"
 ```
@@ -78,7 +78,7 @@ stc predict "despiértame a las cinco de la mañana"
 Windows PowerShell:
 
 ```powershell
-uv tool install "spanish-text-classifier-lora @ https://github.com/Eduardo12Pacheco/spanish-text-classifier-lora/releases/download/v0.1.0/spanish_text_classifier_lora-0.1.0-py3-none-any.whl"
+uv tool install "spanish-text-classifier-lora @ https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/releases/download/v0.1.0/spanish_text_classifier_lora-0.1.0-py3-none-any.whl"
 stc model pull
 stc predict "despiértame a las cinco de la mañana"
 ```

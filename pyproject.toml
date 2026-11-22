@@ -55,10 +55,10 @@ train = [
 stc = "stc.adapters.cli.app:main"
 
 [project.urls]
-Homepage = "https://github.com/Eduardo12Pacheco/spanish-text-classifier-lora"
-Repository = "https://github.com/Eduardo12Pacheco/spanish-text-classifier-lora"
-Issues = "https://github.com/Eduardo12Pacheco/spanish-text-classifier-lora/issues"
-Changelog = "https://github.com/Eduardo12Pacheco/spanish-text-classifier-lora/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora"
+Repository = "https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora"
+Issues = "https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/issues"
+Changelog = "https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/blob/main/CHANGELOG.md"
 
 [dependency-groups]
 dev = [
