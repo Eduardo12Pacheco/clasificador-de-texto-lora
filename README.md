@@ -36,7 +36,7 @@ LoRA-tuned MrBERT-es encoder and a CPU-only ONNX inference path.
 | TF-IDF baseline | 0.8410 [0.8268, 0.8534] | 0.8175 [0.7919, 0.8330] | 0.0849 → 0.0253 |
 | LoRA transformer | 0.8665 [0.8544, 0.8786] | 0.8305 [0.8064, 0.8458] | 0.0938 → 0.0181 |
 
-The LoRA transformer and the TF-IDF baseline perform within statistical noise on the audited test split (Δmacro-F1 +0.0131 (95 % CI [-0.0084, +0.0344]), McNemar p = 0.000); the outcome is a tie.
+The difference in accuracy is statistically significant: the LoRA transformer is more accurate than the TF-IDF baseline on the audited test split (McNemar p = 0.000); the macro-F1 difference is not significant (Δmacro-F1 +0.0131 (95 % CI [-0.0084, +0.0344])).
 
 CPU inference: 15.8 ms p50 / 19.9 ms p95 per utterance at 4 threads (batch-32 throughput 93.2 utterances/s) on 12th Gen Intel(R) Core(TM) i5-12400T. fp32 ONNX bundle: 570.0 MB.
 

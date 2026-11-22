@@ -51,7 +51,7 @@ command; its access log is committed.
 | TF-IDF baseline | 0.8410 [0.8268, 0.8534] | 0.8175 [0.7919, 0.8330] |
 | LoRA transformer | 0.8665 [0.8544, 0.8786] | 0.8305 [0.8064, 0.8458] |
 
-**Verdict:** tie. The LoRA transformer and the TF-IDF baseline perform within statistical noise on the audited test split (Δmacro-F1 +0.0131 (95 % CI [-0.0084, +0.0344]), McNemar p = 0.000); the outcome is a tie.
+**Verdict:** tie. The difference in accuracy is statistically significant: the LoRA transformer is more accurate than the TF-IDF baseline on the audited test split (McNemar p = 0.000); the macro-F1 difference is not significant (Δmacro-F1 +0.0131 (95 % CI [-0.0084, +0.0344])).
 
 Top-3 accuracy is 0.9597; scenario accuracy is
 0.9072.

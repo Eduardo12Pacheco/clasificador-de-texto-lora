@@ -25,7 +25,7 @@
   "split": "test",
   "verdict": "tie",
   "verdict_sentences": {
-    "en": "The LoRA transformer and the TF-IDF baseline perform within statistical noise on the audited test split (Δmacro-F1 +0.0131 (95 % CI [-0.0084, +0.0344]), McNemar p = 0.000); the outcome is a tie.",
-    "es": "El transformer con LoRA y la línea base TF-IDF rinden dentro del ruido estadístico en el test auditado (Δmacro-F1 +0.0131 (95 % CI [-0.0084, +0.0344]), McNemar p = 0.000); el resultado es un empate."
+    "en": "The difference in accuracy is statistically significant: the LoRA transformer is more accurate than the TF-IDF baseline on the audited test split (McNemar p = 0.000); the macro-F1 difference is not significant (Δmacro-F1 +0.0131 (95 % CI [-0.0084, +0.0344])).",
+    "es": "La diferencia de exactitud es estadísticamente significativa: el transformer con LoRA es más exacto que la línea base TF-IDF en el test auditado (McNemar p = 0.000); la diferencia de macro-F1 no es significativa (Δmacro-F1 +0.0131 (95 % CI [-0.0084, +0.0344]))."
   }
 }

@@ -37,7 +37,7 @@ solo para CPU.
 | TF-IDF baseline | 0.8410 [0.8268, 0.8534] | 0.8175 [0.7919, 0.8330] | 0.0849 → 0.0253 |
 | LoRA transformer | 0.8665 [0.8544, 0.8786] | 0.8305 [0.8064, 0.8458] | 0.0938 → 0.0181 |
 
-El transformer con LoRA y la línea base TF-IDF rinden dentro del ruido estadístico en el test auditado (Δmacro-F1 +0.0131 (95 % CI [-0.0084, +0.0344]), McNemar p = 0.000); el resultado es un empate.
+La diferencia de exactitud es estadísticamente significativa: el transformer con LoRA es más exacto que la línea base TF-IDF en el test auditado (McNemar p = 0.000); la diferencia de macro-F1 no es significativa (Δmacro-F1 +0.0131 (95 % CI [-0.0084, +0.0344])).
 
 Inferencia en CPU: 15.8 ms p50 / 19.9 ms p95 por frase con 4 hilos (rendimiento batch-32 de 93.2 frases/s) en 12th Gen Intel(R) Core(TM) i5-12400T. Bundle ONNX fp32 de 570.0 MB.
 
