@@ -42,8 +42,10 @@ CPU inference: 15.8 ms p50 / 19.9 ms p95 per utterance at 4 threads (batch-32 th
 
 <!-- RESULTS:END -->
 
-The comparison is honest: the transformer is faster to serve than it is accurate at
-this scale, and the audit log contains the single release-candidate test read.
+The comparison is honest: on the audited test split the transformer is more accurate
+than the TF-IDF baseline (the 95 % CI of the accuracy difference excludes zero), but the
+macro-F1 difference is not significant. The audit log contains the single release-candidate
+test read.
 
 ## Architecture
 

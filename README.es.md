@@ -43,8 +43,10 @@ Inferencia en CPU: 15.8 ms p50 / 19.9 ms p95 por frase con 4 hilos (rendimiento 
 
 <!-- RESULTS:END -->
 
-La comparación es honesta: a esta escala el transformer es más rápido de servir que
-preciso, y el registro de accesos contiene la única lectura de test de la release.
+La comparación es honesta: en el test auditado el transformer es más exacto que la línea
+base TF-IDF (el IC 95 % de la diferencia de exactitud no incluye cero), pero la diferencia de
+macro-F1 no es significativa. El registro de accesos contiene la única lectura de test de la
+release.
 
 ## Arquitectura
 
