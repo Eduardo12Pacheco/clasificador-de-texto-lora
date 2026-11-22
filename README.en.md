@@ -2,30 +2,72 @@
 
 [Español](README.md) · **English**
 
-Route short Spanish virtual-assistant requests into 60 intents and 18 scenarios with a
-LoRA-tuned MrBERT-es encoder and a CPU-only ONNX inference path.
+<p align="center">
+  <img src="docs/assets/readme/hero.en.svg" width="100%" alt="Spanish intent classifier with LoRA. Real stc predict example: the request «despiértame a las cinco de la mañana» routes to intent alarm_set, scenario alarm, with confidence 0.963.">
+</p>
 
-[![CI](https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/actions/workflows/ci.yml/badge.svg)](https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/actions/workflows/ci.yml)
-[![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](pyproject.toml)
-[![Coverage gate](https://img.shields.io/badge/coverage-%E2%89%A5%2085%25-brightgreen.svg)](pyproject.toml)
-[![CPU-only inference](https://img.shields.io/badge/inference-CPU--only-informational.svg)](#quickstart)
+<p align="center"><strong>Routes short Spanish virtual-assistant requests into 60 intents and 18 scenarios, offline and on CPU.</strong></p>
+
+[![CI](https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/actions/workflows/ci.yml/badge.svg)](https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/actions/workflows/ci.yml) [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](pyproject.toml)
 
 ![Classifying a Spanish request in the local web UI](docs/assets/demo.gif)
 
-## What it does
+## What it is
 
-- Classifies Spanish assistant utterances into the 60 MASSIVE `es-ES` intents and their
-  18 scenarios, fully offline on CPU.
-- Compares a tuned TF-IDF + LinearSVC baseline with a LoRA fine-tune of
-  `BSC-LT/MrBERT-es` under one audited protocol: bootstrap CIs, exact McNemar,
-  per-class metrics, calibration and robustness slices.
-- Audits data leakage before training and locks the test split behind a capability
-  token plus an append-only access log.
-- Calibrates the shipped model with temperature scaling and exposes a dev-chosen
-  `needs_review` threshold through the CLI, the API and the UI.
-- Ships an fp32 ONNX bundle whose sha256 is verified on download, with int8 variants
-  measured against a pre-registered quality gate (all failed, so fp32 ships).
+A classifier for short Spanish virtual-assistant requests. It returns the calibrated intent, its scenario and whether the prediction needs review. Everything runs offline on CPU, from an fp32 ONNX bundle whose sha256 is verified on download.
+
+## Why it is different
+
+- **One audited protocol for every model.** The TF-IDF + LinearSVC baseline and the LoRA fine-tune of `BSC-LT/MrBERT-es` are evaluated under the same protocol: bootstrap CIs, exact McNemar, per-class metrics, calibration and robustness slices.
+- **Locked test split.** A data-leakage audit runs before training, and the test split is read only with a capability token and an append-only access log.
+- **Calibrated confidence.** Temperature scaling on the shipped model and a `needs_review` threshold chosen on dev, exposed through the CLI, the API and the UI.
+- **Published negative results.** The int8 variants failed the pre-registered quantisation gate, so fp32 ships; the result and its measurements are in [ADR-0005](docs/adr/0005-onnx-runtime-inference-and-quantization.md).
+
+## How it works
+
+```mermaid
+flowchart LR
+  CLI["stc CLI"] --> UC["Use cases"]
+  API["FastAPI + local UI"] --> UC
+  UC --> D["Domain: labels, metrics, calibration, robustness"]
+  UC -. ports .-> A["Adapters: MASSIVE, TF-IDF, LoRA/ONNX, trackers, GitHub Release"]
+```
+
+Hexagonal ports and adapters: a pure domain, application use cases and adapters that never import each other. import-linter and an AST purity test enforce the dependency direction; `mypy --strict` covers `src/`. The module map and the ten named patterns are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+- **CLI:** `stc predict`, `stc evaluate`, `stc train`, `stc export`, `stc benchmark` and `stc doctor`; every command has `--help` and stable `--json` output.
+- **API:** `uv run stc serve` binds `127.0.0.1:19080` and exposes `/healthz`, `/v1/model`, `/v1/labels` and `/v1/predict`, with RFC 7807 errors.
+- **UI:** the same command serves a local ES/EN interface with calibrated top-3 bars, a needs-review banner, a baseline comparison toggle and light/dark/system themes. It makes no third-party requests.
+
+| Light | Dark | Mobile (360 px) |
+|---|---|---|
+| ![Interface in light theme](docs/assets/ui-light.png) | ![Interface in dark theme](docs/assets/ui-dark.png) | ![Interface on a mobile viewport](docs/assets/ui-mobile.png) |
+
+Error and comparison states are in [docs/assets/ui-error.png](docs/assets/ui-error.png) and [docs/assets/ui-compare.png](docs/assets/ui-compare.png).
+
+## Quickstart
+
+Requirements: Python 3.12 or later and [uv](https://docs.astral.sh/uv/).
+
+Linux and macOS:
+
+```bash
+uv tool install "spanish-text-classifier-lora @ https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/releases/download/v0.1.0/spanish_text_classifier_lora-0.1.0-py3-none-any.whl"
+stc model pull
+stc predict "despiértame a las cinco de la mañana"
+```
+
+Windows PowerShell:
+
+```powershell
+uv tool install "spanish-text-classifier-lora @ https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/releases/download/v0.1.0/spanish_text_classifier_lora-0.1.0-py3-none-any.whl"
+stc model pull
+stc predict "despiértame a las cinco de la mañana"
+```
+
+`stc model pull` downloads the 570 MB fp32 bundle and verifies its sha256. `stc predict` prints the calibrated top intent, its scenario and whether the prediction needs review; `stc model verify` re-checks every bundle hash.
+
+![stc predict output](docs/assets/cli-predict.svg)
 
 ## Results
 
@@ -49,72 +91,7 @@ than the TF-IDF baseline (the 95 % CI of the accuracy difference excludes zero),
 macro-F1 difference is not significant. The audit log contains the single release-candidate
 test read.
 
-## Architecture
-
-Hexagonal ports and adapters: a pure domain, application use cases and adapters that
-never import each other. The dependency direction is enforced by import-linter and an
-AST purity test; `mypy --strict` covers `src/`.
-
-```mermaid
-flowchart LR
-  CLI["stc CLI"] --> UC["Use cases"]
-  API["FastAPI + local UI"] --> UC
-  UC --> D["Domain: labels, metrics, calibration, robustness"]
-  UC -. ports .-> A["Adapters: MASSIVE, TF-IDF, LoRA/ONNX, trackers, GitHub Release"]
-```
-
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the module map and the ten named
-patterns, and [docs/adr/](docs/adr/README.md) for the decision records.
-
-## Quickstart
-
-Linux and macOS:
-
-```bash
-uv tool install "spanish-text-classifier-lora @ https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/releases/download/v0.1.0/spanish_text_classifier_lora-0.1.0-py3-none-any.whl"
-stc model pull
-stc predict "despiértame a las cinco de la mañana"
-```
-
-Windows PowerShell:
-
-```powershell
-uv tool install "spanish-text-classifier-lora @ https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/releases/download/v0.1.0/spanish_text_classifier_lora-0.1.0-py3-none-any.whl"
-stc model pull
-stc predict "despiértame a las cinco de la mañana"
-```
-
-`stc predict` prints the calibrated top intent, its scenario and whether the prediction
-needs review. `stc model verify` re-checks every bundle hash.
-
-## CLI, API and UI
-
-![stc predict output](docs/assets/cli-predict.svg)
-
-- CLI: `stc predict`, `stc evaluate`, `stc train`, `stc export`, `stc benchmark`,
-  `stc doctor`; every command has `--help` and stable `--json` output.
-- API: `uv run stc serve` binds `127.0.0.1:19080` and exposes `/healthz`, `/v1/model`,
-  `/v1/labels` and `/v1/predict` with RFC 7807 errors.
-- UI: the same command serves a local ES/EN interface with calibrated top-3 bars,
-  a needs-review banner, a baseline comparison toggle and light/dark/system themes.
-
-| Light | Dark | Mobile (360 px) |
-|---|---|---|
-| ![Light UI](docs/assets/ui-light.png) | ![Dark UI](docs/assets/ui-dark.png) | ![Mobile UI](docs/assets/ui-mobile.png) |
-
-Error and comparison states are in [docs/assets/ui-error.png](docs/assets/ui-error.png)
-and [docs/assets/ui-compare.png](docs/assets/ui-compare.png). The UI makes no
-third-party requests.
-
-## Training
-
-Training needs the optional `train` extra and an 8 GB NVIDIA GPU; inference stays on
-CPU. The measured pipeline (screening, full fine-tuning reference, 24-trial Optuna
-search and three final seeds) and the exact commands are in
-[docs/TRAINING.md](docs/TRAINING.md). Every reported number is produced by a committed
-command: see [docs/EVALUATION.md](docs/EVALUATION.md).
-
-## Limitations and honesty
+## Honest limitations
 
 - Data and evaluation are European Spanish (`es-ES`). The Latin-American
   regionalisation suite is synthetic and measures sensitivity, not dialect accuracy.
@@ -124,6 +101,7 @@ command: see [docs/EVALUATION.md](docs/EVALUATION.md).
   the negative result and its measurements are documented in ADR-0005.
 - The test split is read only by `stc report final`; one access-log line is committed
   and re-runs are appended, never deleted.
+- Status: portfolio project under active maintenance, version 0.1.0. The package is marked `Development Status :: 3 - Alpha` in `pyproject.toml`.
 
 ## Documentation
 
@@ -132,6 +110,7 @@ command: see [docs/EVALUATION.md](docs/EVALUATION.md).
 - [CLI reference](docs/CLI.md) · [API guide](docs/API.md) · [Model card](MODEL_CARD.md)
 - [Error analysis](docs/ERROR_ANALYSIS.md) · [Decision records](docs/adr/README.md) ·
   [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
+- Training: needs the optional `train` extra and an 8 GB NVIDIA GPU; inference stays on CPU. The measured pipeline and exact commands are in [docs/TRAINING.md](docs/TRAINING.md).
 
 ## Licence and attribution
 
@@ -140,3 +119,7 @@ derived from `BSC-LT/MrBERT-es` (Apache-2.0, modification stated in the model ca
 Amazon MASSIVE 1.0 and SLURP are CC BY 4.0, Copyright Amazon.com Inc.; the bundled
 fixture sample keeps their attribution. See [NOTICE](NOTICE) and
 [docs/DATA.md](docs/DATA.md) for the pinned checksum and full lineage.
+
+## Author
+
+Eduardo Pacheco · https://github.com/Eduardo12Pacheco

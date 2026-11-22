@@ -2,31 +2,72 @@
 
 **Español** · [English](README.en.md)
 
-Enruta peticiones breves de asistentes virtuales en español hacia 60 intenciones y 18
-escenarios con un encoder MrBERT-es ajustado con LoRA y una ruta de inferencia ONNX
-solo para CPU.
+<p align="center">
+  <img src="docs/assets/readme/hero.svg" width="100%" alt="Clasificador de intenciones en español con LoRA. Ejemplo real de stc predict: la petición «despiértame a las cinco de la mañana» se enruta a la intención alarm_set, escenario alarm, con confianza 0.963.">
+</p>
 
-[![CI](https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/actions/workflows/ci.yml/badge.svg)](https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/actions/workflows/ci.yml)
-[![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](pyproject.toml)
-[![Cobertura mínima](https://img.shields.io/badge/coverage-%E2%89%A5%2085%25-brightgreen.svg)](pyproject.toml)
-[![Inferencia solo CPU](https://img.shields.io/badge/inference-CPU--only-informational.svg)](#inicio-rápido)
+<p align="center"><strong>Enruta peticiones breves de asistentes virtuales en español hacia 60 intenciones y 18 escenarios, offline y en CPU.</strong></p>
+
+[![CI](https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/actions/workflows/ci.yml/badge.svg)](https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/actions/workflows/ci.yml) [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](pyproject.toml)
 
 ![Clasificando una petición en español en la interfaz web local](docs/assets/demo.gif)
 
-## Qué hace
+## Qué es
 
-- Clasifica enunciados de asistente en español hacia las 60 intenciones `es-ES` de
-  MASSIVE y sus 18 escenarios, de forma totalmente offline y en CPU.
-- Compara una línea base TF-IDF + LinearSVC ajustada con un fine-tune LoRA de
-  `BSC-LT/MrBERT-es` bajo un mismo protocolo auditado: intervalos bootstrap, McNemar
-  exacto, métricas por clase, calibración y cortes de robustez.
-- Audita la fuga de datos antes de entrenar y bloquea el conjunto de test tras un token
-  de capacidad y un registro de accesos de solo anexar.
-- Calibra el modelo publicado con temperature scaling y expone un umbral
-  `needs_review` elegido en dev mediante la CLI, la API y la interfaz.
-- Publica un bundle ONNX fp32 cuyo sha256 se verifica al descargar, con variantes int8
-  medidas contra una puerta de calidad preregistrada (todas fallaron; se publica fp32).
+Un clasificador para peticiones breves de asistentes virtuales en español. Devuelve la intención calibrada, su escenario y si la predicción necesita revisión. Todo corre offline en CPU, desde un bundle ONNX fp32 cuyo sha256 se verifica al descargar.
+
+## Por qué es distinto
+
+- **Comparación bajo un protocolo único.** La línea base TF-IDF + LinearSVC y el fine-tune LoRA de `BSC-LT/MrBERT-es` se evalúan con el mismo protocolo: intervalos bootstrap, McNemar exacto, métricas por clase, calibración y cortes de robustez.
+- **Test bloqueado.** Una auditoría de fuga de datos corre antes de entrenar, y el conjunto de test solo se lee con un token de capacidad y un registro de accesos de solo anexar.
+- **Confianza calibrada.** Temperature scaling sobre el modelo publicado y un umbral `needs_review` elegido en dev, expuesto en la CLI, la API y la interfaz.
+- **Negativos publicados.** Las variantes int8 fallaron la puerta de cuantización preregistrada, así que se publica fp32; el resultado y sus medidas están en [ADR-0005](docs/adr/0005-onnx-runtime-inference-and-quantization.md).
+
+## Cómo funciona
+
+```mermaid
+flowchart LR
+  CLI["stc CLI"] --> UC["Casos de uso"]
+  API["FastAPI + interfaz local"] --> UC
+  UC --> D["Dominio: etiquetas, métricas, calibración, robustez"]
+  UC -. puertos .-> A["Adaptadores: MASSIVE, TF-IDF, LoRA/ONNX, trackers, GitHub Release"]
+```
+
+Puertos y adaptadores hexagonales: un dominio puro, casos de uso y adaptadores que nunca se importan entre sí. import-linter y un test AST de pureza hacen cumplir la dirección de dependencias; `mypy --strict` cubre `src/`. El mapa de módulos y los diez patrones están en [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+- **CLI:** `stc predict`, `stc evaluate`, `stc train`, `stc export`, `stc benchmark` y `stc doctor`; cada comando tiene `--help` y salida `--json` estable.
+- **API:** `uv run stc serve` escucha en `127.0.0.1:19080` y expone `/healthz`, `/v1/model`, `/v1/labels` y `/v1/predict`, con errores RFC 7807.
+- **Interfaz:** el mismo comando sirve una UI local ES/EN con barras top-3 calibradas, aviso de revisión, comparación con la línea base y temas claro, oscuro o del sistema. No hace peticiones a terceros.
+
+| Claro | Oscuro | Móvil (360 px) |
+|---|---|---|
+| ![Interfaz en tema claro](docs/assets/ui-light.png) | ![Interfaz en tema oscuro](docs/assets/ui-dark.png) | ![Interfaz en móvil](docs/assets/ui-mobile.png) |
+
+Los estados de error y comparación están en [docs/assets/ui-error.png](docs/assets/ui-error.png) y [docs/assets/ui-compare.png](docs/assets/ui-compare.png).
+
+## Inicio rápido
+
+Requisitos: Python 3.12 o superior y [uv](https://docs.astral.sh/uv/).
+
+Linux y macOS:
+
+```bash
+uv tool install "spanish-text-classifier-lora @ https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/releases/download/v0.1.0/spanish_text_classifier_lora-0.1.0-py3-none-any.whl"
+stc model pull
+stc predict "despiértame a las cinco de la mañana"
+```
+
+Windows PowerShell:
+
+```powershell
+uv tool install "spanish-text-classifier-lora @ https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/releases/download/v0.1.0/spanish_text_classifier_lora-0.1.0-py3-none-any.whl"
+stc model pull
+stc predict "despiértame a las cinco de la mañana"
+```
+
+`stc model pull` descarga el bundle fp32 de 570 MB y verifica su sha256. `stc predict` muestra la intención principal calibrada, su escenario y si la predicción necesita revisión; `stc model verify` vuelve a comprobar todos los hashes del bundle.
+
+![Salida de stc predict](docs/assets/cli-predict.svg)
 
 ## Resultados
 
@@ -50,73 +91,7 @@ base TF-IDF (el IC 95 % de la diferencia de exactitud no incluye cero), pero la 
 macro-F1 no es significativa. El registro de accesos contiene la única lectura de test de la
 release.
 
-## Arquitectura
-
-Puertos y adaptadores hexagonales: un dominio puro, casos de uso de aplicación y
-adaptadores que nunca se importan entre sí. La dirección de dependencias la imponen
-import-linter y un test AST de pureza; `mypy --strict` cubre `src/`.
-
-```mermaid
-flowchart LR
-  CLI["CLI stc"] --> UC["Casos de uso"]
-  API["FastAPI + interfaz local"] --> UC
-  UC --> D["Dominio: etiquetas, métricas, calibración, robustez"]
-  UC -. puertos .-> A["Adaptadores: MASSIVE, TF-IDF, LoRA/ONNX, trackers, GitHub Release"]
-```
-
-Consulta [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) para el mapa de módulos y los
-diez patrones nombrados, y [docs/adr/](docs/adr/README.md) para las decisiones.
-
-## Inicio rápido
-
-Linux y macOS:
-
-```bash
-uv tool install "spanish-text-classifier-lora @ https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/releases/download/v0.1.0/spanish_text_classifier_lora-0.1.0-py3-none-any.whl"
-stc model pull
-stc predict "despiértame a las cinco de la mañana"
-```
-
-Windows PowerShell:
-
-```powershell
-uv tool install "spanish-text-classifier-lora @ https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/releases/download/v0.1.0/spanish_text_classifier_lora-0.1.0-py3-none-any.whl"
-stc model pull
-stc predict "despiértame a las cinco de la mañana"
-```
-
-`stc predict` muestra la intención principal calibrada, su escenario y si la predicción
-necesita revisión. `stc model verify` vuelve a comprobar todos los hashes del bundle.
-
-## CLI, API e interfaz
-
-![Salida de stc predict](docs/assets/cli-predict.svg)
-
-- CLI: `stc predict`, `stc evaluate`, `stc train`, `stc export`, `stc benchmark`,
-  `stc doctor`; cada comando tiene `--help` y salida `--json` estable.
-- API: `uv run stc serve` escucha en `127.0.0.1:19080` y expone `/healthz`, `/v1/model`,
-  `/v1/labels` y `/v1/predict` con errores RFC 7807.
-- Interfaz: el mismo comando sirve una UI local ES/EN con barras top-3 calibradas, aviso
-  de revisión, comparación con la línea base y temas claro/oscuro/sistema.
-
-| Claro | Oscuro | Móvil (360 px) |
-|---|---|---|
-| ![UI clara](docs/assets/ui-light.png) | ![UI oscura](docs/assets/ui-dark.png) | ![UI móvil](docs/assets/ui-mobile.png) |
-
-Los estados de error y comparación están en
-[docs/assets/ui-error.png](docs/assets/ui-error.png) y
-[docs/assets/ui-compare.png](docs/assets/ui-compare.png). La interfaz no hace peticiones
-a terceros.
-
-## Entrenamiento
-
-El entrenamiento necesita el extra opcional `train` y una GPU NVIDIA de 8 GB; la
-inferencia permanece en CPU. El pipeline medido (screening, referencia de fine-tuning
-completo, búsqueda Optuna de 24 trials y tres semillas finales) y los comandos exactos
-están en [docs/TRAINING.md](docs/TRAINING.md). Cada número publicado lo produce un
-comando versionado: consulta [docs/EVALUATION.md](docs/EVALUATION.md).
-
-## Limitaciones y honestidad
+## Limitaciones honestas
 
 - Los datos y la evaluación son español de España (`es-ES`). La suite de
   regionalización latinoamericana es sintética y mide sensibilidad, no precisión
@@ -128,6 +103,7 @@ comando versionado: consulta [docs/EVALUATION.md](docs/EVALUATION.md).
   publicado de 570 MB es fp32; el resultado negativo y sus medidas están en ADR-0005.
 - El conjunto de test solo lo lee `stc report final`; hay una línea de acceso
   versionada y las re-ejecuciones se anexan, nunca se borran.
+- Estado: proyecto de portafolio en mantenimiento activo, versión 0.1.0. El paquete está marcado como `Development Status :: 3 - Alpha` en `pyproject.toml`.
 
 ## Documentación
 
@@ -136,6 +112,7 @@ comando versionado: consulta [docs/EVALUATION.md](docs/EVALUATION.md).
 - [Referencia de CLI](docs/CLI.md) · [Guía de API](docs/API.md) · [Model card](MODEL_CARD.md)
 - [Análisis de errores](docs/ERROR_ANALYSIS.md) · [Decisiones](docs/adr/README.md) ·
   [Contribuir](CONTRIBUTING.md) · [Seguridad](SECURITY.md)
+- Entrenamiento: requiere el extra opcional `train` y una GPU NVIDIA de 8 GB; la inferencia sigue en CPU. El pipeline medido y los comandos exactos están en [docs/TRAINING.md](docs/TRAINING.md).
 
 ## Licencia y atribución
 
@@ -144,3 +121,7 @@ Apache-2.0, derivados de `BSC-LT/MrBERT-es` (Apache-2.0, modificación declarada
 model card). Amazon MASSIVE 1.0 y SLURP son CC BY 4.0, Copyright Amazon.com Inc.; la
 muestra incluida conserva su atribución. Consulta [NOTICE](NOTICE) y
 [docs/DATA.md](docs/DATA.md) para el checksum fijado y el linaje completo.
+
+## Autor
+
+Eduardo Pacheco · https://github.com/Eduardo12Pacheco
