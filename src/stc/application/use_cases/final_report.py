@@ -45,6 +45,7 @@ from stc.domain.perturbations import PERTURBATIONS
 from stc.domain.splits import Split
 from stc.domain.stats import (
     ConfidenceInterval,
+    McNemarResult,
     bootstrap_ci,
     mcnemar_exact,
     paired_bootstrap_delta,
@@ -270,8 +271,8 @@ class FinalReport:
         mcnemar = mcnemar_exact(model_eval.correct, baseline_eval.correct)
         verdict = _verdict(delta_macro.lower, delta_macro.upper, mcnemar.p)
         sentences = {
-            "en": _verdict_sentence("en", verdict, delta_macro, mcnemar.p),
-            "es": _verdict_sentence("es", verdict, delta_macro, mcnemar.p),
+            "en": _verdict_sentence("en", verdict, delta_macro, mcnemar),
+            "es": _verdict_sentence("es", verdict, delta_macro, mcnemar),
         }
 
         robustness = RobustnessEvaluator()
@@ -551,15 +552,15 @@ def _verdict_sentence(
     language: str,
     verdict: str,
     delta: ConfidenceInterval,
-    p_value: float,
+    mcnemar: McNemarResult,
 ) -> str:
-    estimate = delta.estimate
-    lower = delta.lower
-    upper = delta.upper
-    stats = (
-        f"Δmacro-F1 {estimate:+.4f} (95 % CI [{lower:+.4f}, {upper:+.4f}]), "
-        f"McNemar p = {p_value:.3f}"
-    )
+    macro = f"Δmacro-F1 {delta.estimate:+.4f} (95 % CI [{delta.lower:+.4f}, {delta.upper:+.4f}])"
+    stats = f"{macro}, McNemar p = {mcnemar.p:.3f}"
+    # A significant McNemar test with a macro-F1 tie means the paired accuracy
+    # difference is real even though macro-F1 is not. ``b`` counts examples only
+    # the LoRA transformer got right, ``c`` the reverse.
+    significant_accuracy = mcnemar.p < 0.05
+    lora_more_accurate = mcnemar.b > mcnemar.c
     if language == "es":
         if verdict == "transformer_better":
             return (
@@ -570,6 +571,17 @@ def _verdict_sentence(
             return (
                 "La línea base TF-IDF supera de forma significativa al transformer con LoRA "
                 f"en el test auditado ({stats})."
+            )
+        if significant_accuracy:
+            winner = (
+                "el transformer con LoRA es más exacto que la línea base TF-IDF"
+                if lora_more_accurate
+                else "la línea base TF-IDF es más exacta que el transformer con LoRA"
+            )
+            return (
+                f"La diferencia de exactitud es estadísticamente significativa: {winner} "
+                f"en el test auditado (McNemar p = {mcnemar.p:.3f}); la diferencia de "
+                f"macro-F1 no es significativa ({macro})."
             )
         return (
             "El transformer con LoRA y la línea base TF-IDF rinden dentro del ruido "
@@ -584,6 +596,17 @@ def _verdict_sentence(
         return (
             "The TF-IDF baseline significantly outperforms the LoRA transformer "
             f"on the audited test split ({stats})."
+        )
+    if significant_accuracy:
+        winner = (
+            "the LoRA transformer is more accurate than the TF-IDF baseline"
+            if lora_more_accurate
+            else "the TF-IDF baseline is more accurate than the LoRA transformer"
+        )
+        return (
+            f"The difference in accuracy is statistically significant: {winner} "
+            f"on the audited test split (McNemar p = {mcnemar.p:.3f}); the macro-F1 "
+            f"difference is not significant ({macro})."
         )
     return (
         "The LoRA transformer and the TF-IDF baseline perform within statistical noise "

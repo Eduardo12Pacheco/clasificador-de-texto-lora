@@ -18,13 +18,14 @@ from stc.adapters.reporting.json_writer import JsonReportWriter
 from stc.adapters.reporting.markdown import MarkdownReportWriter
 from stc.application.dto import DatasetMeta, ModelInfo
 from stc.application.ports import DatasetRepository
-from stc.application.use_cases.final_report import FinalReport
+from stc.application.use_cases.final_report import FinalReport, _verdict_sentence
 from stc.domain.access import TestAccessEntry as AccessEntry
 from stc.domain.access import TestAccessGrant as AccessGrant
 from stc.domain.calibration import Calibration, ReliabilityBins
 from stc.domain.examples import Example
 from stc.domain.labels import LabelSpace
 from stc.domain.splits import Split
+from stc.domain.stats import ConfidenceInterval, McNemarResult
 
 pytestmark = pytest.mark.unit
 
@@ -199,6 +200,65 @@ def test_tie_verdict(tmp_path: Path) -> None:
     result, _ = _run(tmp_path, _correct(), [1, 2, 2, 3, 0, 1, 2, 3, 0, 1])
 
     assert result.verdict == "tie"
+
+
+_MACRO_DELTA = ConfidenceInterval(estimate=0.0131, lower=-0.0084, upper=0.0344)
+
+
+@pytest.mark.parametrize("language", ["en", "es"])
+def test_significant_mcnemar_is_never_described_as_statistical_noise(language: str) -> None:
+    sentence = _verdict_sentence(language, "tie", _MACRO_DELTA, McNemarResult(b=206, c=130, p=1e-4))
+
+    assert "noise" not in sentence
+    assert "ruido" not in sentence
+
+
+@pytest.mark.parametrize(
+    ("language", "b", "c", "expected"),
+    [
+        (
+            "en",
+            206,
+            130,
+            "the LoRA transformer is more accurate than the TF-IDF baseline",
+        ),
+        (
+            "en",
+            130,
+            206,
+            "the TF-IDF baseline is more accurate than the LoRA transformer",
+        ),
+        (
+            "es",
+            206,
+            130,
+            "el transformer con LoRA es más exacto que la línea base TF-IDF",
+        ),
+        (
+            "es",
+            130,
+            206,
+            "la línea base TF-IDF es más exacta que el transformer con LoRA",
+        ),
+    ],
+)
+def test_significant_mcnemar_states_significance_and_the_winner(
+    language: str, b: int, c: int, expected: str
+) -> None:
+    sentence = _verdict_sentence(language, "tie", _MACRO_DELTA, McNemarResult(b=b, c=c, p=1e-4))
+
+    assert expected in sentence
+    assert "macro-F1" in sentence
+
+
+@pytest.mark.parametrize(
+    ("language", "phrase"),
+    [("en", "statistical noise"), ("es", "ruido estadístico")],
+)
+def test_non_significant_tie_keeps_the_noise_wording(language: str, phrase: str) -> None:
+    sentence = _verdict_sentence(language, "tie", _MACRO_DELTA, McNemarResult(b=2, c=0, p=0.5))
+
+    assert phrase in sentence
 
 
 def test_final_report_writes_every_output_and_one_audit_line(tmp_path: Path) -> None:
