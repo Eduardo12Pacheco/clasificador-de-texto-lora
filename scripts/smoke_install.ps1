@@ -157,10 +157,25 @@ try {
     Write-Host "torch is not importable (S12)"
 
     Write-Host "==> stc serve /healthz"
-    $listener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, 0)
-    $listener.Start()
-    $port = ([System.Net.IPEndPoint]$listener.LocalEndpoint).Port
-    $listener.Stop()
+    # Settings.api_port only accepts 19000-19999, so scan that range like the POSIX script.
+    $port = $null
+    foreach ($candidate in 19000..19999) {
+        $listener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, $candidate)
+        try {
+            $listener.Start()
+            $port = $candidate
+            break
+        }
+        catch [System.Net.Sockets.SocketException] {
+            continue
+        }
+        finally {
+            $listener.Stop()
+        }
+    }
+    if ($null -eq $port) {
+        throw "no free port in 19000-19999"
+    }
     $env:STC_API_PORT = "$port"
     $env:STC_MODEL = $baseline
     $ServeProcess = Start-Process -FilePath $Stc `
