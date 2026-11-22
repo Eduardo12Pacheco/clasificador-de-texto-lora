@@ -70,8 +70,8 @@ def test_readme_blocks_are_replaced_without_touching_the_outside(
     tmp_path: Path, final_reports
 ) -> None:
     final_reports()
-    readme = tmp_path / "README.md"
-    readme_es = tmp_path / "README.es.md"
+    readme = tmp_path / "README.en.md"
+    readme_es = tmp_path / "README.md"
     readme.write_text(PREFIX, encoding="utf-8")
     readme_es.write_text(PREFIX, encoding="utf-8")
 
@@ -108,7 +108,7 @@ def test_outdated_summary_is_rebuilt(tmp_path: Path, final_reports) -> None:
 
 def test_missing_markers_is_an_error(tmp_path: Path, final_reports) -> None:
     final_reports()
-    readme = tmp_path / "README.md"
+    readme = tmp_path / "README.en.md"
     readme.write_text("# no markers\n", encoding="utf-8")
 
     result = _run(tmp_path, readme=readme)
@@ -137,7 +137,7 @@ def test_package_renderer_and_cli_render_share_the_same_output(
     cli_dir = tmp_path / "cli"
     cli_summary = cli_dir / "summary.json"
     cli_table = cli_dir / "results_table.md"
-    readme = cli_dir / "README.md"
+    readme = cli_dir / "README.en.md"
     readme.parent.mkdir(parents=True)
     readme.write_text(PREFIX, encoding="utf-8")
     result = CliRunner().invoke(
@@ -199,9 +199,9 @@ def test_runtime_and_bundle_details_are_in_summary_and_readme(
             ],
         },
     )
-    readme = tmp_path / "README.md"
+    readme = tmp_path / "README.en.md"
     readme.write_text(PREFIX, encoding="utf-8")
-    readme_es = tmp_path / "README.es.md"
+    readme_es = tmp_path / "README.md"
     readme_es.write_text(PREFIX, encoding="utf-8")
 
     result = _run(tmp_path, readme=readme, readme_es=readme_es, registry=registry)

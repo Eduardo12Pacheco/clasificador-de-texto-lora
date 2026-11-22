@@ -16,7 +16,7 @@ from stc.adapters.reporting.results import (
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SUMMARY = REPO_ROOT / "reports" / "summary.json"
-READMES = {"en": REPO_ROOT / "README.md", "es": REPO_ROOT / "README.es.md"}
+READMES = {"en": REPO_ROOT / "README.en.md", "es": REPO_ROOT / "README.md"}
 QUICKSTART = [
     'uv tool install "spanish-text-classifier-lora @ '
     "https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/releases/download/"

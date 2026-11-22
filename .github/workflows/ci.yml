@@ -188,4 +188,4 @@ jobs:
       - name: Enforce the README line budget
         run: |
           test "$(wc -l < README.md)" -le 150
-          if [ -f README.es.md ]; then test "$(wc -l < README.es.md)" -le 150; fi
+          test "$(wc -l < README.en.md)" -le 150
