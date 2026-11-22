@@ -5,7 +5,7 @@
       "name": "stc-es-intent",
       "sha256": "18ff6a1ddcb0ecc86fc8bed3e41f83798686968982a21f48b2ce35350b8ecbb4",
       "size_bytes": 570007756,
-      "url": "https://github.com/Eduardo12Pacheco/spanish-text-classifier-lora/releases/download/v0.1.0/stc-es-intent-0.1.0.zip",
+      "url": "https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/releases/download/v0.1.0/stc-es-intent-0.1.0.zip",
       "version": "0.1.0"
     }
   ],

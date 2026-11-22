@@ -37,7 +37,7 @@ def test_committed_registry_points_at_the_v010_release() -> None:
     assert entry.version == "0.1.0"
     assert entry.license == "Apache-2.0"
     assert entry.url.startswith(
-        "https://github.com/Eduardo12Pacheco/spanish-text-classifier-lora/releases/download/v0.1.0/"
+        "https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora/releases/download/v0.1.0/"
     )
     assert len(entry.sha256) == 64
     assert entry.size_bytes > 100_000_000
