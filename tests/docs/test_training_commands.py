@@ -72,7 +72,7 @@ def test_training_guide_commands_exist() -> None:
 def test_training_guide_documents_measured_stages() -> None:
     text = TRAINING.read_text(encoding="utf-8")
 
-    for stage in ("screening", "full fine-tuning", "Optuna search", "final seeds"):
+    for stage in ("screening", "fine-tuning completo", "búsqueda con Optuna", "semillas finales"):
         assert stage.lower() in text.lower()
     for seconds in ("1972.199", "506.509", "1315.813", "754.476"):
         assert seconds in text

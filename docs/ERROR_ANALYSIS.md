@@ -1,20 +1,18 @@
-# Error analysis — audited test split
+# Análisis de errores — conjunto de test auditado
 
-This document analyses the 603 utterances in `reports/final/errors.json` where at
-least one of the two shipped classifiers is wrong: the TF-IDF baseline and the
-LoRA transformer. The LoRA model makes 397 errors (13.3 % of the 2,974 test
-utterances); the baseline makes 473 (15.9 %). Both models are wrong on 267
-utterances, only the baseline is wrong on 206 and only the LoRA model is wrong
-on 130. Confidences below are calibrated.
+Este documento analiza los 603 enunciados de `reports/final/errors.json` en los que al menos uno de los dos
+clasificadores publicados se equivoca: la línea base TF-IDF y el transformer LoRA. El modelo LoRA comete 397
+errores (13.3 % de los 2,974 enunciados de test); la línea base comete 473 (15.9 %). Ambos modelos fallan en
+267 enunciados, solo la línea base falla en 206 y solo el modelo LoRA falla en 130. Las confianzas citadas son
+calibradas.
 
-The categories are qualitative diagnoses, not mutually exclusive partitions:
-one utterance can be ambiguous and mislabelled at the same time. Every cited
-`ex-<id>` exists in `reports/final/errors.json` and is checked by
-`scripts/check_error_analysis.py`.
+Las categorías son diagnósticos cualitativos, no particiones mutuamente excluyentes: un mismo enunciado puede
+ser ambiguo y tener además una etiqueta errónea. Cada `ex-<id>` citado existe en
+`reports/final/errors.json` y lo comprueba `scripts/check_error_analysis.py`.
 
-## Top-15 confusions (LoRA model; baseline count for the same pair)
+## Las 15 confusiones principales (modelo LoRA; conteo de la línea base para el mismo par)
 
-| # | True → predicted | LoRA | Baseline |
+| # | Real → predicha | LoRA | Línea base |
 |---|---|---|---|
 | 1 | `general_quirky` → `qa_factoid` | 14 | 25 |
 | 2 | `general_quirky` → `calendar_query` | 11 | 10 |
@@ -32,143 +30,124 @@ one utterance can be ambiguous and mislabelled at the same time. Every cited
 | 14 | `iot_hue_lightup` → `iot_hue_lighton` | 4 | 0 |
 | 15 | `news_query` → `qa_factoid` | 4 | 0 |
 
-### Open-domain intents versus news and factoid QA
+### Intenciones de dominio abierto frente a noticias y QA factual
 
-`general_quirky` is MASSIVE's catch-all for requests that do not fit a concrete
-skill, and the model repeatedly routes those utterances to the nearest concrete
-skill. `ex-6301` ("qué está pasando") becomes `news_query` with 0.96 confidence;
-`ex-6382` ("oye esta pasando algo interesante en los deportes ultimamente")
-also becomes `news_query`; `ex-6448` ("trump") becomes `news_query`; and
-`ex-6405` ("que sonido hace un perro") becomes `qa_factoid`. The boundary is
-genuinely fuzzy without a conversation context, but the calibrated confidence is
-high, which makes this class of error dangerous for automatic routing.
+`general_quirky` es el cajón de sastre de MASSIVE para las peticiones que no encajan en una habilidad concreta,
+y el modelo dirige esos enunciados, de forma repetida, a la habilidad concreta más cercana. `ex-6301` ("qué está
+pasando") pasa a `news_query` con 0.96 de confianza; `ex-6382` ("oye esta pasando algo interesante en los
+deportes ultimamente") también pasa a `news_query`; `ex-6448` ("trump") pasa a `news_query`, y `ex-6405` ("que
+sonido hace un perro") pasa a `qa_factoid`. La frontera es realmente difusa sin contexto de conversación, pero la
+confianza calibrada es alta, lo que hace peligrosa esta clase de error para el enrutamiento automático.
 
-**Mitigation.** Add a `general_quirky`-vs-concrete-skill decision feature (for
-example a small set of hand-written negative examples per skill in the training
-data), or lower the confidence of `general_quirky` predictions so the abstention
-policy sends them to review. Both changes must be validated on dev and would be
-a new release candidate.
+**Mitigación.** Añadir una característica de decisión `general_quirky` frente a habilidad concreta (por ejemplo,
+un pequeño conjunto de ejemplos negativos escritos a mano por habilidad en los datos de entrenamiento), o bajar la
+confianza de las predicciones de `general_quirky` para que la política de abstención las envíe a revisión. Ambos
+cambios deben validarse en dev y darían lugar a un nuevo release candidate.
 
-### Calendar action versus calendar query
+### Acción de calendario frente a consulta de calendario
 
-The largest topical cluster is the calendar family. `ex-6962` ("puedo saber lo
-que tengo yo que hacer el próximo sabado a las seis de la tarde") is a query but
-is classified as `calendar_set`; `ex-6968` asks to confirm meetings and send
-invitations, an action, but is classified as `calendar_query`; `ex-7219`
-("pusiste el recordatorio sobre la reunión de mañana") is a query about a past
-action and is classified as `calendar_set`; `ex-7569` ("planificar para mañana")
-is an action but becomes `calendar_query`. Verb tense and the presence of a
-confirmation question are the discriminative cues the encoder misses.
+El cúmulo temático más grande es la familia de calendario. `ex-6962` ("puedo saber lo que tengo yo que hacer el
+próximo sabado a las seis de la tarde") es una consulta, pero se clasifica como `calendar_set`; `ex-6968` pide
+confirmar reuniones y enviar invitaciones, es decir, una acción, pero se clasifica como `calendar_query`; `ex-7219`
+("pusiste el recordatorio sobre la reunión de mañana") es una consulta sobre una acción pasada y se clasifica como
+`calendar_set`; `ex-7569` ("planificar para mañana") es una acción pero pasa a `calendar_query`. El tiempo verbal y
+la presencia de una pregunta de confirmación son las pistas discriminativas que el encoder no capta.
 
-**Mitigation.** Add rule-based features for interrogative markers ("puedo",
-"qué tengo", "cómo será") and imperative markers ("pon", "planifica",
-"confirma") in a small post-processing layer, or oversample the minority action
-formulations during fine-tuning.
+**Mitigación.** Añadir características basadas en reglas para marcadores interrogativos ("puedo", "qué tengo",
+"cómo será") y marcadores imperativos ("pon", "planifica", "confirma") en una pequeña capa de postprocesado, o
+sobremuestrear las formulaciones minoritarias de acción durante el fine-tuning.
 
-### Music and playback ontology
+### Ontología de música y reproducción
 
-Several intents share the same surface vocabulary. `ex-1710` ("cambiar el modo
-de música a rock") is `music_settings` but becomes `play_music`; `ex-4268`
-("cambia a la siguiente canción de la lista") is also `music_settings` and
-becomes `play_music`; `ex-5911` ("reproducir la música") is a generic playback
-control and is classified as `play_music`; `ex-2365` ("que canción hay en la
-radio") is a query but becomes `play_radio`; and `ex-2647` (creating a Pandora
-channel) becomes `play_radio` instead of `music_settings`. The radio/streaming
-entities dominate the lexical signal.
+Varias intenciones comparten el mismo vocabulario superficial. `ex-1710` ("cambiar el modo de música a rock") es
+`music_settings`, pero pasa a `play_music`; `ex-4268` ("cambia a la siguiente canción de la lista") también es
+`music_settings` y pasa a `play_music`; `ex-5911` ("reproducir la música") es un control genérico de reproducción y
+se clasifica como `play_music`; `ex-2365` ("que canción hay en la radio") es una consulta, pero pasa a
+`play_radio`, y `ex-2647` (crear un canal de Pandora) pasa a `play_radio` en lugar de `music_settings`. Las
+entidades de radio y de streaming dominan la señal léxica.
 
-**Mitigation.** Add the service name (Pandora, Spotify, radio) as an explicit
-feature, or train a hierarchical head that first predicts the scenario
-(`music`, `play`) and then the intent; the scenario head is already almost
-perfect and would constrain the intent.
+**Mitigación.** Añadir el nombre del servicio (Pandora, Spotify, radio) como característica explícita, o entrenar
+una cabeza jerárquica que prediga primero el escenario (`music`, `play`) y después la intención; la cabeza de
+escenario ya es casi perfecta y restringiría la intención.
 
-### IoT Hue light action scope
+### Alcance de las acciones de luces IoT de Hue
 
-The light intents differ only by the target attribute (on/off, up/down,
-change/dim). `ex-1071` ("encender las luces del pasillo") is `iot_hue_lightup`
-but becomes `iot_hue_lighton`; `ex-1756` ("enciende las luces") shows the same
-collapse; `ex-2128` ("el color de la luz brillo bajo") is `iot_hue_lightdim` but
-becomes `iot_hue_lightchange`; `ex-2263` ("enseñame un color suave") and
-`ex-2264` ("luz de color para la habitación de estudio") are colour-change
-requests classified as dim/up. The training data uses "encender" for both
-`lighton` and `lightup`, so the distinction is partly annotator-dependent.
+Las intenciones de luz solo se diferencian por el atributo objetivo (encender o apagar, subir o bajar, cambiar o
+atenuar). `ex-1071` ("encender las luces del pasillo") es `iot_hue_lightup`, pero pasa a `iot_hue_lighton`;
+`ex-1756` ("enciende las luces") muestra el mismo colapso; `ex-2128` ("el color de la luz brillo bajo") es
+`iot_hue_lightdim`, pero pasa a `iot_hue_lightchange`; `ex-2263` ("enseñame un color suave") y `ex-2264` ("luz de
+color para la habitación de estudio") son peticiones de cambio de color clasificadas como atenuar o subir. Los
+datos de entrenamiento usan "encender" tanto para `lighton` como para `lightup`, así que la distinción depende en
+parte de quien anota.
 
-**Mitigation.** Treat the light family as a two-stage decision (power vs
-attribute) or merge `lighton`/`lightup` if the product accepts that semantic
-loss; document the choice in a new ADR instead of silently accepting the
-confusion.
+**Mitigación.** Tratar la familia de luces como una decisión en dos etapas (encendido frente a atributo), o fusionar
+`lighton` y `lightup` si el producto acepta esa pérdida semántica; documentar la elección en una ADR nueva en lugar
+de aceptar la confusión en silencio.
 
-### News versus structured question answering
+### Noticias frente a respuestas estructuradas a preguntas
 
-`news_query` and the `qa_*` skills overlap whenever a news request contains a
-number. `ex-281` ("cuál es el tipo de cambio del dólar estadounidense a la libra
-esterlina") is `news_query` but becomes `qa_currency` with 0.996 confidence;
-`ex-451` ("ponme lo último sobre el precio de las acciones de mercadona")
-becomes `qa_stock`; `ex-680` ("mantenme informado sobre el precio del bitcoin")
-becomes `qa_stock`; `ex-1423` ("dime sobre pedro sánchez") becomes
-`qa_factoid`. The label depends on whether the user wants a current update or a
-single fact, which the utterance rarely states.
+`news_query` y las habilidades `qa_*` se solapan siempre que una petición de noticias contiene un número. `ex-281`
+("cuál es el tipo de cambio del dólar estadounidense a la libra esterlina") es `news_query`, pero pasa a
+`qa_currency` con 0.996 de confianza; `ex-451` ("ponme lo último sobre el precio de las acciones de mercadona")
+pasa a `qa_stock`; `ex-680` ("mantenme informado sobre el precio del bitcoin") pasa a `qa_stock`; `ex-1423`
+("dime sobre pedro sánchez") pasa a `qa_factoid`. La etiqueta depende de si el usuario quiere una actualización
+actual o un hecho puntual, algo que el enunciado rara vez indica.
 
-**Mitigation.** Add a "latest/current/update" temporal cue feature and a
-`news_query` vs `qa_*` binary gate before the 60-way head. Also lower the
-confidence threshold for these pairs in the review policy.
+**Mitigación.** Añadir una característica de señal temporal ("lo último", "actual", "actualización") y una compuerta
+binaria `news_query` frente a `qa_*` antes de la cabeza de 60 clases. Además, bajar el umbral de confianza para
+estos pares en la política de revisión.
 
-### Email send versus contact management
+### Envío de correo frente a gestión de contactos
 
-`ex-15828` ("aquí tienes una nueva dirección de correo electrónico para añadir a
-los contactos") is `email_sendemail` but becomes `email_addcontact`;
-`ex-16131` ("este nuevo correo electrónico debería agregarse a mi contacto") is
-the same pattern; `ex-15966` ("envía una respuesta si es muy importante") is
-`email_query` but becomes `email_sendemail`; `ex-16225` ("abre contactos") is
-`email_addcontact` but becomes `email_querycontact`. The contact-book vocabulary
-is the confounding signal.
+`ex-15828` ("aquí tienes una nueva dirección de correo electrónico para añadir a los contactos") es
+`email_sendemail`, pero pasa a `email_addcontact`; `ex-16131` ("este nuevo correo electrónico debería agregarse a
+mi contacto") sigue el mismo patrón; `ex-15966` ("envía una respuesta si es muy importante") es `email_query`, pero
+pasa a `email_sendemail`; `ex-16225` ("abre contactos") es `email_addcontact`, pero pasa a `email_querycontact`. El
+vocabulario de la agenda de contactos es la señal confusora.
 
-**Mitigation.** Add an explicit "add/guardar contacto" vs "enviar/responder"
-pattern feature, and include more contact-management examples in the fixture
-used for regression checks.
+**Mitigación.** Añadir una característica explícita de patrón "añadir o guardar contacto" frente a "enviar o
+responder", e incluir más ejemplos de gestión de contactos en la muestra que se usa para las comprobaciones de
+regresión.
 
-### High-confidence errors as label-noise candidates
+### Errores de alta confianza como candidatos a ruido en las etiquetas
 
-These errors have calibrated confidence ≥ 0.94, so either the model is
-overconfident or the gold label is questionable. They are the first candidates
-for a manual label audit; the last column states the most likely explanation.
+Estos errores tienen una confianza calibrada ≥ 0.94, así que o el modelo está sobreconfiado o la etiqueta de
+referencia es cuestionable. Son los primeros candidatos para una auditoría manual de etiquetas; la última columna
+indica la explicación más probable.
 
-| Example | Text | Gold → predicted | Confidence | Reading |
+| Ejemplo | Texto | Referencia → predicha | Confianza | Lectura |
 |---|---|---|---|---|
-| `ex-612` | por favor borra la alarma despertador a las ocho de la mañana el próximo sábado | `alarm_set` → `alarm_remove` | 0.985 | text asks to delete; gold is likely wrong |
-| `ex-1639` | por favor sube el volumen | `audio_volume_down` → `audio_volume_up` | 0.980 | text asks to raise; gold is likely wrong |
-| `ex-5911` | reproducir la música | `music_settings` → `play_music` | 0.987 | generic play request; label is arguable |
-| `ex-555` | jugar mf doom cualquier cosa | `play_music` → `play_game` | 0.935 | "jugar" and DOOM are game cues; gold is likely wrong |
-| `ex-3205` | jugar poker face de lady gaga | `play_music` → `play_game` | 0.938 | "jugar" is a distractor; gold may be right |
-| `ex-2780` | hay algún concierto próximo de | `music_likeness` → `recommendation_events` | 0.974 | truncated event query; gold is likely wrong |
-| `ex-4166` | cambia el nivel del volumen al maximo | `audio_volume_other` → `audio_volume_up` | 0.944 | "al maximo" is closer to up; label is ambiguous |
-| `ex-50` | siri dime la hora en g. m. t. más cinco | `datetime_convert` → `datetime_query` | 0.912 | arithmetic/time-zone conversion; gold is arguable |
-| `ex-1744` | qué piensas | `music_likeness` → `general_quirky` | 0.961 | free-form opinion; `general_quirky` is defensible |
-| `ex-6301` | qué está pasando | `general_quirky` → `news_query` | 0.964 | context-free; both labels are plausible |
-| `ex-451` | ponme lo último sobre el precio de las acciones de mercadona | `news_query` → `qa_stock` | 0.991 | "lo último" is a news cue; gold may be right |
-| `ex-281` | cuál es el tipo de cambio del dólar estadounidense a la libra esterlina | `news_query` → `qa_currency` | 0.996 | pure currency question; gold is likely wrong |
+| `ex-612` | por favor borra la alarma despertador a las ocho de la mañana el próximo sábado | `alarm_set` → `alarm_remove` | 0.985 | el texto pide borrar; la referencia probablemente es errónea |
+| `ex-1639` | por favor sube el volumen | `audio_volume_down` → `audio_volume_up` | 0.980 | el texto pide subir; la referencia probablemente es errónea |
+| `ex-5911` | reproducir la música | `music_settings` → `play_music` | 0.987 | petición genérica de reproducción; la etiqueta es discutible |
+| `ex-555` | jugar mf doom cualquier cosa | `play_music` → `play_game` | 0.935 | "jugar" y DOOM son pistas de juego; la referencia probablemente es errónea |
+| `ex-3205` | jugar poker face de lady gaga | `play_music` → `play_game` | 0.938 | "jugar" es un distractor; la referencia puede ser correcta |
+| `ex-2780` | hay algún concierto próximo de | `music_likeness` → `recommendation_events` | 0.974 | consulta de evento truncada; la referencia probablemente es errónea |
+| `ex-4166` | cambia el nivel del volumen al maximo | `audio_volume_other` → `audio_volume_up` | 0.944 | "al maximo" se acerca más a subir; la etiqueta es ambigua |
+| `ex-50` | siri dime la hora en g. m. t. más cinco | `datetime_convert` → `datetime_query` | 0.912 | conversión aritmética de husos horarios; la referencia es discutible |
+| `ex-1744` | qué piensas | `music_likeness` → `general_quirky` | 0.961 | opinión de forma libre; `general_quirky` es defendible |
+| `ex-6301` | qué está pasando | `general_quirky` → `news_query` | 0.964 | sin contexto; ambas etiquetas son plausibles |
+| `ex-451` | ponme lo último sobre el precio de las acciones de mercadona | `news_query` → `qa_stock` | 0.991 | "lo último" es una pista de noticias; la referencia puede ser correcta |
+| `ex-281` | cuál es el tipo de cambio del dólar estadounidense a la libra esterlina | `news_query` → `qa_currency` | 0.996 | pregunta de divisas pura; la referencia probablemente es errónea |
 
-**Mitigation.** Audit these 12 utterances against the upstream MASSIVE
-annotation; if the gold label is wrong, keep them in the test split (do not
-edit test data) but document the expected noise floor. For the ambiguous cases,
-the review threshold already sends lower-confidence variants to manual review.
+**Mitigación.** Auditar estos 12 enunciados frente a la anotación original de MASSIVE; si la referencia es errónea,
+mantenerlos en el conjunto de test (sin editar los datos de test), pero documentar el suelo de ruido esperado. En
+los casos ambiguos, el umbral de revisión ya envía a revisión manual las variantes de menor confianza.
 
-### Short and context-free utterances
+### Enunciados cortos y sin contexto
 
-Utterances of one to three tokens carry little evidence: `ex-46` ("que pasa")
-is `general_greet` but becomes `calendar_query`; `ex-9291` ("pon") is
-`play_radio` but becomes `play_music`; `ex-10333` ("abre saga") is `play_game`
-but becomes `play_audiobook`; `ex-10828` ("borrar todo") is `lists_remove` but
-becomes `calendar_remove`. The baseline is also wrong on most of these, so the
-gap is not transformer-specific.
+Los enunciados de una a tres palabras aportan poca evidencia: `ex-46` ("que pasa") es `general_greet`, pero pasa a
+`calendar_query`; `ex-9291` ("pon") es `play_radio`, pero pasa a `play_music`; `ex-10333` ("abre saga") es
+`play_game`, pero pasa a `play_audiobook`; `ex-10828` ("borrar todo") es `lists_remove`, pero pasa a
+`calendar_remove`. La línea base también falla en la mayoría de estos casos, así que la brecha no es específica del
+transformer.
 
-**Mitigation.** For very short inputs, prefer the abstention path and ask the
-user for a clarifying follow-up instead of routing silently; the API and UI
-already expose `needs_review` for this purpose.
+**Mitigación.** Para entradas muy cortas, preferir la ruta de abstención y pedir al usuario una aclaración en lugar
+de enrutar en silencio; la API y la UI ya exponen `needs_review` para ese fin.
 
-## What the analysis does not show
+## Lo que el análisis no muestra
 
-These categories are drawn from a single test split of a synthetic,
-human-localised corpus. They do not prove that the model fails on real
-Latin-American Spanish; the dialect probe in `reports/final/robustness.json` is
-synthetic and is labelled as such in ADR-0009. None of the mitigations above is
-implemented in v0.1.0: they are candidates for a future release.
+Estas categorías provienen de un único conjunto de test de un corpus sintético localizado por personas. No demuestran
+que el modelo falle con el español latinoamericano real; la sonda dialectal de `reports/final/robustness.json` es
+sintética y así se etiqueta en la ADR-0009. Ninguna de las mitigaciones anteriores está implementada en la v0.1.0:
+son candidatas para una versión futura.
