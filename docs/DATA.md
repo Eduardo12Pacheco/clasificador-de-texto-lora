@@ -1,30 +1,28 @@
-# Data: sources, licences, lineage and cleaning
+# Datos: fuentes, licencias, linaje y limpieza
 
-This project trains and evaluates on **Amazon MASSIVE 1.0, locale `es-ES`**.
-Everything below is reproducible from the pinned archive and the committed
-commands; no dataset file is tracked in git except the small CC BY 4.0 sample
-in `src/stc/_fixture/massive_es_sample/`.
+Este proyecto entrena y evalúa con **Amazon MASSIVE 1.0, locale `es-ES`**. Todo lo que sigue es
+reproducible a partir del archivo fijado y de los comandos versionados; ningún archivo de datos se
+versiona en git, salvo la pequeña muestra CC BY 4.0 en `src/stc/_fixture/massive_es_sample/`.
 
-## Pinned source
+## Fuente fijada
 
-| Field | Value |
+| Campo | Valor |
 |---|---|
-| Dataset | Amazon MASSIVE 1.0 (`es-ES`), human-localised from SLURP |
-| Tarball URL | `https://amazon-massive-nlu-dataset.s3.amazonaws.com/amazon-massive-dataset-1.0.tar.gz` |
-| Tarball size | 39,500,415 bytes |
-| Tarball sha256 | `7df623fd2d300a4d235d6ee5bd396c9a28258d3a0ccb29abdb054506eba153f8` |
-| Extracted members | `1.0/data/es-ES.jsonl`, `1.0/LICENSE`, `1.0/NOTICE.md` |
-| Rows | 11,514 train / 2,033 dev / 2,974 test = 16,521 |
-| Labels | 60 intents, 18 scenarios (`scenario` = intent prefix before the first `_`) |
-| Licence | CC BY 4.0, Copyright Amazon.com Inc. |
+| Conjunto de datos | Amazon MASSIVE 1.0 (`es-ES`), localizado por personas a partir de SLURP |
+| URL del tarball | `https://amazon-massive-nlu-dataset.s3.amazonaws.com/amazon-massive-dataset-1.0.tar.gz` |
+| Tamaño del tarball | 39,500,415 bytes |
+| sha256 del tarball | `7df623fd2d300a4d235d6ee5bd396c9a28258d3a0ccb29abdb054506eba153f8` |
+| Miembros extraídos | `1.0/data/es-ES.jsonl`, `1.0/LICENSE`, `1.0/NOTICE.md` |
+| Filas | 11,514 train / 2,033 dev / 2,974 test = 16,521 |
+| Etiquetas | 60 intenciones, 18 escenarios (`scenario` = prefijo de la intención antes del primer `_`) |
+| Licencia | CC BY 4.0, Copyright Amazon.com Inc. |
 
-The constants live in `src/stc/adapters/data/massive_archive.py`; the download
-writes a `.part` file, checks the byte count and then the sha256, and extracts
-only the three allow-listed regular files. On a checksum mismatch nothing is
-extracted. A corrupt mirror cannot escape the destination directory: absolute
-paths, `..` components, backslashes and links are rejected. A `VERIFIED` file
-records the accepted sha256, and `stc data fetch` becomes a cache hit with no
-network access.
+Las constantes viven en `src/stc/adapters/data/massive_archive.py`. La descarga escribe un archivo
+`.part`, comprueba el número de bytes y después el sha256, y extrae solo los tres archivos regulares
+de la lista de permitidos. Ante una discrepancia de checksum no se extrae nada. Un espejo corrupto no
+puede escapar del directorio de destino: se rechazan las rutas absolutas, los componentes `..`, las
+barras invertidas y los enlaces. Un archivo `VERIFIED` registra el sha256 aceptado, y `stc data fetch`
+pasa a ser un acierto de caché sin acceso a la red.
 
 ```bash
 uv run stc data fetch          # sha256 OK 7df623fd…153f8
@@ -33,7 +31,7 @@ uv run stc data prepare        # train=10898 dev=2033 test=2974 dropped=616
 uv run stc data audit --out reports
 ```
 
-Data lives under `${STC_DATA_DIR:-${STC_HOME:-<platform data dir>}/data}`:
+Los datos viven bajo `${STC_DATA_DIR:-${STC_HOME:-<platform data dir>}/data}`:
 
 ```
 data/raw/massive-1.0/{es-ES.jsonl,LICENSE,NOTICE.md,VERIFIED}
@@ -41,110 +39,107 @@ data/raw/massive-1.0.tar.gz
 data/processed/massive-1.0/{train,dev,test}.jsonl, meta.json
 ```
 
-## Licences and attribution
+## Licencias y atribución
 
-- **MASSIVE**: CC BY 4.0, Copyright Amazon.com Inc. See the archive's `LICENSE`
-  and `NOTICE.md`, and the project `NOTICE`.
-- **SLURP** (upstream English corpus): CC BY 4.0.
-- The bundled fixture sample is redistributed under CC BY 4.0 with the same
-  attribution; its `NOTICE.md` states that the project selected and reformatted
-  the rows.
+- **MASSIVE**: CC BY 4.0, Copyright Amazon.com Inc. Ver el `LICENSE` y el `NOTICE.md` del archivo, y el
+  `NOTICE` del proyecto.
+- **SLURP** (corpus original en inglés): CC BY 4.0.
+- La muestra incluida (fixture) se redistribuye bajo CC BY 4.0 con la misma atribución; su `NOTICE.md`
+  indica que el proyecto seleccionó y reformateó las filas.
 
-## Base-model licences
+## Licencias de los modelos base
 
-Base models are fetched from the Hugging Face Hub when training or screening
-runs; their weights are not tracked in this repository. Only MrBERT-es has its
-licence stated in a repository file (`NOTICE`, `MODEL_CARD.md`). The two
-screening models have no licence statement in this repository, so their rows
-point to the upstream model card instead of restating a licence.
+Los modelos base se descargan del Hugging Face Hub al ejecutar el entrenamiento o el screening; sus
+pesos no se versionan en este repositorio. Solo MrBERT-es tiene su licencia declarada en un archivo del
+repositorio (`NOTICE`, `MODEL_CARD.md`). Los dos modelos de screening no tienen declaración de licencia
+en este repositorio, así que sus filas remiten a la model card de origen en lugar de repetir una
+licencia.
 
-| Model | Role in this repository | Licence | Source |
+| Modelo | Rol en este repositorio | Licencia | Fuente |
 |---|---|---|---|
-| `BSC-LT/MrBERT-es` | Shipped backbone, LoRA fine-tuned | Apache-2.0 (`NOTICE`, `MODEL_CARD.md`) | https://huggingface.co/BSC-LT/MrBERT-es |
-| `bertin-project/bertin-roberta-base-spanish` | Screening candidate (`configs/screening.toml`) | See model card at https://huggingface.co/bertin-project/bertin-roberta-base-spanish | same as left |
-| `Qwen/Qwen3-0.6B` | Screening candidate only; never selected or exported (`backbone_selection.py`) | See model card at https://huggingface.co/Qwen/Qwen3-0.6B | same as left |
+| `BSC-LT/MrBERT-es` | Backbone publicado, ajustado con LoRA | Apache-2.0 (`NOTICE`, `MODEL_CARD.md`) | https://huggingface.co/BSC-LT/MrBERT-es |
+| `bertin-project/bertin-roberta-base-spanish` | Candidato de screening (`configs/screening.toml`) | Ver la model card en https://huggingface.co/bertin-project/bertin-roberta-base-spanish | Ídem |
+| `Qwen/Qwen3-0.6B` | Solo candidato de screening; nunca se selecciona ni se exporta (`backbone_selection.py`) | Ver la model card en https://huggingface.co/Qwen/Qwen3-0.6B | Ídem |
 
-## Lineage
+## Linaje
 
 ```mermaid
 flowchart LR
-  A[pinned tarball<br/>sha256 7df623fd…] --> B[verify size + sha256]
-  B --> C[extract 3 members]
-  C --> D[parse + validate 16,521 rows]
-  D --> E[leakage audit<br/>reports/data_audit.json]
-  E --> F[clean train only<br/>D3]
+  A[tarball fijado<br/>sha256 7df623fd…] --> B[verificar tamaño + sha256]
+  B --> C[extraer 3 miembros]
+  C --> D[parsear + validar 16,521 filas]
+  D --> E[auditoría de fugas<br/>reports/data_audit.json]
+  E --> F[limpiar solo train<br/>D3]
   F --> G[(train 10,898)]
   D --> H[(dev 2,033)]
   D --> I[(test 2,974)]
-  G --> J[baseline + LoRA training]
+  G --> J[entrenamiento de línea base + LoRA]
   H --> J
-  I --> K[one audited final evaluation]
+  I --> K[una evaluación final auditada]
 ```
 
-## Split roles
+## Roles de las particiones
 
-- **train** — fitting only, after the cleaning policy below.
-- **dev** — every search and selection decision (hyper-parameters, backbone,
-  model seed, temperature and review threshold, quantisation gate).
-- **test** — one audited final evaluation per release candidate, behind
-  `TestAccessGrant`; every read appends a line to
-  `reports/test_access_log.jsonl`.
+- **train** — solo para ajustar, tras la política de limpieza que se describe más abajo.
+- **dev** — todas las decisiones de búsqueda y selección (hiperparámetros, backbone, semilla del modelo,
+  temperatura y umbral de revisión, puerta de cuantización).
+- **test** — una evaluación final auditada por release candidate, tras un `TestAccessGrant`; cada lectura
+  añade una línea a `reports/test_access_log.jsonl`.
 
-See [ADR-0004](adr/0004-evaluation-protocol-and-leakage-policy.md).
+Ver [ADR-0004](adr/0004-evaluation-protocol-and-leakage-policy.md).
 
-## Cleaning policy (decision D3)
+## Política de limpieza (decisión D3)
 
-`normalize_for_dedup` = `casefold → NFKD → drop combining marks → remove
-[^\w\s] → collapse whitespace → strip`. Train is sorted by integer id and:
+`normalize_for_dedup` = `casefold → NFKD → quitar marcas combinantes → quitar [^\w\s] → colapsar espacios → strip`.
+Train se ordena por id entero y:
 
-1. rows whose normalised text appears in dev or test are dropped
-   (`OVERLAP_WITH_EVAL`);
-2. groups whose normalised text carries more than one intent are dropped whole
+1. se eliminan las filas cuyo texto normalizado aparece en dev o test (`OVERLAP_WITH_EVAL`);
+2. se eliminan completos los grupos cuyo texto normalizado tiene más de una intención
    (`LABEL_CONFLICT_DUPLICATE`);
-3. other duplicate groups keep the lowest id (`EXACT_DUPLICATE` for the rest).
+3. los demás grupos de duplicados conservan el id más bajo (`EXACT_DUPLICATE` para el resto).
 
-Dev and test are **never** modified. Translator `worker_id` cannot be used to
-regroup: 19 of 20 workers appear in more than one partition.
+Dev y test **nunca** se modifican. El `worker_id` del traductor no puede usarse para reagrupar: 19 de
+20 workers aparecen en más de una partición.
 
-Measured by `uv run stc data audit --out reports`:
+Medido con `uv run stc data audit --out reports`:
 
-| Split | Raw rows | Processed rows |
+| Partición | Filas originales | Filas procesadas |
 |---|---:|---:|
 | train | 11,514 | 10,898 |
 | dev | 2,033 | 2,033 |
 | test | 2,974 | 2,974 |
 
-| Audit field | Value |
+| Campo de auditoría | Valor |
 |---|---:|
-| Dev∩test normalised overlap texts | 45 |
-| Dev rows also in train | 123 (7 label-conflicting) |
-| Test rows also in train | 152 (6 label-conflicting) |
-| Train duplicate groups | 264 (384 excess rows) |
-| Train label-conflict groups (after overlap removal) | 19 |
-| Dev / test duplicate groups | 18 / 31 |
-| Drops: overlap / label-conflict / exact | 356 / 43 / 217 |
-| Train after cleaning | 10,898 |
+| Textos normalizados solapados dev∩test | 45 |
+| Filas de dev también presentes en train | 123 (7 con conflicto de etiquetas) |
+| Filas de test también presentes en train | 152 (6 con conflicto de etiquetas) |
+| Grupos de duplicados en train | 264 (384 filas sobrantes) |
+| Grupos con conflicto de etiquetas en train (tras quitar solapamientos) | 19 |
+| Grupos de duplicados en dev / test | 18 / 31 |
+| Eliminaciones: solapamiento / conflicto de etiquetas / exactas | 356 / 43 / 217 |
+| Train tras la limpieza | 10,898 |
 
-`reports/data_audit.json` contains every number plus the dropped ids by reason;
-`reports/data_audit.md` is the human-readable companion.
+`reports/data_audit.json` contiene todos los números y los ids eliminados por motivo;
+`reports/data_audit.md` es el resumen legible para personas.
 
-## Bundled fixture (decision D24)
+## Muestra incluida (decisión D24)
 
-`scripts/make_fixture.py` selects, per intent, up to 6 train / 2 dev / 2 test
-rows by ascending `sha256(id)` from the processed splits. The current sample has
-358 / 118 / 117 rows (593 total, 74,858 bytes of JSONL), covers all 60 intents
-in train and ships with `LICENSE-CC-BY-4.0.txt` and `NOTICE.md`. Running the
-script twice produces byte-identical files:
+`scripts/make_fixture.py` selecciona, por intención, hasta 6 filas de train, 2 de dev y 2 de test,
+ordenadas por `sha256(id)` ascendente a partir de las particiones procesadas. La muestra actual tiene
+358 / 118 / 117 filas (593 en total, 74,858 bytes de JSONL), cubre las 60 intenciones en train y se
+distribuye con `LICENSE-CC-BY-4.0.txt` y `NOTICE.md`. Ejecutar el script dos veces produce archivos
+idénticos byte a byte:
 
 ```bash
 uv run python scripts/make_fixture.py
 uv run stc data fixture info   # train 358 / dev 118 / test 117
 ```
 
-The committed fixture is byte-stable (`scripts/make_fixture.py` is
-deterministic). Its checksums are:
+La muestra versionada es estable byte a byte (`scripts/make_fixture.py` es determinista). Sus
+checksums son:
 
-| File | Bytes | sha256 |
+| Archivo | Bytes | sha256 |
 |---|---:|---|
 | `train.jsonl` | 45,054 | `d3d013ccb385cd38085c5728c43cd3bb3ccedf112dd61b6ac57ae82165cf8f59` |
 | `dev.jsonl` | 14,966 | `4cbcfff75ab4ca4ff8ef6c5d497f1c04baeeebe4fccd2fffa020624de830aea3` |
@@ -152,29 +147,28 @@ deterministic). Its checksums are:
 | `LICENSE-CC-BY-4.0.txt` | — | `c2e6ea015269147de02117ebdd91f30ef09831251f5345fa8365273b1db1d435` |
 | `NOTICE.md` | — | `35a6c6e009ae9e302da75762e2d7e3b58d1569176ee50bed984d94ca8c530977` |
 
-The two audit reports are generated by `uv run stc data audit --out reports`:
-`reports/data_audit.json` is the machine-readable record (raw/processed counts,
-overlap fields, drop counts and dropped ids by reason) and
-`reports/data_audit.md` is its human-readable companion. Re-run the command
-instead of editing either file.
+Los dos reportes de auditoría los genera `uv run stc data audit --out reports`: `reports/data_audit.json`
+es el registro legible por máquinas (conteos originales y procesados, campos de solapamiento,
+conteos de eliminación e ids eliminados por motivo), y `reports/data_audit.md` es su versión legible
+para personas. Vuelve a ejecutar el comando en lugar de editar cualquiera de los dos archivos.
 
-## Rejected candidates
+## Candidatos descartados
 
-| Candidate | Reason |
+| Candidato | Motivo |
 |---|---|
-| MeLiSA | Licence "other" tied to an Amazon agreement; demo-only. |
-| TASS / InterTASS | No licence statement; research-only tweets. |
-| MLSUM (es) | Non-commercial terms; Spain-only. |
+| MeLiSA | Licencia "other" ligada a un acuerdo con Amazon; solo demostración. |
+| TASS / InterTASS | Sin declaración de licencia; tuits solo para investigación. |
+| MLSUM (es) | Términos no comerciales; solo España. |
 | XL-Sum | CC BY-NC-SA 4.0. |
-| SIB-200 | Seven topic classes, too small. |
-| WikiCAT_es v2 | Automatically derived labels; inconsistent licence. |
-| MTEB SpanishNewsClassification | Upstream provenance unverifiable. |
-| `cardiffnlp` tweet sentiment | No licence metadata. |
+| SIB-200 | Siete clases temáticas; demasiado pequeño. |
+| WikiCAT_es v2 | Etiquetas derivadas automáticamente; licencia inconsistente. |
+| MTEB SpanishNewsClassification | Procedencia original no verificable. |
+| `cardiffnlp` tweet sentiment | Sin metadatos de licencia. |
 
-## Synthetic dialect disclaimer
+## Aviso sobre dialectos sintéticos
 
-MASSIVE has no Latin-American Spanish locale. The robustness report applies
-**synthetic** Mexico, Ecuador and Rioplatense substitutions (lexicon and voseo)
-to the test split. This is a sensitivity probe of lexical brittleness, not
-evidence of real LatAm accuracy, and it is labelled synthetic in the README,
-model card, reports and [ADR-0009](adr/0009-synthetic-dialect-robustness.md).
+MASSIVE no tiene un locale de español latinoamericano. El reporte de robustez aplica sustituciones
+**sintéticas** de México, Ecuador y el rioplatense (léxico y voseo) al conjunto de test. Es una sonda
+de sensibilidad a la fragilidad léxica, no evidencia de precisión real en LatAm, y está etiquetada como
+sintética en el README, la model card, los reportes y la
+[ADR-0009](adr/0009-synthetic-dialect-robustness.md).
