@@ -8,6 +8,8 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
+from stc.application.ports import BundleArchive
+
 __all__ = ["PackAdapterResult", "PackBundle", "PackResult", "compute_sha256"]
 
 MANIFEST_NAME = "manifest.json"
@@ -46,9 +48,7 @@ class PackAdapterResult:
 class PackBundle:
     """Build the D13 release layout and zip it deterministically."""
 
-    def __init__(self, archive: object) -> None:
-        # ``archive`` is the BundleArchive port; typed loosely so the packer can
-        # also be exercised with a tiny fake in tests.
+    def __init__(self, archive: BundleArchive) -> None:
         self._archive = archive
 
     def run(
@@ -63,7 +63,7 @@ class PackBundle:
     ) -> PackResult:
         """Assemble ``bundle_dir`` plus release companions and write ``out``."""
         root = Path(bundle_dir)
-        manifest = self._archive.verify(root)  # type: ignore[attr-defined]
+        manifest = self._archive.verify(root)
         name = str(manifest["name"])
         version = str(manifest["version"])
         with tempfile.TemporaryDirectory() as scratch:
@@ -93,7 +93,7 @@ class PackBundle:
                 if path.is_file()
             ]
             (staging / MANIFEST_NAME).write_text(_dump(payload), encoding="utf-8", newline="\n")
-            target_zip = self._archive.write_zip(staging, Path(out))  # type: ignore[attr-defined]
+            target_zip = self._archive.write_zip(staging, Path(out))
         digest = _sha256(target_zip)
         return PackResult(
             path=target_zip,
@@ -118,7 +118,7 @@ class PackBundle:
             candidate = source / name
             if candidate.is_file():
                 shutil.copyfile(candidate, staging / name)
-        target = self._archive.write_zip(staging, Path(out))  # type: ignore[attr-defined]
+        target = self._archive.write_zip(staging, Path(out))
         return PackAdapterResult(
             path=target,
             sha256=_sha256(target),
