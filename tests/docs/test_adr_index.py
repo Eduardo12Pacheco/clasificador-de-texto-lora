@@ -8,10 +8,10 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ADR_DIR = REPO_ROOT / "docs" / "adr"
 INDEX = ADR_DIR / "README.md"
-REQUIRED_HEADINGS = ("Context", "Decision", "Alternatives", "Consequences")
+REQUIRED_HEADINGS = ("Contexto", "Decisión", "Alternativas", "Consecuencias")
 INDEX_LINK = re.compile(r"\]\((\d{4}-[^)]+\.md)\)")
 STATUS = re.compile(
-    r"^- \*\*Status:\*\* (Proposed|Accepted|Superseded by ADR-\d{4})\s*$",
+    r"^- \*\*Estado:\*\* (Propuesto|Aceptado|Reemplazado por ADR-\d{4})\s*$",
     re.MULTILINE,
 )
 
@@ -45,7 +45,7 @@ def test_every_adr_has_status_and_required_sections() -> None:
             match.group(1).strip() for match in re.finditer(r"^## (.+)$", text, flags=re.MULTILINE)
         }
 
-        assert STATUS.search(text), f"{path.name} needs a Status line"
+        assert STATUS.search(text), f"{path.name} needs an Estado line"
         assert text.startswith("# ADR-"), f"{path.name} needs an ADR title"
         for heading in REQUIRED_HEADINGS:
             assert heading in headings, f"{path.name} needs a ## {heading} section"

@@ -1,72 +1,68 @@
-# ADR-0007 — Artifact distribution, bundles and integrity
+# ADR-0007 — Distribución de artefactos, bundles e integridad
 
-- **Status:** Accepted
-- **Date:** 2026-11-20
-- **Deciders:** project owner
+- **Estado:** Aceptado
+- **Fecha:** 2026-11-20
+- **Decisores:** responsable del proyecto
 
-## Context
+## Contexto
 
-The model is ~574 MiB in fp32, far beyond what belongs in git, and the project
-is distributed as a Python tool with no hosted service. Users must be able to
-obtain the exact bytes the reports describe, detect a corrupt or tampered
-download, and do so offline. The baseline artifact is a pickled sklearn object,
-which is a code-execution risk if loaded from an untrusted source.
+El modelo ocupa ~574 MiB en fp32, muy por encima de lo que pertenece a git, y el proyecto se
+distribuye como una herramienta de Python sin servicio alojado. Los usuarios deben poder obtener
+exactamente los bytes que describen los reportes, detectar una descarga corrupta o manipulada, y
+hacerlo sin conexión. El artefacto base es un objeto de sklearn serializado con pickle, lo que supone
+un riesgo de ejecución de código si se carga desde una fuente no confiable.
 
-## Decision
+## Decisión
 
-1. **Bundle layout (`bundle_version: 1`, D13).** A directory containing
-   `manifest.json`, `model.onnx` (or the shipped variant), `tokenizer.json`,
-   `labels.json`, `calibration.json`, optional `baseline/`, `MODEL_CARD.md`,
-   `LICENSE` and `NOTICE`. The manifest records bundle and tool versions, model
-   parameters, base-model id/revision/licence, adapter recipe, dataset id and
-   counts, ONNX op-set and input/output names, tokenizer settings, and a
-   `files` list with `{path, sha256, size}` for every content file.
-2. **Manifest as trust anchor.** `verify_bundle` hashes every listed file,
-   rejects size or checksum mismatches, rejects unsafe relative paths, and
-   reports unexpected files instead of silently ignoring them. Loading a
-   bundle verifies it by default; the CLI's explicit variant path skips the
-   bundle scan because quantisation variants live outside the bundle.
-3. **Deterministic releases.** `stc bundle pack` re-hashes the assembled
-   layout, writes sorted zip entries with a fixed 1980-01-01 timestamp and
-   deflate level 9, and prints the sha256 and size. Two packs of the same inputs
-   are byte-identical. The LoRA adapter ships as a second archive.
-4. **Committed registry, external weights.** `src/stc/model_registry.json`
-   stores only `{name, version, url, sha256, size_bytes, license}`. `stc model
-   pull` downloads with `urllib`, streams to a temporary file, verifies the
-   sha256, and extracts with a zip-slip guard (rejecting absolute paths, `..`,
-   backslashes and symlinks). `STC_OFFLINE=1` refuses network pulls with exit 5;
-   `--from-file` still works offline. Installed bundles live under
-   `${STC_HOME}/models/<name>/<version>/`.
-5. **skops allow-list.** The baseline is loaded through `skops.io` with a type
-   allow-list restricted to sklearn, numpy, scipy.sparse and builtins; any other
-   type raises `UntrustedArtifactError` (exit 3). Its own manifest hashes
-   `baseline.skops` and `labels.json`.
-6. **Distribution transport.** The bundle is a GitHub Release asset attached by
-   `scripts/publish_model.sh` (T13), never by CI and never in git; GitHub
-   allows assets below 2 GiB. `scripts/check_no_weights.py` fails if weights or
-   archives become tracked.
+1. **Layout del bundle (`bundle_version: 1`, D13).** Un directorio con `manifest.json`,
+   `model.onnx` (o la variante publicada), `tokenizer.json`, `labels.json`, `calibration.json`,
+   `baseline/` opcional, `MODEL_CARD.md`, `LICENSE` y `NOTICE`. El manifiesto registra las versiones
+   del bundle y de la herramienta, los parámetros del modelo, el id, la revisión y la licencia del
+   modelo base, la receta del adaptador, el id y los conteos del conjunto de datos, el op-set de ONNX
+   y los nombres de entrada y salida, la configuración del tokenizer y una lista `files` con
+   `{path, sha256, size}` para cada archivo de contenido.
+2. **El manifiesto como ancla de confianza.** `verify_bundle` calcula el hash de cada archivo listado,
+   rechaza discrepancias de tamaño o de checksum, rechaza rutas relativas inseguras e informa de los
+   archivos inesperados en lugar de ignorarlos en silencio. Cargar un bundle lo verifica por defecto;
+   la ruta explícita de variante de la CLI omite el escaneo del bundle porque las variantes de
+   cuantización viven fuera del bundle.
+3. **Releases deterministas.** `stc bundle pack` vuelve a calcular el hash del layout ensamblado,
+   escribe entradas zip ordenadas con una marca de tiempo fija (1980-01-01) y deflate nivel 9, e
+   imprime el sha256 y el tamaño. Dos empaquetados de las mismas entradas son idénticos byte a byte.
+   El adaptador LoRA se publica como un segundo archivo.
+4. **Registro versionado, pesos externos.** `src/stc/model_registry.json` almacena solo
+   `{name, version, url, sha256, size_bytes, license}`. `stc model pull` descarga con `urllib`,
+   transmite a un archivo temporal, verifica el sha256 y extrae con una protección contra zip-slip
+   (rechaza rutas absolutas, `..`, barras invertidas y enlaces simbólicos). `STC_OFFLINE=1` rechaza
+   las descargas de red con código de salida 5; `--from-file` sigue funcionando sin conexión. Los
+   bundles instalados viven en `${STC_HOME}/models/<name>/<version>/`.
+5. **Lista de tipos permitidos de skops.** La línea base se carga mediante `skops.io` con una lista de
+   tipos restringida a sklearn, numpy, scipy.sparse y builtins; cualquier otro tipo lanza
+   `UntrustedArtifactError` (código de salida 3). Su propio manifiesto calcula el hash de
+   `baseline.skops` y de `labels.json`.
+6. **Transporte de distribución.** El bundle es un asset de GitHub Release que adjunta
+   `scripts/publish_model.sh` (T13); nunca lo hace CI ni va a git. GitHub permite assets de menos de
+   2 GiB. `scripts/check_no_weights.py` falla si los pesos o los archivos comprimidos quedan
+   versionados.
 
-## Alternatives
+## Alternativas
 
-- Git LFS: still makes clones heavy and couples weights to history.
-- Hugging Face Hub in v0.1.0: optional later, not needed for a local-first tool.
-- A raw tarball without per-file hashes: no way to detect a partially replaced
-  bundle.
-- `pickle` for the baseline: arbitrary code execution; rejected in favour of
-  skops plus the allow-list.
+- Git LFS: aun así hace pesados los clones y acopla los pesos al historial.
+- Hugging Face Hub en v0.1.0: opcional más adelante; no es necesario para una herramienta local-first.
+- Un tarball sin hashes por archivo: no hay forma de detectar un bundle reemplazado parcialmente.
+- `pickle` para la línea base: permite ejecutar código arbitrario; descartado a favor de skops con
+  lista de tipos permitidos.
 
-## Consequences
+## Consecuencias
 
-- Every installed model is reproducible from the registry entry and verifiable
-  offline.
-- Packing is deterministic, so the registry sha256 can be compared by a human
-  or a CI step.
-- Changing the bundle layout requires a `bundle_version` bump and a new ADR
-  addendum.
-- A corrupt download fails before anything is installed; partial state cannot
-  shadow a good bundle because installation copies into a fresh tree.
+- Cada modelo instalado es reproducible a partir de la entrada del registro y verificable sin conexión.
+- El empaquetado es determinista, así que el sha256 del registro puede comparar una persona o un paso
+  de CI.
+- Cambiar el layout del bundle requiere subir `bundle_version` y añadir un nuevo addendum a esta ADR.
+- Una descarga corrupta falla antes de instalar nada; un estado parcial no puede ocultar un bundle
+  bueno porque la instalación copia en un árbol nuevo.
 
-## Evidence
+## Evidencia
 
 - `uv run pytest tests/unit/adapters/test_bundle_io.py -q`
 - `uv run pytest tests/unit/adapters/test_model_hub.py -q`

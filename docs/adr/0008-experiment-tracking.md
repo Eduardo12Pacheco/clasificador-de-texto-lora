@@ -1,56 +1,55 @@
-# ADR-0008 — Experiment tracking
+# ADR-0008 — Seguimiento de experimentos
 
-- **Status:** Accepted
-- **Date:** 2026-11-20
-- **Deciders:** project owner
+- **Estado:** Aceptado
+- **Fecha:** 2026-11-20
+- **Decisores:** responsable del proyecto
 
-## Context
+## Contexto
 
-T7 runs screening, a full fine-tuning reference, an Optuna search and final
-seed runs. The evidence must be reproducible and reviewable without committing
-large checkpoints or databases. The project is local-first and must not require
-an account or a hosted tracking server. D9 fixes a port and its adapters; D5
-requires the Optuna search to be resumable.
+T7 ejecuta el screening, una referencia de fine-tuning completo, una búsqueda con Optuna y las
+ejecuciones de semillas finales. La evidencia debe ser reproducible y revisable sin versionar
+checkpoints grandes ni bases de datos. El proyecto es local-first y no debe requerir una cuenta ni un
+servidor de seguimiento alojado. D9 fija un puerto y sus adaptadores; D5 exige que la búsqueda de
+Optuna pueda reanudarse.
 
-## Decision
+## Decisión
 
-1. **`ExperimentTracker` port** (`application/ports.py`) with four adapters:
-   - `JsonlTracker` (default): one JSONL event stream per run directory, no
-     extra dependency and trivially diffable after collection.
-   - `MlflowTracker`: local SQLite (`sqlite:///artifacts/mlflow.db`), storing
-     params, per-epoch metrics, tags (git sha, backbone, seed) and `run.json`.
-   - `NullTracker`: Null Object for commands that run without tracking.
-   - `CompositeTracker`: fan-out with per-child error isolation so a broken
-     MLflow store cannot lose a training run.
-2. **Pure `TrackerFactory`.** It parses `STC_TRACKER` (`jsonl`, `jsonl,mlflow`,
-   `null`), rejects unknown names with `InvalidInputError`, and receives builder
-   callables from the composition root. The application layer never imports
-   adapters, which keeps the hexagonal contracts intact.
-3. **Optuna storage is a local SQLite file** (`<out>/optuna.db`) with
-   `load_if_exists=True`. `--resume` runs only the missing trials up to the
-   requested budget; a second invocation prints `0 new trials`.
-4. **Only compact summaries are committed.** `scripts/collect_experiment_reports.py`
-   strips absolute paths and large trial payloads, writes deterministic JSON
-   under `reports/experiments/`, and copies the search figures. Databases,
-   checkpoints and trial directories stay under `artifacts/`, which is ignored.
+1. **Puerto `ExperimentTracker`** (`application/ports.py`) con cuatro adaptadores:
+   - `JsonlTracker` (por defecto): un flujo de eventos JSONL por directorio de ejecución, sin dependencia
+     extra y trivialmente comparable tras la recolección.
+   - `MlflowTracker`: SQLite local (`sqlite:///artifacts/mlflow.db`), que almacena parámetros, métricas
+     por época, etiquetas (git sha, backbone, semilla) y `run.json`.
+   - `NullTracker`: Null Object para los comandos que se ejecutan sin seguimiento.
+   - `CompositeTracker`: distribución a varios hijos con aislamiento de errores por hijo, para que un
+     almacén de MLflow roto no pierda una ejecución de entrenamiento.
+2. **`TrackerFactory` puro.** Interpreta `STC_TRACKER` (`jsonl`, `jsonl,mlflow`, `null`), rechaza los
+   nombres desconocidos con `InvalidInputError` y recibe funciones constructoras desde el composition
+   root. La capa de aplicación nunca importa adaptadores, lo que mantiene intactos los contratos
+   hexagonales.
+3. **El almacenamiento de Optuna es un archivo SQLite local** (`<out>/optuna.db`) con
+   `load_if_exists=True`. `--resume` ejecuta solo los trials que faltan hasta el presupuesto solicitado;
+   una segunda invocación imprime `0 new trials`.
+4. **Solo se versionan resúmenes compactos.** `scripts/collect_experiment_reports.py` elimina las rutas
+   absolutas y las cargas útiles grandes de los trials, escribe JSON determinista en
+   `reports/experiments/` y copia las figuras de búsqueda. Las bases de datos, los checkpoints y los
+   directorios de trials permanecen en `artifacts/`, que está ignorado.
 
-## Alternatives
+## Alternativas
 
-- Weights & Biases or a hosted MLflow: requires an account/network and violates
-  the zero-account constraint.
-- Plain stdout logs: not queryable and easy to lose.
-- Committing the SQLite databases: binary, large and not reviewable.
+- Weights & Biases o un MLflow alojado: requieren cuenta o red y violan la restricción de cero cuentas.
+- Logs simples en stdout: no se pueden consultar y son fáciles de perder.
+- Versionar las bases de datos SQLite: son binarias, grandes y no revisables.
 
-## Consequences
+## Consecuencias
 
-- Every training run has a portable event stream next to its artifacts even
-  when MLflow is not installed.
-- Report collection is a separate, deterministic step; T11 validates it with
+- Cada ejecución de entrenamiento tiene un flujo de eventos portable junto a sus artefactos, incluso
+  cuando MLflow no está instalado.
+- La recolección de reportes es un paso separado y determinista; T11 la valida con
   `scripts/validate_reports.py experiments`.
-- Tracker failures are visible through `CompositeTracker.errors` instead of
-  crashing a multi-hour run.
+- Los fallos del tracker son visibles mediante `CompositeTracker.errors` en lugar de tumbar una
+  ejecución de entrenamiento de varias horas.
 
-## Evidence
+## Evidencia
 
 - `uv run pytest tests/unit/adapters/test_trackers.py -q`
 - `uv run pytest tests/unit/application/test_tracker_factory.py -q`

@@ -1,100 +1,124 @@
-# ADR-0005 — ONNX Runtime inference and the quantisation gate
+# ADR-0005 — Inferencia con ONNX Runtime y la puerta de cuantización
 
-- **Status:** Accepted
-- **Date:** 2026-11-20
-- **Deciders:** project owner
+- **Estado:** Aceptado
+- **Fecha:** 2026-11-20
+- **Decisores:** responsable del proyecto
 
-## Context
+## Contexto
 
-S11/S12 require a CPU-only inference path that never imports `torch`, an ONNX
-export of the merged LoRA model with measured fp32 parity, and an honest
-decision about int8 quantisation. The planning probe on the owner's machine
-showed that fp32 ONNX is exact and already fast, while default dynamic int8
-loses several points of macro-F1 on a ModernBERT architecture. Shipping int8
-blind would silently degrade the product; shipping fp32 blindly would ignore a
-pure win when a variant passes.
+S11/S12 exigen una ruta de inferencia solo para CPU que nunca importe `torch`, una exportación a
+ONNX del modelo LoRA fusionado con paridad fp32 medida y una decisión honesta sobre la
+cuantización int8. La sonda de planificación en la máquina del responsable mostró que el ONNX
+fp32 es exacto y ya es rápido, mientras que la int8 dinámica por defecto pierde varios puntos de
+macro-F1 en una arquitectura ModernBERT. Publicar int8 a ciegas degradaría el producto en
+silencio; publicar fp32 a ciegas descartaría una ganancia limpia si alguna variante la supera.
 
-## Decision
+## Decisión
 
-1. **ONNX Runtime is the only runtime scorer.** `OnnxClassifier`
-   (`adapters/inference/onnx_classifier.py`) loads `model.onnx`, the Rust
-   `tokenizers` file and `labels.json`, uses `CPUExecutionProvider`, honours an
-   explicit `intra_op_num_threads`, and returns float32 logits in input order.
-   The runtime package contract forbids `torch`, `transformers`, `peft`,
-   `onnx` and `optuna` in every runtime adapter; only `onnxruntime` and
-   `tokenizers` are imported.
-2. **Export pipeline.** `OnnxExporter` rebuilds the base backbone with eager
-   attention, attaches the PEFT adapter, calls `merge_and_unload()`, wraps the
-   model so the graph emits a single `logits` output, and exports with
-   `opset_version=17`, `dynamo=False`, dynamic batch and sequence axes. It
-   copies the tokenizer, writes `labels.json`, and records a manifest.
-3. **fp32 parity is a hard gate.** A merged-model vs ONNX comparison on dev
-   passes only when `max |Δlogit| <= 5e-3` and argmax agreement is exactly
-   `1.0`. `stc export` writes `export_parity.json` and fails the run if the
-   parity check fails.
-4. **Quantisation candidate matrix (D12).** Four variants are built and
-   evaluated on dev: `int8_dynamic`, `int8_dynamic_per_channel`,
-   `int8_dynamic_mlp_only` (exclude attention, head and classifier nodes by
-   name) and `int8_static_qdq` (QDQ, per-channel, 512 fixed-width calibration
-   utterances, percentile). A variant ships only when its macro-F1 drop versus
-   fp32 is `<= 0.5` point **and** argmax agreement is `>= 99 %`. The smallest
-   passing variant ships; otherwise fp32 ships. `quantization_dev.json` records
-   every variant and the shipped format.
-5. **Static calibration fallback.** ONNX Runtime's percentile calibrator cannot
-   build a 2048-bin histogram when a tensor has a single value (the constant
-   attention mask of the tiny test graph is one such case). The exporter falls
-   back to MinMax calibration for that export only; the real MrBERT-es export
-   uses percentile as decided.
+1. **ONNX Runtime es el único evaluador en runtime.** `OnnxClassifier`
+   (`adapters/inference/onnx_classifier.py`) carga `model.onnx`, el archivo `tokenizers` de Rust y
+   `labels.json`, usa `CPUExecutionProvider`, respeta un `intra_op_num_threads` explícito y
+   devuelve logits float32 en el orden de entrada. El contrato de paquetes de runtime prohíbe
+   `torch`, `transformers`, `peft`, `onnx` y `optuna` en todo adaptador de runtime; solo se
+   importan `onnxruntime` y `tokenizers`.
+2. **Pipeline de exportación.** `OnnxExporter` reconstruye el backbone base con atención eager,
+   añade el adaptador PEFT, llama a `merge_and_unload()`, envuelve el modelo para que el grafo
+   emita una única salida `logits` y exporta con `opset_version=17`, `dynamo=False` y ejes
+   dinámicos de batch y secuencia. Copia el tokenizer, escribe `labels.json` y registra un
+   manifiesto.
+3. **La paridad fp32 es una puerta obligatoria.** La comparación entre el modelo fusionado y ONNX
+   en dev solo pasa si `max |Δlogit| <= 5e-3` y el acuerdo de argmax es exactamente `1.0`.
+   `stc export` escribe `export_parity.json` y falla la ejecución si la verificación de paridad
+   no se cumple.
+4. **Matriz de candidatos de cuantización (D12).** Se construyen y evalúan en dev cuatro variantes:
+   `int8_dynamic`, `int8_dynamic_per_channel`, `int8_dynamic_mlp_only` (excluye por nombre los nodos
+   de atención, cabeza y clasificador) e `int8_static_qdq` (QDQ, por canal, 512 enunciados de
+   calibración de ancho fijo, percentil). Una variante se publica solo si su caída de macro-F1
+   frente a fp32 es `<= 0.5` puntos **y** el acuerdo de argmax es `>= 99 %`. Se publica la variante
+   aprobada más pequeña; si ninguna pasa, se publica fp32. `quantization_dev.json` registra cada
+   variante y el formato publicado.
+5. **Respaldo de calibración estática.** El calibrador por percentiles de ONNX Runtime no puede
+   construir un histograma de 2048 bins cuando un tensor tiene un único valor (la máscara de
+   atención constante del grafo de prueba diminuto es uno de esos casos). El exportador recurre a
+   la calibración MinMax solo para esa exportación; la exportación real de MrBERT-es usa percentil,
+   como se decidió.
 
-## Alternatives
+## Alternativas
 
-- TorchScript inference: keeps `torch` in the runtime, violating S12 and the
-  CPU-only install story.
-- `optimum` export: extra dependency for a path we already control explicitly.
-- Shipping int8 unconditionally: the probe measured a 3–4.5 pt macro-F1 loss.
-- Shipping fp32 unconditionally: the negative result must be measured, not
-  assumed; a future backbone may pass the gate.
+- Inferencia con TorchScript: mantiene `torch` en el runtime, lo que viola S12 y la historia de
+  instalación solo para CPU.
+- Exportación con `optimum`: dependencia extra para una ruta que ya controlamos de forma explícita.
+- Publicar int8 incondicionalmente: la sonda midió una pérdida de 3–4.5 pt de macro-F1.
+- Publicar fp32 incondicionalmente: el resultado negativo debe medirse, no suponerse; un futuro
+  backbone puede pasar la puerta.
 
-## Consequences
+## Consecuencias
 
-- The installed tool works on a CPU with no training extra; a CI smoke test
-  asserts `import torch` fails inside the tool environment.
-- The int8 decision is reproducible from committed dev reports; the gate can
-  flip without code changes once a run passes.
-- `scripts/list_onnx_nodes.py` exists so the first real export can confirm the
-  `mlp_only` node-name patterns before they are trusted.
-- The first real export (T12) appends measured results to this ADR.
+- La herramienta instalada funciona en una CPU sin el extra de entrenamiento; un smoke test de CI
+  verifica que `import torch` falla dentro del entorno de la herramienta.
+- La decisión sobre int8 es reproducible a partir de los reportes de dev versionados; la puerta
+  puede cambiar sin tocar código cuando una ejecución la supere.
+- `scripts/list_onnx_nodes.py` existe para que la primera exportación real confirme los patrones de
+  nombres de nodo de `mlp_only` antes de confiar en ellos.
+- La primera exportación real (T12) añade resultados medidos a esta ADR.
 
-## Evidence
+## Evidencia
 
-- Planning probe (not committed): fp32 parity 100 % argmax agreement, max
-  |Δlogit| 1.39e-3; default int8 0.8234 accuracy / 0.7827 macro-F1 / 88.5 %
-  agreement; per-channel 0.8328 / 0.7983 / 90.1 %; fp32 0.8613 / 0.8282.
+- Sonda de planificación (no versionada): paridad fp32 con 100 % de acuerdo de argmax y
+  max |Δlogit| 1.39e-3; int8 por defecto 0.8234 de exactitud / 0.7827 de macro-F1 / 88.5 % de
+  acuerdo; por canal 0.8328 / 0.7983 / 90.1 %; fp32 0.8613 / 0.8282.
 - `uv run pytest tests/unit/adapters/test_onnx_classifier.py -q`
 - `uv run pytest tests/unit/adapters/test_parity.py -q`
 - `uv run python -m pytest tests/unit/adapters/test_export_torch.py -q -m torch`
 - `uv run python -c "import sys, stc.adapters.inference.onnx_classifier; assert 'torch' not in sys.modules"`
 
-## Results (T12, real export)
+## Resultados (T12, exportación real)
 
-Command: `uv run stc export --run artifacts/final/seed-42 --out artifacts/bundle --quantize all --reports reports/final` on the owner's RTX 4060 host. The fp32 graph is 601,760,862 bytes (574 MiB), opset 17, dynamic batch and sequence axes. `onnx.checker` and `stc bundle verify` pass.
+Comando: `uv run stc export --run artifacts/final/seed-42 --out artifacts/bundle --quantize all --reports reports/final`
+en el host RTX 4060 del responsable. El grafo fp32 ocupa 601,760,862 bytes
+(574 MiB), opset 17, con ejes dinámicos de batch y secuencia. `onnx.checker` y `stc bundle verify`
+pasan.
 
-**fp32 parity (dev, 2,033 utterances).** `max |Δlogit| = 3.92e-3` (limit 5e-3), argmax agreement `1.0`, `passed: true`. The dev sanity run reproduced the selected seed's torch metrics exactly: accuracy 0.8795, macro-F1 0.8699.
+**Paridad fp32 (dev, 2,033 enunciados).** `max |Δlogit| = 3.92e-3` (límite 5e-3), acuerdo de argmax
+`1.0`, `passed: true`. La ejecución de sanidad en dev reprodujo exactamente las métricas de torch de
+la semilla seleccionada: exactitud 0.8795, macro-F1 0.8699.
 
-**`mlp_only` patterns.** The first real export confirms the node names assumed by `quantization.py`: attention MatMuls live under `/inner/model/layers.N/attn/...` (for example `/inner/model/layers.0/attn/Wqkv/MatMul`) and the classifier head under `/inner/head/dense/MatMul`; `/attn/`, `/head/` and `/classifier/` therefore match real nodes and exclude the intended MatMuls. No pattern correction was needed.
+**Patrones de `mlp_only`.** La primera exportación real confirma los nombres de nodo que supone
+`quantization.py`: los MatMul de atención viven bajo `/inner/model/layers.N/attn/...` (por ejemplo
+`/inner/model/layers.0/attn/Wqkv/MatMul`) y la cabeza del clasificador bajo
+`/inner/head/dense/MatMul`; por tanto, `/attn/`, `/head/` y `/classifier/` coinciden con nodos
+reales y excluyen los MatMul previstos. No hizo falta corregir ningún patrón.
 
-**Quantisation matrix (dev).** Gate: macro-F1 drop ≤ 0.5 pt and label agreement ≥ 99 %. All four variants fail; fp32 ships.
+**Matriz de cuantización (dev).** Puerta: caída de macro-F1 ≤ 0.5 pt y acuerdo de etiquetas ≥ 99 %.
+Las cuatro variantes no pasan; se publica fp32.
 
-| Variant | Accuracy | Macro-F1 | Agreement | Size (bytes) | Gate |
+| Variante | Exactitud | Macro-F1 | Acuerdo | Tamaño (bytes) | Puerta |
 |---|---|---|---|---|---|
-| fp32 | 0.8795 | 0.8699 | 1.0000 | 601,760,862 | reference |
-| `int8_dynamic` | 0.8490 | 0.8223 | 0.9139 | 151,317,198 | fail |
-| `int8_dynamic_per_channel` | 0.8593 | 0.8318 | 0.9179 | 151,997,624 | fail |
-| `int8_dynamic_mlp_only` | 0.8603 | 0.8430 | 0.9228 | 309,082,247 | fail |
-| `int8_static_qdq` | 0.0246 | 0.0083 | 0.0251 | 152,669,567 | fail |
+| fp32 | 0.8795 | 0.8699 | 1.0000 | 601,760,862 | referencia |
+| `int8_dynamic` | 0.8490 | 0.8223 | 0.9139 | 151,317,198 | no pasa |
+| `int8_dynamic_per_channel` | 0.8593 | 0.8318 | 0.9179 | 151,997,624 | no pasa |
+| `int8_dynamic_mlp_only` | 0.8603 | 0.8430 | 0.9228 | 309,082,247 | no pasa |
+| `int8_static_qdq` | 0.0246 | 0.0083 | 0.0251 | 152,669,567 | no pasa |
 
-The dynamic results are in the same direction as the planning probe but slightly worse: ModernBERT attention is sensitive to int8 weight rounding, and the mlp-only variant pays for a bigger file while still losing 2.7 pt macro-F1. The static QDQ export failed in this run (2.5 % label agreement with fp32, dev macro-F1 0.0083), so it is not a candidate even before the quality gate. The cause was not investigated. The export used the MinMax calibration described below, so this measurement does not show that the architecture cannot be quantized statically.
+Los resultados dinámicos van en la misma dirección que la sonda de planificación, pero son algo
+peores: la atención de ModernBERT es sensible al redondeo de pesos int8, y la variante mlp-only paga
+con un archivo más grande y aun así pierde 2.7 pt de macro-F1. La exportación QDQ estática falló en
+esta ejecución (2.5 % de acuerdo de etiquetas con fp32, macro-F1 de dev 0.0083), así que no es
+candidata incluso antes de la puerta de calidad. La causa no fue investigada. La exportación usó la
+calibración MinMax descrita abajo, así que esta medición no demuestra que la arquitectura no pueda
+cuantizarse de forma estática.
 
-**Static calibration deviation.** D12 selected percentile calibration for `int8_static_qdq`. Per-channel percentile histograms over this 150 M-parameter encoder peak at 19.1 GiB RSS (measured with ONNX Runtime 1.32.0); the shared 31 GiB host repeatedly OOM-killed the process at ~6.0 GiB anonymous RSS under concurrent portfolio jobs. The variant therefore uses `CalibrationMethod.MinMax` with the same QDQ graph, per-channel weights and 512 fixed-width calibration utterances. This is the only deviation from D12 and it affects a candidate that fails the gate by a wide margin; it does not change the shipped format. `tests/unit/adapters/test_export_torch.py::test_static_variant_uses_minmax_calibration` pins the choice.
+**Desviación en la calibración estática.** D12 eligió calibración por percentiles para
+`int8_static_qdq`. Los histogramas por percentiles por canal sobre este encoder de 150 M de
+parámetros alcanzan un pico de 19.1 GiB de RSS (medido con ONNX Runtime 1.32.0); el host compartido
+de 31 GiB terminó repetidamente el proceso por OOM con ~6.0 GiB de RSS anónimo bajo trabajos
+concurrentes del portafolio. Por ello, la variante usa `CalibrationMethod.MinMax` con el mismo grafo
+QDQ, pesos por canal y 512 enunciados de calibración de ancho fijo. Es la única desviación de D12 y
+afecta a un candidato que falla la puerta por un margen amplio; no cambia el formato publicado.
+`tests/unit/adapters/test_export_torch.py::test_static_variant_uses_minmax_calibration` fija esta
+elección.
 
-**CPU benchmark (S12, `reports/final/benchmark.json`).** Intel Core i5-12400T, ONNX Runtime 1.32.0, fp32, 200 single-utterance runs: 1 thread p50 30.32 ms / p95 43.93 ms; 4 threads p50 15.80 ms / p95 19.90 ms; batch-32 throughput 28.9 / 93.2 utterances/s. The shipped manifest records `quantization.mode = "fp32"`.
+**Benchmark de CPU (S12, `reports/final/benchmark.json`).** Intel Core i5-12400T, ONNX Runtime 1.32.0,
+fp32, 200 ejecuciones de un solo enunciado: 1 hilo p50 30.32 ms / p95 43.93 ms; 4 hilos p50 15.80 ms /
+p95 19.90 ms; rendimiento batch-32 de 28.9 / 93.2 enunciados/s. El manifiesto publicado registra
+`quantization.mode = "fp32"`.

@@ -1,83 +1,82 @@
-# ADR-0004 — Evaluation protocol and leakage policy
+# ADR-0004 — Protocolo de evaluación y política de fuga de datos
 
-- **Status:** Accepted
-- **Date:** 2026-11-20
-- **Deciders:** project owner
+- **Estado:** Aceptado
+- **Fecha:** 2026-11-20
+- **Decisores:** responsable del proyecto
 
-## Context
+## Contexto
 
-MASSIVE is assembled from translations of SLURP and contains genuine duplicate
-utterances across partitions. Reading the test split early, or training on rows
-whose text also appears in dev/test, silently inflates the final comparison and
-makes the baseline-vs-transformer verdict untrustworthy. The protocol must be
-pre-registered, reproducible and visible in committed artifacts.
+MASSIVE se ensambla a partir de traducciones de SLURP y contiene duplicados genuinos de
+enunciados entre particiones. Leer el conjunto de test antes de tiempo, o entrenar con filas
+cuyo texto también aparece en dev o test, infla silenciosamente la comparación final y vuelve
+no fiable el veredicto entre la línea base y el transformer. El protocolo debe estar
+pre-registrado, ser reproducible y verse en artefactos versionados.
 
-## Decision
+## Decisión
 
-### Split roles (D4)
+### Roles de las particiones (D4)
 
-- **train** — model fitting only.
-- **dev** — hyper-parameter search, backbone screening, model selection,
-  temperature/fitting, review-threshold choice and the quantisation gate.
-- **test** — exactly one audited final evaluation per release candidate. It is
-  read only through a `TestAccessGrant` issued to `stc evaluate --split test
-  --final` and `stc report final`; every read appends one line to
-  `reports/test_access_log.jsonl`. Every other use case receives a
-  `DevOnlyRepository` that raises `TestSplitLocked` (exit 6) for test.
+- **train** — solo para ajustar el modelo.
+- **dev** — búsqueda de hiperparámetros, screening de backbones, selección de modelo,
+  temperatura, elección del umbral de revisión y la puerta de cuantización.
+- **test** — exactamente una evaluación final auditada por release candidate. Solo se lee
+  mediante un `TestAccessGrant` emitido a `stc evaluate --split test --final` y a
+  `stc report final`; cada lectura añade una línea a `reports/test_access_log.jsonl`. Cualquier
+  otro caso de uso recibe un `DevOnlyRepository` que lanza `TestSplitLocked` (código de salida 6)
+  para test.
 
-Seed variance is measured on **dev** (three seeds), never on test.
+La varianza entre semillas se mide en **dev** (tres semillas), nunca en test.
 
-### Cleaning policy (D3)
+### Política de limpieza (D3)
 
-`normalize_for_dedup` is `casefold → NFKD → drop combining marks → remove
-`[^\w\s]` → collapse whitespace → strip`. Train rows are sorted by integer id
-and three stages run on train only:
+`normalize_for_dedup` aplica, en este orden: `casefold`, `NFKD`, quitar las marcas combinantes,
+quitar `[^\w\s]`, colapsar los espacios y `strip`. Las filas de train se ordenan por id entero y
+tres etapas se ejecutan solo sobre train:
 
-1. drop rows whose normalised text appears in dev or test (`OVERLAP_WITH_EVAL`);
-2. drop every row of a group whose normalised text carries more than one intent
+1. eliminar las filas cuyo texto normalizado aparece en dev o test (`OVERLAP_WITH_EVAL`);
+2. eliminar todas las filas de un grupo cuyo texto normalizado tiene más de una intención
    (`LABEL_CONFLICT_DUPLICATE`);
-3. keep the lowest-id row of every remaining duplicate group
-   (`EXACT_DUPLICATE` for the others).
+3. conservar la fila de menor id de cada grupo de duplicados restante (`EXACT_DUPLICATE` para
+   las demás).
 
-Dev and test are never modified. Translator `worker_id` cannot be used to
-regroup splits: 19 of 20 workers appear in more than one partition.
+Dev y test nunca se modifican. El `worker_id` del traductor no puede usarse para reagrupar
+particiones: 19 de los 20 workers aparecen en más de una partición.
 
-### Metrics and statistics (D2)
+### Métricas y estadística (D2)
 
-Primary metric: macro-F1 over classes with at least one true example in the
-evaluated split, `zero_division=0`. Secondary: accuracy, weighted-F1, top-3
-accuracy, scenario accuracy, ECE/NLL/Brier. Confidence intervals: percentile
-bootstrap, B = 2000, `numpy.random.default_rng(13)`, paired resampling for the
-baseline-vs-model Δ. Significance: exact two-sided McNemar on per-example
-correctness.
+Métrica principal: macro-F1 sobre las clases con al menos un ejemplo real en la partición
+evaluada, `zero_division=0`. Secundarias: exactitud, F1 ponderado, exactitud top-3, exactitud
+por escenario y ECE/NLL/Brier. Intervalos de confianza: bootstrap percentil, B = 2000,
+`numpy.random.default_rng(13)`, remuestreo pareado para el Δ entre línea base y modelo.
+Significancia: McNemar bilateral exacto sobre la corrección por ejemplo.
 
-## Alternatives
+## Alternativas
 
-- **Re-split the corpus from scratch** — discards the official, human-designed
-  partitions and makes results incomparable with published MASSIVE numbers.
-- **Deduplicate every split** — would hide the real contamination from the
-  numbers; the protocol reports dev/test duplication instead of erasing it.
-- **Train on all rows and report test after tuning** — leaks the test split
-  into model selection and cannot be audited.
-- **Group splits by `worker_id`** — impossible without losing most data because
-  workers span partitions.
+- **Volver a particionar el corpus desde cero**: descarta las particiones oficiales diseñadas
+  por personas y hace que los resultados no sean comparables con las cifras publicadas de
+  MASSIVE.
+- **Deduplicar todas las particiones**: ocultaría la contaminación real en las cifras; el
+  protocolo reporta la duplicación entre dev y test en lugar de borrarla.
+- **Entrenar con todas las filas y reportar test después de ajustar**: filtra el conjunto de test
+  a la selección del modelo y no puede auditarse.
+- **Agrupar particiones por `worker_id`**: imposible sin perder la mayoría de los datos, porque
+  los workers abarcan varias particiones.
 
-## Consequences
+## Consecuencias
 
-- Train shrinks from 11,514 to 10,898 rows (616 dropped: 356 overlap, 43
-  label-conflict, 217 exact duplicates).
-- Dev/test keep 45 overlapping normalised texts and their own duplicate groups;
-  those numbers are committed in `reports/data_audit.json` rather than hidden.
-- The test evaluation is expensive to repeat by design; re-runs must be recorded
-  in the evaluation log (`docs/EVALUATION.md`).
-- The final comparison is statistical: a small transformer lead may be a tie.
+- Train se reduce de 11,514 a 10,898 filas (616 eliminadas: 356 por solapamiento, 43 por conflicto
+  de etiquetas y 217 duplicados exactos).
+- Dev y test conservan 45 textos normalizados solapados y sus propios grupos de duplicados; esos
+  números quedan versionados en `reports/data_audit.json` en lugar de ocultarse.
+- La evaluación de test es costosa de repetir por diseño; las reejecuciones deben registrarse en el
+  registro de evaluación (`docs/EVALUATION.md`).
+- La comparación final es estadística: una pequeña ventaja del transformer puede ser un empate.
 
-## Evidence
+## Evidencia
 
 - `uv run stc data prepare` → `train=10898 dev=2033 test=2974 dropped=616`.
-- `uv run stc data audit --out reports` → exact counts in the acceptance list
-  (dev∩test 45, dev-in-train 123/7 conflicts, test-in-train 152/6, 264 train
-  duplicate groups, 19 label-conflict groups, dev 18 / test 31 groups).
-- `tests/unit/domain/test_leakage.py` and
-  `tests/unit/application/test_dev_only_repository.py` enforce the policy and
-  the lock in the test suite.
+- `uv run stc data audit --out reports` → conteos exactos de la lista de aceptación (dev∩test 45,
+  dev en train 123 con 7 conflictos, test en train 152 con 6, 264 grupos de duplicados en train,
+  19 grupos con conflicto de etiquetas, 18 grupos en dev y 31 en test).
+- `tests/unit/domain/test_leakage.py` y `tests/unit/application/test_dev_only_repository.py`
+  hacen cumplir la política y el bloqueo en la suite de tests.
