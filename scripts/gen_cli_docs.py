@@ -6,19 +6,19 @@ from __future__ import annotations
 import argparse
 import contextlib
 import io
-import re
 import sys
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
+from unittest import mock
 
 import typer.main
+from rich.console import Console
 from typer._click.core import Command, Context
 
 from stc.adapters.cli.app import app
 
-# Rich colours help output when GITHUB_ACTIONS or FORCE_COLOR is set; the committed
-# reference must not depend on the environment that generates it.
-ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;?]*[ -/]*[@-~]")
+HELP_WIDTH = 80
 
 EXIT_CODES = (
     (0, "Success."),
@@ -31,13 +31,20 @@ EXIT_CODES = (
 )
 
 
+def _help_console(**options: Any) -> Console:
+    # Rich picks box glyphs and width from the host (legacy Windows consoles, COLUMNS,
+    # GITHUB_ACTIONS, a TTY). Pin them so the committed reference matches everywhere.
+    return Console(
+        **{**options, "width": HELP_WIDTH, "force_terminal": False, "legacy_windows": False}
+    )
+
+
 def _help_text(command: Command, context: Context) -> str:
     # Typer's vendored Click prints the help document instead of returning it.
     buffer = io.StringIO()
     with contextlib.redirect_stdout(buffer):
         command.get_help(context)
-    text = ANSI_ESCAPE.sub("", buffer.getvalue())
-    lines = [line.rstrip() for line in text.splitlines()]
+    lines = [line.rstrip() for line in buffer.getvalue().splitlines()]
     while lines and not lines[0]:
         lines.pop(0)
     while lines and not lines[-1]:
@@ -95,7 +102,8 @@ def build_cli_docs() -> str:
     root = typer.main.get_command(app)
     if not _children(root):
         raise TypeError("the Typer application is not a command group")
-    entries = _collect_help(root, path=["stc"], parent=None)
+    with mock.patch("typer.rich_utils.Console", _help_console):
+        entries = _collect_help(root, path=["stc"], parent=None)
 
     blocks: list[str] = [
         "# CLI reference",
