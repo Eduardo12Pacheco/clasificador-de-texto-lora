@@ -38,14 +38,14 @@ def test_architecture_guide_has_the_expected_sections() -> None:
 
     assert len(headings) >= 8
     for required in (
-        "Purpose and constraints",
-        "Layers and dependency direction",
-        "Module map",
-        "Ports and adapters",
-        "Patterns in use",
-        "Data and inference lifecycle",
-        "Test pyramid",
-        "How the boundaries are enforced",
-        "Extension recipes",
+        "Propósito y restricciones",
+        "Capas y dirección de dependencias",
+        "Mapa de módulos",
+        "Puertos y adaptadores",
+        "Patrones en uso",
+        "Ciclo de vida de datos e inferencia",
+        "Pirámide de tests",
+        "Cómo se hacen cumplir los límites",
+        "Recetas de extensión",
     ):
         assert required in headings
