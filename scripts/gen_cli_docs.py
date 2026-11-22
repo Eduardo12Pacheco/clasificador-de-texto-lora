@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import io
+import re
 import sys
 from collections.abc import Sequence
 from pathlib import Path
@@ -14,6 +15,10 @@ import typer.main
 from typer._click.core import Command, Context
 
 from stc.adapters.cli.app import app
+
+# Rich colours help output when GITHUB_ACTIONS or FORCE_COLOR is set; the committed
+# reference must not depend on the environment that generates it.
+ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;?]*[ -/]*[@-~]")
 
 EXIT_CODES = (
     (0, "Success."),
@@ -31,7 +36,7 @@ def _help_text(command: Command, context: Context) -> str:
     buffer = io.StringIO()
     with contextlib.redirect_stdout(buffer):
         command.get_help(context)
-    text = buffer.getvalue()
+    text = ANSI_ESCAPE.sub("", buffer.getvalue())
     lines = [line.rstrip() for line in text.splitlines()]
     while lines and not lines[0]:
         lines.pop(0)
