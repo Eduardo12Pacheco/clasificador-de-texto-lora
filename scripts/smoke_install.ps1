@@ -212,6 +212,9 @@ try {
     }
 
     Write-Host "SMOKE OK"
+    # Success path only: a stale $LASTEXITCODE from a native command would otherwise
+    # make the GitHub pwsh wrapper exit 1 after the checks passed. Failures still throw.
+    exit 0
 }
 catch {
     Write-Host "smoke installation failed; artifacts kept in $Root" -ForegroundColor Red
