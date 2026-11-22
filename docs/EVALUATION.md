@@ -184,7 +184,7 @@ uv run stc calibrate --bundle artifacts/bundle --baseline artifacts/baseline --r
 uv run stc benchmark --bundle artifacts/bundle --threads 1,4 --runs 200 --out reports/final/benchmark.json
 uv run stc report final --bundle artifacts/bundle --baseline artifacts/baseline --out reports/final --figures reports/figures
 uv run python scripts/collect_experiment_reports.py --artifacts artifacts --out reports/experiments --figures reports/figures
-uv run python scripts/render_results.py --summary reports/summary.json --table reports/results_table.md
+uv run python scripts/render_results.py --summary reports/summary.json --table reports/results_table.md --registry src/stc/model_registry.json
 uv run python scripts/render_model_card.py --template docs/model_card.template.md --summary reports/summary.json --out MODEL_CARD.md
 uv run python scripts/validate_reports.py all
 ```
