@@ -1,12 +1,12 @@
-# Contributing
+# Contribuir
 
-Thanks for taking a look. This repository is a local-first portfolio project, so the
-contribution workflow is deliberately small and reproducible.
+Gracias por echarle un vistazo. Este repositorio es un proyecto de portafolio local-first, así que el flujo de
+contribución es deliberadamente pequeño y reproducible.
 
-## Development setup
+## Configuración del entorno de desarrollo
 
-Requirements: Python 3.12 (managed by `uv`), git, and optionally an NVIDIA GPU for the
-training tests.
+Requisitos: Python 3.12 (gestionado con `uv`), git y, opcionalmente, una GPU NVIDIA para los tests de
+entrenamiento.
 
 ```bash
 git clone https://github.com/Eduardo12Pacheco/clasificador-de-texto-lora.git
@@ -15,12 +15,12 @@ uv sync --locked --group dev
 uv run stc --version
 ```
 
-`uv.lock` is committed. Update it deliberately with `uv lock` and explain dependency
-changes in the pull request.
+`uv.lock` está versionado. Actualízalo de forma deliberada con `uv lock` y explica los cambios de dependencias
+en el pull request.
 
-## The gate
+## La puerta de calidad
 
-Every change must pass the same gate that CI runs:
+Todo cambio debe pasar la misma puerta que ejecuta CI:
 
 ```bash
 uv run ruff check .
@@ -30,13 +30,13 @@ uv run lint-imports
 uv run pytest -q -m "not e2e and not torch"
 ```
 
-Add coverage when the change touches `src/stc`:
+Añade cobertura cuando el cambio toque `src/stc`:
 
 ```bash
 uv run pytest -q --cov=src/stc --cov-fail-under=85
 ```
 
-Training tests and browser tests are opt-in because they need extra packages:
+Los tests de entrenamiento y de navegador son opcionales porque necesitan paquetes adicionales:
 
 ```bash
 uv sync --locked --extra train --group dev
@@ -46,34 +46,32 @@ uv run playwright install chromium
 uv run pytest -q -m e2e
 ```
 
-## Test-first and boundaries
+## Test-first y límites
 
-Read `docs/ARCHITECTURE.md` before changing a layer and `docs/EVALUATION.md`
-before changing a metric or a split rule. The GPU pipeline is documented in
-`docs/TRAINING.md`.
+Lee `docs/ARCHITECTURE.md` antes de cambiar una capa y `docs/EVALUATION.md` antes de cambiar una métrica o una
+regla de particiones. El pipeline de GPU está documentado en `docs/TRAINING.md`.
 
-- Write the failing test first, then the smallest implementation that passes.
-- Keep the hexagon intact: `domain` is pure Python plus NumPy, `application` owns ports
-  and use cases, adapters hold I/O. `lint-imports` and
-  `tests/architecture/test_layers.py` enforce the direction.
-- Do not weaken, skip or delete a test to get a green run.
-- Run `uv run python scripts/check_no_weights.py` before committing: weights, datasets
-  and large archives never enter git.
+- Escribe primero el test que falla y después la implementación más pequeña que lo haga pasar.
+- Mantén el hexágono intacto: `domain` es Python puro más NumPy, `application` es responsable de los puertos y
+  los casos de uso, y los adaptadores contienen la E/S. `lint-imports` y `tests/architecture/test_layers.py`
+  hacen cumplir la dirección.
+- No debilites, no omitas y no borres un test para lograr una ejecución en verde.
+- Ejecuta `uv run python scripts/check_no_weights.py` antes de hacer commit: los pesos, los conjuntos de datos y
+  los archivos grandes nunca entran en git.
 
 ## Commits
 
-Conventional Commits in English, one coherent unit per commit (roughly 400 changed lines
-or fewer). Include tests and docs with the behaviour they describe. Do not add AI
-attribution lines. Branch from `main`; do not force-push.
+Conventional Commits en inglés, una unidad coherente por commit (unas 400 líneas cambiadas o menos). Incluye los
+tests y la documentación junto con el comportamiento que describen. No añadas líneas de atribución a la IA. Parte
+de `main`; no hagas force-push.
 
 ## Releases
 
-Releases are tag-driven and the model assets are attached manually. Never commit or
-upload weights from CI.
+Las releases se disparan con tags y los assets del modelo se adjuntan de forma manual. Nunca subas pesos desde CI.
 
-1. Confirm the version in `pyproject.toml` and the model bundle in
-   `src/stc/model_registry.json` agree with the release you are cutting.
-2. Push `main`, then create and push the annotated tag:
+1. Confirma que la versión en `pyproject.toml` y el bundle del modelo en `src/stc/model_registry.json` coinciden
+   con la release que vas a publicar.
+2. Sube `main` y, después, crea y sube el tag anotado:
 
    ```bash
    git tag -a v0.1.0 -m "v0.1.0"
@@ -81,25 +79,22 @@ upload weights from CI.
    git push origin v0.1.0
    ```
 
-3. The `Release` workflow checks that the tag matches the package version, builds the
-   wheel and sdist, generates release notes from Conventional Commits with git-cliff,
-   writes `SHA256SUMS` and creates the GitHub Release. It refuses any asset above
-   100 MB.
-4. Attach the verified model bundle to that release:
+3. El workflow `Release` comprueba que el tag coincide con la versión del paquete, construye el wheel y el sdist,
+   genera las notas de la release a partir de los Conventional Commits con git-cliff, escribe `SHA256SUMS` y crea
+   la GitHub Release. Rechaza cualquier asset de más de 100 MB.
+4. Adjunta a esa release el bundle del modelo verificado:
 
    ```bash
    scripts/publish_model.sh v0.1.0
    ```
 
-   The helper requires an authenticated `gh`, an existing release, and a bundle whose
-   sha256 equals the registry entry. It uploads `dist-model/stc-es-intent-*.zip` and
-   `dist-model/SHA256SUMS-model.txt`; it never touches git.
-5. The `Verify release` workflow runs on the published release (and can be dispatched
-   with a tag): it installs the released wheel on Linux, Windows and macOS, waits for
-   the model asset, pulls and verifies the bundle, checks
-   `tests/fixtures/smoke_phrases.json` and runs `stc doctor`.
+   El helper requiere un `gh` autenticado, una release existente y un bundle cuyo sha256 sea igual al del
+   registro. Sube `dist-model/stc-es-intent-*.zip` y `dist-model/SHA256SUMS-model.txt`; nunca toca git.
+5. El workflow `Verify release` se ejecuta sobre la release publicada (y puede lanzarse con un tag): instala el
+   wheel publicado en Linux, Windows y macOS, espera el asset del modelo, descarga y verifica el bundle,
+   comprueba `tests/fixtures/smoke_phrases.json` y ejecuta `stc doctor`.
 
-Local installation behaves like the released package:
+La instalación local se comporta como el paquete publicado:
 
 ```bash
 bash scripts/smoke_install.sh --check   # prerequisites only
@@ -108,8 +103,8 @@ bash scripts/smoke_install.sh --uninstall
 pwsh ./scripts/smoke_install.ps1 -Check # Windows equivalent
 ```
 
-The smoke installation uses a temporary `UV_TOOL_DIR` and `STC_HOME`, so it never
-replaces your normal `stc`. CI runs the same scripts in the `smoke-install` matrix job.
+La instalación de humo usa un `UV_TOOL_DIR` y un `STC_HOME` temporales, así que nunca reemplaza tu `stc` normal.
+CI ejecuta los mismos scripts en el job de matriz `smoke-install`.
 
-Security-relevant checks before a release: `gitleaks git --no-banner`, the dependency
-audit described in `SECURITY.md`, and `uv run python scripts/validate_workflows.py`.
+Las comprobaciones de seguridad previas a una release son `gitleaks git --no-banner`, la auditoría de dependencias
+descrita en `SECURITY.md` y `uv run python scripts/validate_workflows.py`.

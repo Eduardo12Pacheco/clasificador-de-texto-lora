@@ -1,73 +1,69 @@
-# Security policy
+# Política de seguridad
 
-## Supported versions
+## Versiones soportadas
 
-| Version | Supported |
+| Versión | Soportada |
 |---------|-----------|
-| 0.1.x   | Yes       |
+| 0.1.x   | Sí        |
 
-## Reporting a vulnerability
+## Reportar una vulnerabilidad
 
-Please do not open a public issue for a suspected vulnerability. Use GitHub private
-vulnerability reporting ("Report a vulnerability" in the Security tab) on
-`Eduardo12Pacheco/clasificador-de-texto-lora`, or the repository's private Security
-Advisory form. Include the affected version, reproduction steps and impact. We aim to
-acknowledge reports within seven days.
+No abras una incidencia pública por una posible vulnerabilidad. Usa el reporte privado de vulnerabilidades de
+GitHub ("Report a vulnerability" en la pestaña Security) en `Eduardo12Pacheco/clasificador-de-texto-lora`, o el
+formulario privado de Security Advisory del repositorio. Incluye la versión afectada, los pasos para reproducirla
+y el impacto. Nuestro objetivo es acusar recibo de los reportes en un plazo de siete días.
 
-## Threat model
+## Modelo de amenazas
 
-The project is a local-first tool. It downloads a public dataset and a public model
-bundle on explicit commands, serves a UI on loopback and never phones home. The
-following assets and boundaries are in scope.
+El proyecto es una herramienta local-first. Descarga un conjunto de datos público y un bundle de modelo público
+solo con comandos explícitos, sirve una UI en loopback y nunca envía datos a terceros. Los siguientes activos y
+límites están dentro del alcance.
 
-### Untrusted model bundles
+### Bundles de modelo no confiables
 
-- `src/stc/model_registry.json` pins the release URL, size and sha256 of the published
-  bundle. `stc model pull` streams the download to a temporary file and refuses to
-  install it when the checksum or size differs (`IntegrityError`, exit 3).
-- Every unpacked bundle is checked against its `manifest.json`: each listed file must
-  match its recorded sha256 and size, unexpected files are rejected, and unsafe paths
-  (absolute paths, `..`, backslashes, symlinks) are refused before extraction.
-- `stc model verify` re-checks an installed bundle at any time.
-- Baseline `skops` artifacts are loaded through a type allow-list restricted to
-  scikit-learn, NumPy, SciPy and builtin containers; any other type raises
-  `UntrustedArtifactError` (exit 3) instead of unpickling it.
-- The ONNX Runtime session never enables custom operators or remote model fetching.
+- `src/stc/model_registry.json` fija la URL de la release, el tamaño y el sha256 del bundle publicado.
+  `stc model pull` transmite la descarga a un archivo temporal y se niega a instalarla si el checksum o el tamaño no
+  coinciden (`IntegrityError`, código de salida 3).
+- Cada bundle descomprimido se verifica contra su `manifest.json`: cada archivo listado debe coincidir con su
+  sha256 y tamaño registrados, los archivos inesperados se rechazan y las rutas no seguras (rutas absolutas, `..`,
+  barras invertidas, enlaces simbólicos) se rechazan antes de extraer.
+- `stc model verify` vuelve a comprobar un bundle instalado en cualquier momento.
+- Los artefactos `skops` de la línea base se cargan mediante una lista de tipos permitidos restringida a
+  scikit-learn, NumPy, SciPy y contenedores integrados; cualquier otro tipo lanza `UntrustedArtifactError`
+  (código de salida 3) en lugar de deserializarse.
+- La sesión de ONNX Runtime nunca habilita operadores personalizados ni descargas remotas de modelos.
 
-### Local server
+### Servidor local
 
-- `stc serve` binds `127.0.0.1:19080` by default (configurable with `STC_API_HOST` and
-  `STC_API_PORT`; the port range 19000-19999 avoids collisions with the other local
-  projects on this machine). It prints a warning when asked to bind a non-loopback
-  interface and is not a hardened public service.
-- Responses carry `Content-Security-Policy: default-src 'self'`,
-  `X-Content-Type-Options: nosniff` and `Referrer-Policy: no-referrer`. The UI makes no
-  third-party requests and loads no remote fonts or scripts.
-- Input text is never logged; request logs contain only lengths, identifiers and
-  timings. Validation bounds (64 texts, 512 characters each, `top_k` 1-10) limit
-  accidental resource exhaustion.
+- `stc serve` enlaza `127.0.0.1:19080` por defecto (configurable con `STC_API_HOST` y `STC_API_PORT`; el rango de
+  puertos 19000-19999 evita colisiones con los demás proyectos locales de esta máquina). Imprime una advertencia
+  cuando se le pide enlazar una interfaz que no es loopback, y no es un servicio público endurecido.
+- Las respuestas incluyen `Content-Security-Policy: default-src 'self'`, `X-Content-Type-Options: nosniff` y
+  `Referrer-Policy: no-referrer`. La UI no hace peticiones a terceros y no carga fuentes ni scripts remotos.
+- El texto de entrada nunca se registra; los logs de peticiones contienen solo longitudes, identificadores y
+  tiempos. Los límites de validación (64 textos, 512 caracteres cada uno y `top_k` de 1 a 10) limitan el
+  agotamiento accidental de recursos.
 
-### Supply chain and repository hygiene
+### Cadena de suministro e higiene del repositorio
 
-- Dependencies are locked in `uv.lock` and audited in CI with
+- Las dependencias están fijadas en `uv.lock` y se auditan en CI con
   `uv export --locked --no-dev ... | uvx pip-audit --no-deps`.
-- The full git history is scanned with gitleaks. GitHub Actions references are checked
-  by `scripts/validate_workflows.py` and actionlint, and workflows request the minimum
-  `permissions`.
-- Model weights, datasets and archives never enter git: `scripts/check_no_weights.py`
-  fails on tracked files above 1 MB or with a weight/bundle extension outside the tiny
-  test fixtures.
-- Releases are tag-driven. CI builds only the wheel and sdist and refuses assets above
-  100 MB; the verified model bundle is attached afterwards by the maintainer with
-  `scripts/publish_model.sh`, which checks the registry checksum first.
+- El historial completo de git se analiza con gitleaks. Las referencias de GitHub Actions las comprueban
+  `scripts/validate_workflows.py` y actionlint, y los workflows piden los `permissions` mínimos.
+- Los pesos del modelo, los conjuntos de datos y los archivos comprimidos nunca entran en git:
+  `scripts/check_no_weights.py` falla si hay archivos versionados de más de 1 MB o con una extensión de peso o de
+  bundle fuera de las pequeñas muestras de test.
+- Las releases se disparan con tags. CI construye solo el wheel y el sdist y rechaza assets de más de 100 MB; el
+  bundle del modelo verificado lo adjunta después el responsable con `scripts/publish_model.sh`, que primero
+  comprueba el checksum del registro.
 
-## Dependency audit exceptions
+## Excepciones de la auditoría de dependencias
 
-There are currently no ignored advisories. If an advisory cannot be fixed immediately,
-the exact package, advisory identifier, justification and review date are recorded here
-and in the commit that adds the ignore, rather than silently disabling the audit.
+Actualmente no hay advisories ignorados. Si un advisory no puede corregirse de inmediato, el paquete exacto, el
+identificador del advisory, la justificación y la fecha de revisión se registran aquí y en el commit que añade la
+excepción, en lugar de desactivar la auditoría en silencio.
 
-## Running the checks locally
+## Ejecutar las comprobaciones en local
 
 ```bash
 uv sync --locked --group dev
@@ -78,5 +74,5 @@ uvx pip-audit -r /tmp/req.txt --no-deps --disable-pip
 gitleaks git --no-banner
 ```
 
-Release and installer steps are documented in `CONTRIBUTING.md` and exercised by the
-`smoke-install` CI job.
+Los pasos de release e instalación están documentados en `CONTRIBUTING.md` y los ejercita el job `smoke-install`
+de CI.
