@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="hero-title hero-desc">
+  <title id="hero-title">Spanish intent classifier with LoRA</title>
+  <desc id="hero-desc">Spanish intent classifier with a LoRA-tuned MrBERT-es encoder and CPU-only ONNX inference. Real stc predict example: the request «despiértame a las cinco de la mañana» routes to intent alarm_set, scenario alarm, with confidence 0.963.</desc>
+
+  <rect width="1200" height="360" rx="24" fill="#111421"/>
+
+  <g id="title-block" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+    <text x="64" y="76" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20" fill="#a5b4fc">MrBERT-es + LoRA · ONNX on CPU</text>
+    <text x="64" y="146" font-size="58" font-weight="700" fill="#f1f3f8">Spanish intent</text>
+    <text x="64" y="212" font-size="58" font-weight="700" fill="#f1f3f8">classifier with</text>
+    <text x="64" y="278" font-size="58" font-weight="700" fill="#f1f3f8">LoRA</text>
+    <text x="64" y="326" font-size="24" fill="#a9b2c2">60 intents · 18 scenarios · offline on CPU</text>
+  </g>
+
+  <g id="routing-card">
+    <rect x="716" y="48" width="420" height="264" rx="16" fill="#171a21" stroke="#333a46" stroke-width="2"/>
+    <text x="744" y="84" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" fill="#a9b2c2">stc predict</text>
+    <line x1="744" y1="100" x2="1108" y2="100" stroke="#333a46" stroke-width="2"/>
+    <g font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+      <text x="744" y="130" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" fill="#a9b2c2">request</text>
+      <text x="744" y="160" font-size="24" fill="#f1f3f8">despiértame a las cinco</text>
+      <text x="744" y="188" font-size="24" fill="#f1f3f8">de la mañana</text>
+    </g>
+    <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+      <text x="744" y="226" font-size="18" fill="#a9b2c2">intent</text>
+      <text x="900" y="226" font-size="24" fill="#a5b4fc">alarm_set</text>
+      <text x="744" y="262" font-size="18" fill="#a9b2c2">scenario</text>
+      <text x="900" y="262" font-size="24" fill="#f1f3f8">alarm</text>
+      <text x="744" y="298" font-size="18" fill="#a9b2c2">confidence</text>
+    </g>
+    <rect x="900" y="286" width="150" height="14" rx="7" fill="#1f232c"/>
+    <rect x="900" y="286" width="144" height="14" rx="7" fill="#6fd6a0"/>
+    <text x="1062" y="298" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" fill="#f1f3f8">0.963</text>
+  </g>
+</svg>
