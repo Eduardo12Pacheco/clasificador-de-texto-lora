@@ -50,6 +50,20 @@ data/processed/massive-1.0/{train,dev,test}.jsonl, meta.json
   attribution; its `NOTICE.md` states that the project selected and reformatted
   the rows.
 
+## Base-model licences
+
+Base models are fetched from the Hugging Face Hub when training or screening
+runs; their weights are not tracked in this repository. Only MrBERT-es has its
+licence stated in a repository file (`NOTICE`, `MODEL_CARD.md`). The two
+screening models have no licence statement in this repository, so their rows
+point to the upstream model card instead of restating a licence.
+
+| Model | Role in this repository | Licence | Source |
+|---|---|---|---|
+| `BSC-LT/MrBERT-es` | Shipped backbone, LoRA fine-tuned | Apache-2.0 (`NOTICE`, `MODEL_CARD.md`) | https://huggingface.co/BSC-LT/MrBERT-es |
+| `bertin-project/bertin-roberta-base-spanish` | Screening candidate (`configs/screening.toml`) | See model card at https://huggingface.co/bertin-project/bertin-roberta-base-spanish | same as left |
+| `Qwen/Qwen3-0.6B` | Screening candidate only; never selected or exported (`backbone_selection.py`) | See model card at https://huggingface.co/Qwen/Qwen3-0.6B | same as left |
+
 ## Lineage
 
 ```mermaid
