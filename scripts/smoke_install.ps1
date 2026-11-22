@@ -183,6 +183,16 @@ try {
         }
     }
     if (-not $healthy) {
+        if ($ServeProcess.HasExited) {
+            Write-Host "serve exited early with code $($ServeProcess.ExitCode)"
+        }
+        foreach ($log in @("serve.log", "serve.err.log")) {
+            $logPath = Join-Path $Work $log
+            if (Test-Path $logPath) {
+                Write-Host "--- $log (tail)"
+                Get-Content -Path $logPath -Tail 40
+            }
+        }
         throw "serve did not answer /healthz within 60 seconds"
     }
 
