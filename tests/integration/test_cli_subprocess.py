@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -15,13 +16,18 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 TINY_BUNDLE = REPO_ROOT / "tests" / "fixtures" / "tiny_bundle"
 
 
-def _run(args: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+def _run(
+    args: list[str], *, env: dict[str, str] | None = None, **kwargs: object
+) -> subprocess.CompletedProcess[str]:
+    # Overlay on the inherited environment: on Windows a child without SystemRoot
+    # cannot initialise Winsock (WinError 10106) when it imports asyncio.
     return subprocess.run(
         [sys.executable, "-m", "stc", *args],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
         check=False,
+        env={**os.environ, **(env or {})},
         **kwargs,
     )
 
