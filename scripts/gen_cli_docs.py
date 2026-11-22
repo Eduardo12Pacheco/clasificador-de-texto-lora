@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import io
+import re
 import sys
 from collections.abc import Sequence
 from pathlib import Path
@@ -19,6 +20,8 @@ from typer._click.core import Command, Context
 from stc.adapters.cli.app import app
 
 HELP_WIDTH = 80
+# Path defaults are printed with the host separator (backslashes on Windows).
+PATH_DEFAULT = re.compile(r"\[default: [^\]]*\]")
 
 EXIT_CODES = (
     (0, "Success."),
@@ -44,7 +47,8 @@ def _help_text(command: Command, context: Context) -> str:
     buffer = io.StringIO()
     with contextlib.redirect_stdout(buffer):
         command.get_help(context)
-    lines = [line.rstrip() for line in buffer.getvalue().splitlines()]
+    text = PATH_DEFAULT.sub(lambda match: match.group(0).replace("\\", "/"), buffer.getvalue())
+    lines = [line.rstrip() for line in text.splitlines()]
     while lines and not lines[0]:
         lines.pop(0)
     while lines and not lines[-1]:
